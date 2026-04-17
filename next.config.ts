@@ -34,6 +34,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Admin CMS (Vite SPA) servido em /admin/*. Arquivos estáticos em
+  // public/admin/ têm prioridade; qualquer rota do React Router que não
+  // bata com arquivo cai no index.html do SPA.
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        { source: '/admin', destination: '/admin/index.html' },
+        { source: '/admin/:path*', destination: '/admin/index.html' },
+      ],
+    }
+  },
 }
 
 export default nextConfig

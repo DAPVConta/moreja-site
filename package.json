@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:admin": "node scripts/build-admin.mjs",
+    "build": "npm run build:admin && next build",
     "start": "next start",
     "lint": "eslint"
   },
