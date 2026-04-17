@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, ChevronLeft, Phone, MessageCircle } from 'lucide-react'
-import { fetchProperty, fetchEmpreendimentos, formatPrice } from '@/lib/properties'
+import { fetchEmpreendimento, fetchEmpreendimentos, formatPrice } from '@/lib/properties'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
@@ -16,7 +16,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const property = await fetchProperty(id)
+  const property = await fetchEmpreendimento(id)
   if (!property) return { title: 'Empreendimento não encontrado | Morejá' }
 
   const title = `${property.titulo} | Empreendimento Morejá`
@@ -43,7 +43,7 @@ export async function generateStaticParams() {
 
 export default async function EmpreendimentoPage({ params }: PageProps) {
   const { id } = await params
-  const property = await fetchProperty(id)
+  const property = await fetchEmpreendimento(id)
   if (!property) notFound()
 
   return (

@@ -62,6 +62,17 @@ export async function fetchProperty(id: string): Promise<Property | null> {
   return fetchLocalProperty(id)
 }
 
+export async function fetchEmpreendimento(id: string): Promise<Property | null> {
+  try {
+    const data = await proxyFetch(`empreendimentos/${id}`, {})
+    if (data && (data as Property).id) return data as Property
+  } catch (err) {
+    console.error('fetchEmpreendimento error:', err)
+  }
+
+  return fetchLocalProperty(id)
+}
+
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   const result = await fetchProperties({ destaque: true, limit: 6 })
   return result.data
