@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.sistemasupremo.com.br',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.sistemasupremo.com.br',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {

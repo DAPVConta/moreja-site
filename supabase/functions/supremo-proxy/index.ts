@@ -31,6 +31,99 @@ function checkRateLimit(ip: string): boolean {
   return true
 }
 
+// Supremo photo records use `url_foto_g` (large), `url_foto_p` (small) or
+// `url_foto_externa` for externally hosted images. Prefer the large one.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractPhotoUrl(foto: Record<string, any>): string | null {
+  const candidates = [foto.url_foto_g, foto.url_foto_p, foto.url_foto_externa]
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.length > 0) return c
+  }
+  return null
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractVideoUrl(video: Record<string, any>): string | null {
+  const candidates = [video.url, video.link, video.youtube, video.vimeo, video.src]
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.length > 0) return c
+  }
+  return null
+}
+
+async function supremoGet(path: string): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch(`${SUPREMO_API_URL}/${path}`, {
+      headers: {
+        'Authorization': `Bearer ${SUPREMO_JWT}`,
+        'Accept': 'application/json',
+      },
+    })
+    if (!res.ok) return null
+    return await res.json() as Record<string, unknown>
+  } catch (err) {
+    console.error(`supremoGet(${path}) error:`, err)
+    return null
+  }
+}
+
+// Imóveis: photos live at /imoveis/:id/fotos (flat list, ordered by `ordem`).
+async function fetchImovelPhotos(id: string): Promise<string[]> {
+  const payload = await supremoGet(`imoveis/${id}/fotos?por_pagina=100`)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items: Record<string, any>[] = Array.isArray(payload?.data) ? (payload!.data as Record<string, any>[]) : []
+  items.sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+  return items.map(extractPhotoUrl).filter((u): u is string => !!u)
+}
+
+// Empreendimentos: photos are nested under galerias — need two hops.
+//   /empreendimentos/:id/galerias               → list galleries
+//   /empreendimentos/:id/galerias/:gid/fotos    → photos of each gallery
+async function fetchEmpreendimentoPhotos(id: string): Promise<string[]> {
+  const payload = await supremoGet(`empreendimentos/${id}/galerias?por_pagina=100`)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const galerias: Record<string, any>[] = Array.isArray(payload?.data) ? (payload!.data as Record<string, any>[]) : []
+  if (galerias.length === 0) return []
+
+  const perGallery = await Promise.all(
+    galerias.map(async (g) => {
+      const gid = g.id
+      if (gid === undefined || gid === null) return [] as string[]
+      const p = await supremoGet(`empreendimentos/${id}/galerias/${gid}/fotos?por_pagina=100`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fotos: Record<string, any>[] = Array.isArray(p?.data) ? (p!.data as Record<string, any>[]) : []
+      fotos.sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+      return fotos.map(extractPhotoUrl).filter((u): u is string => !!u)
+    })
+  )
+  return perGallery.flat()
+}
+
+async function fetchPhotos(resource: 'imoveis' | 'empreendimentos', id: string): Promise<string[]> {
+  return resource === 'empreendimentos'
+    ? fetchEmpreendimentoPhotos(id)
+    : fetchImovelPhotos(id)
+}
+
+// Videos: only /empreendimentos/:id/videos is known to exist.
+async function fetchVideoUrls(resource: 'imoveis' | 'empreendimentos', id: string): Promise<string[]> {
+  if (resource !== 'empreendimentos') return []
+  const payload = await supremoGet(`empreendimentos/${id}/videos?por_pagina=100`)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items: Record<string, any>[] = Array.isArray(payload?.data) ? (payload!.data as Record<string, any>[]) : []
+  return items.map(extractVideoUrl).filter((u): u is string => !!u)
+}
+
+// Supremo expects `finalidade` as a number (1=Venda, 2=Locação, 3=ambos).
+// The site sends it as a string, so we translate.
+function finalidadeToNumber(v: string): string | null {
+  const n = v.toLowerCase()
+  if (n === 'venda' || v === '1') return '1'
+  if (n === 'locação' || n === 'locacao' || v === '2') return '2'
+  if (n.includes('venda') && n.includes('loca') || v === '3') return '3'
+  return null
+}
+
 function buildSupremoUrl(resource: string, params: URLSearchParams): string {
   const supremoParams = new URLSearchParams()
 
@@ -39,7 +132,6 @@ function buildSupremoUrl(resource: string, params: URLSearchParams): string {
     page: 'pagina',
     limit: 'por_pagina',
     tipo: 'tipo',
-    finalidade: 'finalidade',
     bairro: 'bairro',
     cidade: 'cidade',
     preco_min: 'preco_min',
@@ -54,6 +146,13 @@ function buildSupremoUrl(resource: string, params: URLSearchParams): string {
   for (const [appKey, supremoKey] of Object.entries(paramMap)) {
     const value = params.get(appKey)
     if (value) supremoParams.set(supremoKey, value)
+  }
+
+  // finalidade requires string→number translation
+  const finalidade = params.get('finalidade')
+  if (finalidade) {
+    const num = finalidadeToNumber(finalidade)
+    if (num) supremoParams.set('finalidade', num)
   }
 
   return `${SUPREMO_API_URL}/${resource}?${supremoParams.toString()}`
@@ -82,47 +181,55 @@ function parseArea(v: string | number | null | undefined): number {
   return isNaN(n) ? 0 : n
 }
 
-// Normalise a Supremo imovel record to our Property shape
+// Normalise a Supremo imovel record to our Property shape.
+// Supremo field names (from observed payloads):
+//   nome, valor, numero_quartos, numero_banheiros, numero_garagens, numero_suites,
+//   condominio_mensal, iptu_mensal, brasil_*, situacao, finalidade, url_foto_g/p,
+//   url_360, youtube, data_cadastro, data_edicao, id_captador, captador_nome,
+//   captador_email, captador_ddd, captador_telefone.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeImovel(raw: Record<string, any>) {
+  const coverPhoto = raw.url_foto_g || raw.url_foto_p
+  const captadorPhone = [raw.captador_ddd, raw.captador_telefone]
+    .filter((p) => p !== null && p !== undefined && String(p).length > 0)
+    .join('')
   return {
     id: String(raw.id ?? ''),
-    codigo: raw.codigo ?? String(raw.id ?? ''),
-    titulo: raw.titulo ?? raw.nome ?? '',
-    tipo: raw.tipo ?? raw.nome_tipo ?? '',
-    subtipo: raw.subtipo ?? raw.nome_subtipo ?? undefined,
+    codigo: raw.codigo_interno || String(raw.id ?? ''),
+    titulo: raw.nome ?? '',
+    tipo: raw.tipo ?? '',
+    subtipo: raw.tipo ?? undefined,
     finalidade: mapFinalidade(raw.finalidade),
-    preco: parseNum(raw.preco),
-    preco_condominio: raw.preco_condominio ? parseNum(raw.preco_condominio) : undefined,
-    preco_iptu: raw.preco_iptu ? parseNum(raw.preco_iptu) : undefined,
-    bairro: raw.bairro ?? raw.brasil_bairro ?? '',
-    cidade: raw.cidade ?? raw.brasil_cidade ?? '',
-    estado: raw.estado ?? raw.brasil_estado_uf ?? '',
-    cep: raw.cep ?? undefined,
-    endereco: raw.endereco ?? undefined,
-    numero: raw.numero ?? undefined,
+    preco: parseNum(raw.valor),
+    preco_condominio: raw.condominio_mensal ? parseNum(raw.condominio_mensal) : undefined,
+    preco_iptu: raw.iptu_mensal ? parseNum(raw.iptu_mensal) : undefined,
+    bairro: raw.brasil_bairro ?? raw.internacional_bairro ?? '',
+    cidade: raw.brasil_cidade ?? raw.internacional_cidade ?? '',
+    estado: raw.brasil_estado_uf ?? raw.internacional_estado ?? '',
+    cep: raw.cep || undefined,
+    endereco: raw.endereco || undefined,
+    numero: raw.numero || undefined,
     complemento: raw.complemento || undefined,
     area_total: parseArea(raw.area_total),
-    area_util: raw.area_util ? parseArea(raw.area_util) : parseArea(raw.area_privativa),
-    area_terreno: raw.area_terreno ? parseArea(raw.area_terreno) : undefined,
-    quartos: parseNum(raw.quartos),
-    suites: raw.suites ? parseNum(raw.suites) : undefined,
-    banheiros: parseNum(raw.banheiros),
-    vagas: raw.vagas ? parseNum(raw.vagas) : parseNum(raw.garagens),
+    area_util: parseArea(raw.area_util) || parseArea(raw.area_privativa),
+    area_terreno: raw.area_construida ? parseArea(raw.area_construida) : undefined,
+    quartos: parseNum(raw.numero_quartos),
+    suites: raw.numero_suites ? parseNum(raw.numero_suites) : undefined,
+    banheiros: parseNum(raw.numero_banheiros),
+    vagas: parseNum(raw.numero_garagens),
     descricao: raw.descricao ?? '',
-    fotos: Array.isArray(raw.fotos) ? raw.fotos : [],
-    video_url: raw.video_url ?? undefined,
-    tour_virtual: raw.tour_virtual ?? undefined,
+    // Cover photo is embedded in the list payload; full gallery is fetched later.
+    fotos: coverPhoto ? [coverPhoto] : [],
+    video_url: raw.youtube || undefined,
+    tour_virtual: raw.url_360 || undefined,
     latitude: raw.latitude ? parseNum(raw.latitude) : undefined,
     longitude: raw.longitude ? parseNum(raw.longitude) : undefined,
-    destaque: Boolean(raw.destaque ?? raw.publicar),
-    publicado_em: raw.publicado_em ?? raw.criado_em ?? undefined,
-    atualizado_em: raw.atualizado_em ?? undefined,
-    corretor_id: raw.corretor_id ? String(raw.corretor_id) : undefined,
-    corretor_nome: raw.corretor_nome ?? undefined,
-    corretor_foto: raw.corretor_foto ?? undefined,
-    corretor_creci: raw.corretor_creci ?? undefined,
-    corretor_whatsapp: raw.corretor_whatsapp ?? undefined,
+    destaque: raw.fl_exibir_tarja === 1,
+    publicado_em: raw.data_cadastro ?? undefined,
+    atualizado_em: raw.data_edicao ?? undefined,
+    corretor_id: raw.id_captador ? String(raw.id_captador) : undefined,
+    corretor_nome: raw.captador_nome ?? undefined,
+    corretor_whatsapp: captadorPhone || undefined,
   }
 }
 
@@ -163,11 +270,17 @@ function normalizeEmpreendimento(raw: Record<string, any>) {
   }
 }
 
-// Only items with `publicar === 1` (or truthy equivalents) are allowed on the site.
+// Only published items are allowed on the site.
+// Supremo uses different flags for each resource:
+//   - Empreendimentos: `publicar === 1`
+//   - Imóveis:         `publicado === "Sim"` (string) — may also come as 1/true
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isPublished(raw: Record<string, any>): boolean {
-  const v = raw.publicar
-  return v === 1 || v === '1' || v === true
+  const pubImovel = raw.publicado
+  if (pubImovel === 'Sim' || pubImovel === 1 || pubImovel === '1' || pubImovel === true) return true
+  const pubEmp = raw.publicar
+  if (pubEmp === 1 || pubEmp === '1' || pubEmp === true) return true
+  return false
 }
 
 // Normalise the Supremo paginated list response to our PropertyListResponse shape
@@ -285,11 +398,31 @@ Deno.serve(async (req: Request) => {
   }
 
   // Normalise response
-  let normalized: unknown
+  const mediaResource = isEmpreendimento ? 'empreendimentos' : 'imoveis'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let normalized: any
   if (isDetail) {
     normalized = isEmpreendimento ? normalizeEmpreendimento(raw) : normalizeImovel(raw)
+    // Enrich with photos + first video URL (best-effort, parallel)
+    const id = String(raw.id ?? '')
+    const [fotos, videos] = await Promise.all([
+      fetchPhotos(mediaResource, id),
+      fetchVideoUrls(mediaResource, id),
+    ])
+    if (fotos.length > 0) normalized.fotos = fotos
+    if (videos.length > 0) normalized.video_url = videos[0]
   } else {
-    normalized = normalizeListResponse(raw, isEmpreendimento)
+    const list = normalizeListResponse(raw, isEmpreendimento)
+    // Enrich each item in the list with its cover photo(s).
+    // Fetched in parallel to keep latency low.
+    const enriched = await Promise.all(
+      list.data.map(async (item) => {
+        if (item.fotos && item.fotos.length > 0) return item
+        const fotos = await fetchPhotos(mediaResource, item.id)
+        return fotos.length > 0 ? { ...item, fotos } : item
+      })
+    )
+    normalized = { ...list, data: enriched }
   }
 
   // Cache detail results (2h TTL)
