@@ -163,19 +163,30 @@ function normalizeEmpreendimento(raw: Record<string, any>) {
   }
 }
 
+// Only items with `publicar === 1` (or truthy equivalents) are allowed on the site.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPublished(raw: Record<string, any>): boolean {
+  const v = raw.publicar
+  return v === 1 || v === '1' || v === true
+}
+
 // Normalise the Supremo paginated list response to our PropertyListResponse shape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeListResponse(raw: Record<string, any>, isEmpreendimento: boolean) {
   const page = Number(raw.paginaAtual ?? raw.pagina_atual ?? 1)
   const limit = Number(raw.porPagina ?? raw.por_pagina ?? 12)
-  const total = Number(raw.total ?? 0)
-  const pages = Number((raw.totalPaginas ?? raw.total_paginas) ?? (Math.ceil(total / limit) || 0))
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items: Record<string, any>[] = Array.isArray(raw.data) ? raw.data : []
-  const data = items.map((item) =>
+  const published = items.filter(isPublished)
+  const data = published.map((item) =>
     isEmpreendimento ? normalizeEmpreendimento(item) : normalizeImovel(item)
   )
+
+  // Upstream totals include unpublished items, so we report counts based on
+  // what we actually return for this page.
+  const total = published.length
+  const pages = total > 0 ? Math.max(1, Math.ceil(total / limit)) : 0
 
   return { data, total, page, limit, pages }
 }
@@ -264,6 +275,14 @@ Deno.serve(async (req: Request) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = await supremoRes.json() as Record<string, any>
+
+  // For detail requests, block access to unpublished items.
+  if (isDetail && !isPublished(raw)) {
+    return new Response(
+      JSON.stringify({ error: 'Not found' }),
+      { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
 
   // Normalise response
   let normalized: unknown
