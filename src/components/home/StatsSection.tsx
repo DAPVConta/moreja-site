@@ -39,7 +39,7 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
   const displayStats = stats.length > 0 ? stats : defaultStats
 
   return (
-    <section className="bg-[#ededd1] py-20 relative overflow-hidden">
+    <section className="bg-[#ededd1] py-14 sm:py-20 relative overflow-hidden">
       {/* Decorative pattern */}
       <div
         aria-hidden="true"
@@ -51,16 +51,16 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
           {displayStats.map((stat) => (
             <div
               key={stat.key}
               className="group text-center animate-fade-in"
             >
               {/* Icon in elegant circular badge */}
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mb-3 sm:mb-4">
                 <div
-                  className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#010744] to-[#1a1f6e] shadow-lg shadow-[#010744]/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-[#010744]/30"
+                  className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#010744] to-[#1a1f6e] shadow-lg shadow-[#010744]/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-[#010744]/30"
                 >
                   {/* Gold accent corner */}
                   <span
@@ -73,10 +73,10 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
                 </div>
               </div>
 
-              <p className="text-5xl font-black text-[#010744] mb-1 tracking-tight leading-none">
+              <p className="text-3xl sm:text-4xl md:text-5xl font-black text-[#010744] mb-1 tracking-tight leading-none">
                 {stat.value}
               </p>
-              <p className="text-sm text-gray-700 font-semibold tracking-wide">
+              <p className="text-xs sm:text-sm text-gray-700 font-semibold tracking-wide">
                 {stat.label}
               </p>
 

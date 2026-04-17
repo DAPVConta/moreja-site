@@ -86,31 +86,34 @@ export function PropertyFiltersClient({
     <div className={`space-y-5 ${isPending ? 'opacity-60 pointer-events-none' : ''}`}>
       {/* Search */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        <label htmlFor="flt-q" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Buscar
         </label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            type="text"
+            id="flt-q"
+            type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
             placeholder="Bairro, cidade, código..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+            autoCapitalize="words"
+            className="w-full pl-9 pr-3 py-3 lg:py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Tipo */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        <label htmlFor="flt-tipo" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Tipo de imóvel
         </label>
         <select
+          id="flt-tipo"
           value={tipo}
           onChange={(e) => setTipo(e.target.value)}
-          className="w-full py-2 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent bg-white"
+          className="w-full py-3 lg:py-2 px-3 text-base lg:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent bg-white"
         >
           <option value="">Todos os tipos</option>
           {propertyTypes.map((t) => (
@@ -123,29 +126,33 @@ export function PropertyFiltersClient({
 
       {/* Bairro */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        <label htmlFor="flt-bairro" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Bairro
         </label>
         <input
+          id="flt-bairro"
           type="text"
           value={bairro}
           onChange={(e) => setBairro(e.target.value)}
           placeholder="Digite o bairro"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+          autoCapitalize="words"
+          className="w-full px-3 py-3 lg:py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
         />
       </div>
 
       {/* Cidade */}
       <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        <label htmlFor="flt-cidade" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Cidade
         </label>
         <input
+          id="flt-cidade"
           type="text"
           value={cidade}
           onChange={(e) => setCidade(e.target.value)}
           placeholder="Digite a cidade"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+          autoCapitalize="words"
+          className="w-full px-3 py-3 lg:py-2 text-base lg:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
         />
       </div>
 
@@ -154,7 +161,7 @@ export function PropertyFiltersClient({
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Faixa de preço
         </label>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {priceRanges.map((range) => {
             const isActive =
               String(range.min || '') === precoMin && String(range.max || '') === precoMax
@@ -163,10 +170,10 @@ export function PropertyFiltersClient({
                 key={range.label}
                 type="button"
                 onClick={() => handlePriceRange(range)}
-                className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                className={`w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors ${
                   isActive
                     ? 'bg-[#010744] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                 }`}
               >
                 {range.label}
@@ -193,17 +200,18 @@ export function PropertyFiltersClient({
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           Quartos
         </label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-5 gap-1.5">
           {['', '1', '2', '3', '4'].map((q_) => (
             <button
               key={q_ || 'todos'}
               type="button"
               onClick={() => setQuartos(q_)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`h-11 text-sm font-medium rounded-lg transition-colors ${
                 quartos === q_
                   ? 'bg-[#010744] text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
               }`}
+              aria-pressed={quartos === q_}
             >
               {q_ === '' ? 'Todos' : q_ === '4' ? '4+' : q_}
             </button>
@@ -216,7 +224,7 @@ export function PropertyFiltersClient({
         <button
           type="button"
           onClick={applyFilters}
-          className="w-full py-2.5 bg-[#f2d22e] text-[#010744] font-semibold rounded-lg hover:bg-[#e6c820] transition-colors"
+          className="w-full py-3 bg-[#f2d22e] text-[#010744] font-semibold rounded-lg hover:bg-[#e6c820] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2"
         >
           {isPending ? 'Buscando...' : 'Aplicar Filtros'}
         </button>
@@ -224,7 +232,7 @@ export function PropertyFiltersClient({
           <button
             type="button"
             onClick={clearFilters}
-            className="w-full py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <X className="w-3.5 h-3.5" />
             Limpar filtros
@@ -241,12 +249,14 @@ export function PropertyFiltersClient({
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#010744] text-white rounded-lg font-medium text-sm"
+          className="w-full flex items-center justify-center gap-2 px-4 h-11 bg-white border border-gray-300 text-[#010744] rounded-lg font-semibold text-sm active:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744]"
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-filters"
         >
           <SlidersHorizontal className="w-4 h-4" />
           Filtros
           {hasActiveFilters && (
-            <span className="bg-[#f2d22e] text-[#010744] text-xs font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-[#f2d22e] text-[#010744] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
               •
             </span>
           )}
@@ -255,23 +265,32 @@ export function PropertyFiltersClient({
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div
+          id="mobile-filters"
+          className="lg:hidden fixed inset-0 z-50 flex"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filtros de imóveis"
+        >
           <div
             className="fixed inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative z-10 ml-auto w-80 max-w-full bg-white h-full overflow-y-auto p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-6">
+          <div className="relative z-10 ml-auto w-[min(22rem,100vw)] bg-white h-full flex flex-col shadow-xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
               <h2 className="text-lg font-semibold">Filtros</h2>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="inline-flex items-center justify-center w-11 h-11 -mr-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Fechar filtros"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {filterContent}
+            <div className="flex-1 overflow-y-auto p-5 pb-24">
+              {filterContent}
+            </div>
           </div>
         </div>
       )}

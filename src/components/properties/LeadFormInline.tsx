@@ -71,42 +71,56 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
     )
   }
 
+  const inputCls =
+    'w-full px-3 py-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent'
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3" noValidate>
       <input
         type="text"
+        name="name"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
         placeholder="Seu nome *"
         required
-        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+        autoComplete="name"
+        autoCapitalize="words"
+        className={inputCls}
       />
       <input
         type="email"
+        name="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Seu e-mail *"
         required
-        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+        autoComplete="email"
+        inputMode="email"
+        autoCapitalize="none"
+        spellCheck={false}
+        className={inputCls}
       />
       <input
         type="tel"
+        name="phone"
         value={telefone}
         onChange={(e) => setTelefone(e.target.value)}
         placeholder="Telefone / WhatsApp"
-        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+        autoComplete="tel"
+        inputMode="tel"
+        className={inputCls}
       />
       <textarea
         value={mensagem}
         onChange={(e) => setMensagem(e.target.value)}
-        rows={3}
-        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent resize-none"
+        rows={4}
+        className={`${inputCls} resize-none`}
       />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
+        className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2"
       >
         <Send className="w-4 h-4" />
         {loading ? 'Enviando...' : 'Enviar mensagem'}

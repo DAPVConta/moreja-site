@@ -51,14 +51,14 @@ export function HeroSection({
         />
       )}
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 md:py-28">
+        <div className="text-center mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 sm:mb-6">
             {title}{' '}
             {highlight && <span className="text-[#f2d22e]">{highlight}</span>}
           </h1>
           {subtitle && (
-            <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
               {subtitle}
             </p>
           )}

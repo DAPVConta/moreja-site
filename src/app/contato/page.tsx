@@ -40,17 +40,17 @@ export default function ContatoPage() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="bg-[#010744] py-16">
+        <div className="bg-[#010744] py-10 sm:py-16">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Entre em contato</h1>
-            <p className="text-blue-200 text-lg max-w-xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Entre em contato</h1>
+            <p className="text-blue-200 text-base sm:text-lg max-w-xl mx-auto">
               Nossa equipe está pronta para te atender e encontrar o imóvel ideal para você.
             </p>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+        <div className="container mx-auto px-4 py-10 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
             {/* Contact Info */}
             <div className="space-y-8">
               <div>
@@ -72,22 +72,22 @@ export default function ContatoPage() {
                   )}
 
                   {whatsapp && (
-                    <div className="flex items-start gap-4">
+                    <a
+                      href={`https://wa.me/55${whatsapp}?text=${encodeURIComponent('Olá! Gostaria de mais informações sobre imóveis.')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-4 rounded-xl p-2 -m-2 hover:bg-green-50 transition-colors"
+                    >
                       <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
                         <MessageCircle className="w-6 h-6 text-green-600" />
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">WhatsApp</p>
-                        <a
-                          href={`https://wa.me/55${whatsapp}?text=${encodeURIComponent('Olá! Gostaria de mais informações sobre imóveis.')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-green-600 hover:underline font-medium"
-                        >
+                        <span className="text-green-600 font-medium">
                           Iniciar conversa →
-                        </a>
+                        </span>
                       </div>
-                    </div>
+                    </a>
                   )}
 
                   <div className="flex items-start gap-4">
@@ -141,8 +141,8 @@ export default function ContatoPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Envie uma mensagem</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">Envie uma mensagem</h2>
               <ContactForm />
             </div>
           </div>

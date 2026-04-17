@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin, Phone, Mail } from 'lucide-react'
+import { MapPin, Phone, Mail, ChevronDown, MessageCircle } from 'lucide-react'
 import { MoRejaLogo } from './Header'
 
 // Social media SVG icons (lucide-react doesn't have brand icons)
@@ -46,6 +46,12 @@ const companyLinks = [
   { href: '/contato', label: 'Contato' },
 ]
 
+const accordionSections = [
+  { title: 'Empresa', links: companyLinks },
+  { title: 'Comprar', links: buyLinks },
+  { title: 'Alugar', links: rentLinks },
+]
+
 interface FooterProps {
   logoUrl?: string | null
   companyName?: string
@@ -54,21 +60,125 @@ interface FooterProps {
 export function Footer({ logoUrl, companyName }: FooterProps = {}) {
   return (
     <footer className="text-white" style={{ background: 'var(--brand-primary, #010744)' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div className="lg:col-span-1">
-            <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={companyName} />
-            <p className="mt-4 text-sm text-gray-300 leading-relaxed">
+      {/* ═══════════════════════ MOBILE LAYOUT ═══════════════════════ */}
+      <div className="lg:hidden">
+        <div className="max-w-7xl mx-auto px-4 pt-8 pb-6">
+          {/* 1. Quick CTAs */}
+          <div className="grid grid-cols-2 gap-3">
+            <a
+              href="tel:+5511999999999"
+              className="flex items-center justify-center gap-2 h-12 rounded-xl bg-white/10 active:bg-white/15 text-sm font-semibold transition-colors"
+              aria-label="Ligar para a Morejá"
+            >
+              <Phone size={18} className="text-[#f2d22e]" aria-hidden="true" />
+              Ligar
+            </a>
+            <a
+              href="https://wa.me/5511999999999"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 h-12 rounded-xl bg-green-500 active:bg-green-600 text-sm font-semibold transition-colors"
+              aria-label="WhatsApp da Morejá"
+            >
+              <MessageCircle size={18} aria-hidden="true" />
+              WhatsApp
+            </a>
+          </div>
+
+          {/* 2. Brand */}
+          <div className="mt-8 text-center">
+            <div className="inline-block">
+              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={companyName} />
+            </div>
+            <p className="mt-3 text-sm text-gray-300 leading-relaxed max-w-[18rem] mx-auto">
               Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
             </p>
-            <div className="flex gap-3 mt-6">
+          </div>
+
+          {/* 3. Contato - actionable info cards */}
+          <div className="mt-7 grid grid-cols-1 gap-2">
+            <a
+              href="https://maps.google.com/?q=Rua+Exemplo+123+São+Paulo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+            >
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                <MapPin size={18} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 text-sm">
+                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Endereço</p>
+                <p className="text-white">Rua Exemplo, 123 — São Paulo/SP</p>
+              </div>
+            </a>
+            <a
+              href="tel:+5511999999999"
+              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+            >
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                <Phone size={18} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 text-sm">
+                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Telefone</p>
+                <p className="text-white">(11) 9 9999-9999</p>
+              </div>
+            </a>
+            <a
+              href="mailto:contato@moreja.com.br"
+              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+            >
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                <Mail size={18} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 text-sm">
+                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">E-mail</p>
+                <p className="text-white truncate">contato@moreja.com.br</p>
+              </div>
+            </a>
+          </div>
+
+          {/* 4. Navegação - accordions */}
+          <nav className="mt-7 border-y border-white/10 divide-y divide-white/10" aria-label="Navegação do rodapé">
+            {accordionSections.map((section) => (
+              <details key={section.title} className="group">
+                <summary className="flex items-center justify-between py-4 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                  <span className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs">
+                    {section.title}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className="text-[#f2d22e] transition-transform duration-200 group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <ul className="pb-3 -mt-1">
+                  {section.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="block py-2.5 pl-1 text-sm text-gray-300 active:text-[#f2d22e] transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </nav>
+
+          {/* 5. Social */}
+          <div className="mt-7">
+            <p className="text-center text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-3">
+              Siga-nos
+            </p>
+            <div className="flex justify-center gap-3">
               <a
                 href="https://instagram.com/morejaimoveis"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram da Morejá"
-                className="p-2 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
               >
                 <IconInstagram />
               </a>
@@ -77,7 +187,7 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook da Morejá"
-                className="p-2 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
               >
                 <IconFacebook />
               </a>
@@ -86,82 +196,127 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube da Morejá"
-                className="p-2 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
               >
                 <IconYoutube />
               </a>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Empresa */}
-          <div>
-            <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Empresa</h3>
-            <ul className="space-y-3">
-              {companyLinks.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                    {link.label}
-                  </Link>
+      {/* ═══════════════════════ DESKTOP LAYOUT ═══════════════════════ */}
+      <div className="hidden lg:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-4 gap-10">
+            {/* Brand */}
+            <div>
+              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={companyName} />
+              <p className="mt-4 text-sm text-gray-300 leading-relaxed">
+                Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
+              </p>
+              <div className="flex gap-3 mt-6">
+                <a
+                  href="https://instagram.com/morejaimoveis"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram da Morejá"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                >
+                  <IconInstagram />
+                </a>
+                <a
+                  href="https://facebook.com/morejaimoveis"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook da Morejá"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                >
+                  <IconFacebook />
+                </a>
+                <a
+                  href="https://youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube da Morejá"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
+                >
+                  <IconYoutube />
+                </a>
+              </div>
+            </div>
+
+            {/* Empresa */}
+            <div>
+              <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Empresa</h3>
+              <ul className="space-y-3">
+                {companyLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Comprar / Alugar */}
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Comprar</h3>
+                <ul className="space-y-3">
+                  {buyLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Alugar</h3>
+                <ul className="space-y-3">
+                  {rentLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Contato */}
+            <div>
+              <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Contato</h3>
+              <ul className="space-y-4">
+                <li className="flex gap-3 text-sm text-gray-300">
+                  <MapPin size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                  <span>Rua Exemplo, 123<br />São Paulo — SP</span>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Comprar / Alugar */}
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Comprar</h3>
-              <ul className="space-y-3">
-                {buyLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <a href="tel:+5511999999999" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                    <Phone size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                    (11) 9 9999-9999
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:contato@moreja.com.br" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                    <Mail size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                    contato@moreja.com.br
+                  </a>
+                </li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Alugar</h3>
-              <ul className="space-y-3">
-                {rentLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Contato */}
-          <div>
-            <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Contato</h3>
-            <ul className="space-y-4">
-              <li className="flex gap-3 text-sm text-gray-300">
-                <MapPin size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
-                <span>Rua Exemplo, 123<br />São Paulo — SP</span>
-              </li>
-              <li>
-                <a href="tel:+5511999999999" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                  <Phone size={16} className="text-[#f2d22e] shrink-0" />
-                  (11) 9 9999-9999
-                </a>
-              </li>
-              <li>
-                <a href="mailto:contato@moreja.com.br" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                  <Mail size={16} className="text-[#f2d22e] shrink-0" />
-                  contato@moreja.com.br
-                </a>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
 
+      {/* ═══════════════════════ BOTTOM BAR (shared) ═══════════════════════ */}
       <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 text-xs text-gray-400 text-center sm:text-left">
           <p>© {new Date().getFullYear()} Morejá Imobiliária. Todos os direitos reservados.</p>
           <p>CRECI-SP 00000-J</p>
         </div>

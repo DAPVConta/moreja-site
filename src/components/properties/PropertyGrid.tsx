@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { fetchProperties } from '@/lib/properties'
 import { PROPERTY_TYPES, PRICE_RANGES_VENDA, PRICE_RANGES_LOCACAO } from '@/types/property'
 import { PropertyCard, PropertyCardSkeleton } from './PropertyCard'
@@ -75,7 +76,7 @@ async function PropertyResults({
 
       {totalPages > 1 && (
         <nav
-          className="flex justify-center items-center gap-2 mt-12"
+          className="flex justify-center items-center flex-wrap gap-2 mt-10 sm:mt-12"
           aria-label="Paginação de imóveis"
         >
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -117,9 +118,10 @@ function PaginationLink({
   const isActive = page === currentPage
 
   return (
-    <a
+    <Link
       href={`?${params.toString()}`}
-      className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+      scroll
+      className={`min-w-11 h-11 px-3 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
         isActive
           ? 'bg-[#010744] text-white'
           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -128,7 +130,7 @@ function PaginationLink({
       aria-current={isActive ? 'page' : undefined}
     >
       {page}
-    </a>
+    </Link>
   )
 }
 
@@ -139,10 +141,10 @@ export async function PropertyGrid({ searchParams, finalidade, title }: Property
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-[#010744] py-12">
+      <div className="bg-[#010744] py-8 sm:py-12">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
-          <p className="text-blue-200">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">{title}</h1>
+          <p className="text-blue-200 text-sm sm:text-base">
             {finalidade === 'Venda'
               ? 'Encontre o imóvel ideal para comprar'
               : 'Encontre o imóvel ideal para alugar'}
@@ -150,8 +152,8 @@ export async function PropertyGrid({ searchParams, finalidade, title }: Property
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-72 shrink-0">
             <PropertyFiltersClient
@@ -165,8 +167,7 @@ export async function PropertyGrid({ searchParams, finalidade, title }: Property
           {/* Main Content */}
           <main className="flex-1 min-w-0">
             {/* Sort Bar */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="hidden sm:block" />
+            <div className="flex items-center justify-end mb-5 sm:mb-6">
               <OrderSelect currentOrder={params.order} currentParams={params} />
             </div>
 
@@ -216,23 +217,48 @@ function OrderSelect({
     return `?${p.toString()}`
   }
 
+  const active = currentOrder ?? 'relevancia'
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600 whitespace-nowrap">Ordenar por:</span>
-      <div className="flex gap-1 flex-wrap">
-        {options.map((opt) => (
-          <a
-            key={opt.value}
-            href={buildUrl(opt.value)}
-            className={`px-3 py-1.5 text-sm rounded-lg transition-colors whitespace-nowrap ${
-              (currentOrder ?? 'relevancia') === opt.value
-                ? 'bg-[#010744] text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            {opt.label}
-          </a>
-        ))}
+    <div className="w-full sm:w-auto">
+      {/* Mobile: native select for easy tap */}
+      <label className="sm:hidden flex items-center gap-2 text-sm text-gray-600">
+        <span className="whitespace-nowrap">Ordenar:</span>
+        <select
+          value={active}
+          onChange={(e) => {
+            if (typeof window !== 'undefined') {
+              window.location.href = buildUrl(e.target.value)
+            }
+          }}
+          className="flex-1 min-w-0 px-3 py-2.5 text-base bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744]"
+          aria-label="Ordenar imóveis"
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </label>
+
+      {/* Desktop: pill buttons */}
+      <div className="hidden sm:flex items-center gap-2">
+        <span className="text-sm text-gray-600 whitespace-nowrap">Ordenar por:</span>
+        <div className="flex gap-1 flex-wrap">
+          {options.map((opt) => (
+            <Link
+              key={opt.value}
+              href={buildUrl(opt.value)}
+              scroll={false}
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors whitespace-nowrap ${
+                active === opt.value
+                  ? 'bg-[#010744] text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {opt.label}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   )

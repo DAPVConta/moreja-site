@@ -41,15 +41,21 @@ export function CategoryCards({
   cards,
 }: CategoryCardsProps = {}) {
   const categories = cards && cards.length > 0 ? cards : defaultCards
+
+  // Tailwind JIT só reconhece class names literais; mapeamos manualmente.
+  const cols = Math.min(categories.length, 3)
+  const gridCols =
+    cols === 1 ? 'grid-cols-1' : cols === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
+
   return (
-    <section className="py-20 bg-[#ededd1]">
+    <section className="py-14 sm:py-20 bg-[#ededd1]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 sm:mb-12">
           <h2 className="section-title">{title}</h2>
           <p className="section-subtitle">{subtitle}</p>
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-${Math.min(categories.length, 3)} gap-6`}>
+        <div className={`grid grid-cols-1 ${gridCols} gap-5 sm:gap-6`}>
           {categories.map((cat) => (
             <Link
               key={cat.title}
@@ -66,9 +72,9 @@ export function CategoryCards({
               <div className="absolute inset-0 bg-gradient-to-t from-[#010744]/90 via-[#010744]/40 to-transparent" />
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{cat.title}</h3>
-                <p className="text-sm text-gray-200 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2">{cat.title}</h3>
+                <p className="text-sm text-gray-200 mb-3 sm:mb-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                   {cat.description}
                 </p>
                 <span className="inline-flex items-center gap-2 text-[#f2d22e] font-semibold text-sm">

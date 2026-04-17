@@ -78,17 +78,17 @@ export default async function ImovelPage({ params }: PageProps) {
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">
           <div className="container mx-auto px-4 py-3">
-            <nav className="flex items-center gap-2 text-sm text-gray-500">
-              <Link href="/" className="hover:text-[#010744]">Início</Link>
-              <span>/</span>
-              <Link href={finalidadePath} className="hover:text-[#010744]">{finalidadeLabel}</Link>
-              <span>/</span>
-              <span className="text-gray-800 truncate max-w-xs">{property.titulo}</span>
+            <nav className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
+              <Link href="/" className="hover:text-[#010744] shrink-0">Início</Link>
+              <span className="shrink-0">/</span>
+              <Link href={finalidadePath} className="hover:text-[#010744] shrink-0">{finalidadeLabel}</Link>
+              <span className="shrink-0">/</span>
+              <span className="text-gray-800 truncate min-w-0">{property.titulo}</span>
             </nav>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           {/* Back */}
           <Link
             href={finalidadePath}
@@ -98,35 +98,35 @@ export default async function ImovelPage({ params }: PageProps) {
             Voltar à listagem
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Left: Gallery + Details */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-5 sm:space-y-6">
               {/* Gallery */}
               <PropertyGallery fotos={property.fotos} titulo={property.titulo} />
 
               {/* Title & Price */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                  <div className="min-w-0">
                     {property.destaque && (
                       <span className="inline-block bg-[#f2d22e] text-[#010744] text-xs font-bold px-2 py-1 rounded mb-2">
                         DESTAQUE
                       </span>
                     )}
-                    <h1 className="text-2xl font-bold text-gray-900">{property.titulo}</h1>
-                    <div className="flex items-center gap-1.5 text-gray-500 mt-1">
-                      <MapPin className="w-4 h-4 text-[#010744]" />
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">{property.titulo}</h1>
+                    <div className="flex items-start gap-1.5 text-gray-500 mt-1 text-sm sm:text-base">
+                      <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
                       <span>{property.bairro}, {property.cidade} – {property.estado}</span>
                     </div>
                     <p className="text-xs text-gray-400 mt-1">Ref.: {property.codigo}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-[#010744]">
+                  <div className="sm:text-right">
+                    <p className="text-2xl sm:text-3xl font-bold text-[#010744]">
                       {formatPrice(property.preco)}
+                      {property.finalidade === 'Locação' && (
+                        <span className="text-sm font-normal text-gray-400">/mês</span>
+                      )}
                     </p>
-                    {property.finalidade === 'Locação' && (
-                      <p className="text-sm text-gray-500">/mês</p>
-                    )}
                     {property.preco_condominio && (
                       <p className="text-sm text-gray-500">
                         Cond: {formatPrice(property.preco_condominio)}/mês
@@ -141,7 +141,7 @@ export default async function ImovelPage({ params }: PageProps) {
                 </div>
 
                 {/* Features */}
-                <div className="flex flex-wrap gap-6 mt-6 pt-6 border-t border-gray-100">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gray-100">
                   {property.area_util ? (
                     <div className="flex items-center gap-2 text-gray-700">
                       <Maximize2 className="w-5 h-5 text-[#010744]" />
@@ -234,9 +234,9 @@ export default async function ImovelPage({ params }: PageProps) {
             </div>
 
             {/* Right: Contact Card */}
-            <aside className="space-y-4">
-              {/* Sticky Contact */}
-              <div className="sticky top-24">
+            <aside className="space-y-4 pb-20 lg:pb-0">
+              {/* Sticky on desktop only */}
+              <div className="lg:sticky lg:top-24">
                 {/* Share */}
                 <ShareButton titulo={property.titulo} />
 
@@ -297,6 +297,30 @@ export default async function ImovelPage({ params }: PageProps) {
               </div>
             </aside>
           </div>
+        </div>
+
+        {/* Mobile sticky action bar */}
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-3 py-2.5 flex gap-2 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+          {property.corretor_whatsapp && (
+            <a
+              href={`https://wa.me/55${property.corretor_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Tenho interesse no imóvel "${property.titulo}" (ref. ${property.codigo}).`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 active:bg-green-600 text-white h-12 rounded-lg font-semibold text-sm"
+              aria-label="Contatar por WhatsApp"
+            >
+              <MessageCircle className="w-5 h-5" />
+              WhatsApp
+            </a>
+          )}
+          <a
+            href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm"
+            aria-label="Ligar para a corretora"
+          >
+            <Phone className="w-5 h-5" />
+            Ligar
+          </a>
         </div>
       </div>
     </>

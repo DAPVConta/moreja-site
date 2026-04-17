@@ -61,17 +61,17 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">
           <div className="container mx-auto px-4 py-3">
-            <nav className="flex items-center gap-2 text-sm text-gray-500">
-              <Link href="/" className="hover:text-[#010744]">Início</Link>
-              <span>/</span>
-              <Link href="/empreendimentos" className="hover:text-[#010744]">Empreendimentos</Link>
-              <span>/</span>
-              <span className="text-gray-800 truncate max-w-xs">{property.titulo}</span>
+            <nav className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
+              <Link href="/" className="hover:text-[#010744] shrink-0">Início</Link>
+              <span className="shrink-0">/</span>
+              <Link href="/empreendimentos" className="hover:text-[#010744] shrink-0 hidden sm:inline">Empreendimentos</Link>
+              <span className="shrink-0 hidden sm:inline">/</span>
+              <span className="text-gray-800 truncate min-w-0">{property.titulo}</span>
             </nav>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           <Link
             href="/empreendimentos"
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[#010744] mb-6 transition-colors"
@@ -87,17 +87,17 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 space-y-5 sm:space-y-6">
               <PropertyGallery fotos={property.fotos} titulo={property.titulo} />
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.titulo}</h1>
-                <div className="flex items-center gap-1.5 text-gray-500 mb-4">
-                  <MapPin className="w-4 h-4 text-[#010744]" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 leading-snug">{property.titulo}</h1>
+                <div className="flex items-start gap-1.5 text-gray-500 text-sm sm:text-base mb-4">
+                  <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
                   <span>{property.bairro}, {property.cidade} – {property.estado}</span>
                 </div>
-                <div className="text-3xl font-bold text-[#010744] mb-6">
+                <div className="text-2xl sm:text-3xl font-bold text-[#010744] mb-5 sm:mb-6">
                   A partir de {formatPrice(property.preco)}
                 </div>
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
@@ -121,8 +121,8 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
               )}
             </div>
 
-            <aside>
-              <div className="sticky top-24 space-y-4">
+            <aside className="pb-20 lg:pb-0">
+              <div className="lg:sticky lg:top-24 space-y-4">
                 <ShareButtonClient titulo={property.titulo} />
 
                 {property.corretor_whatsapp && (
@@ -155,6 +155,30 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
               </div>
             </aside>
           </div>
+        </div>
+
+        {/* Mobile sticky action bar */}
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-3 py-2.5 flex gap-2 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+          {property.corretor_whatsapp && (
+            <a
+              href={`https://wa.me/55${property.corretor_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Tenho interesse no empreendimento "${property.titulo}". Gostaria de mais informações.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 active:bg-green-600 text-white h-12 rounded-lg font-semibold text-sm"
+              aria-label="Contatar por WhatsApp"
+            >
+              <MessageCircle className="w-5 h-5" />
+              WhatsApp
+            </a>
+          )}
+          <a
+            href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm"
+            aria-label="Ligar"
+          >
+            <Phone className="w-5 h-5" />
+            Ligar
+          </a>
         </div>
       </div>
     </>

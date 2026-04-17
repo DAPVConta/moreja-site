@@ -71,56 +71,74 @@ export function ContactForm() {
     )
   }
 
+  const inputCls =
+    'w-full px-3 py-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent'
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="cf-name" className="block text-sm font-medium text-gray-700 mb-1">
             Nome <span className="text-red-500">*</span>
           </label>
           <input
+            id="cf-name"
             type="text"
+            name="name"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             required
-            className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+            autoComplete="name"
+            autoCapitalize="words"
+            className={inputCls}
             placeholder="Seu nome completo"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="cf-phone" className="block text-sm font-medium text-gray-700 mb-1">
             Telefone
           </label>
           <input
+            id="cf-phone"
             type="tel"
+            name="phone"
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
-            className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+            autoComplete="tel"
+            inputMode="tel"
+            className={inputCls}
             placeholder="(XX) XXXXX-XXXX"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="cf-email" className="block text-sm font-medium text-gray-700 mb-1">
           E-mail <span className="text-red-500">*</span>
         </label>
         <input
+          id="cf-email"
           type="email"
+          name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent"
+          autoComplete="email"
+          inputMode="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          className={inputCls}
           placeholder="seu@email.com"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Assunto</label>
+        <label htmlFor="cf-subject" className="block text-sm font-medium text-gray-700 mb-1">Assunto</label>
         <select
+          id="cf-subject"
           value={assunto}
           onChange={(e) => setAssunto(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent bg-white"
+          className={`${inputCls} bg-white`}
         >
           <option value="">Selecione um assunto</option>
           {ASSUNTOS.map((a) => (
@@ -130,27 +148,28 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="cf-message" className="block text-sm font-medium text-gray-700 mb-1">
           Mensagem <span className="text-red-500">*</span>
         </label>
         <textarea
+          id="cf-message"
           value={mensagem}
           onChange={(e) => setMensagem(e.target.value)}
           required
           rows={5}
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent resize-none"
+          className={`${inputCls} resize-none`}
           placeholder="Como podemos te ajudar?"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+        <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg" role="alert">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-60"
+        className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3.5 rounded-lg font-semibold transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2"
       >
         <Send className="w-4 h-4" />
         {loading ? 'Enviando...' : 'Enviar mensagem'}

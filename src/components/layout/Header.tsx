@@ -30,7 +30,7 @@ export function MoRejaLogo({
       <img
         src={logoUrl}
         alt={companyName ?? 'Logo'}
-        className={`h-12 w-auto max-w-[220px] object-contain ${className ?? ''}`}
+        className={`h-7 md:h-12 w-auto max-w-[132px] md:max-w-[220px] object-contain ${className ?? ''}`}
       />
     )
   }
@@ -39,14 +39,16 @@ export function MoRejaLogo({
     variant === 'yellow' ? '#f2d22e' : variant === 'white' ? '#ffffff' : '#010744'
 
   return (
-    <span className="flex items-center gap-1 font-black text-2xl tracking-tight" style={{ color }}>
+    <span
+      className={`flex items-center gap-0.5 md:gap-1 font-black text-sm md:text-2xl tracking-tight ${className ?? ''}`}
+      style={{ color }}
+    >
       M
       <span className="relative inline-flex items-center justify-center">
         <MapPin
-          size={28}
           fill={color}
           strokeWidth={0}
-          className="absolute"
+          className="absolute w-[17px] h-[17px] md:w-7 md:h-7"
           aria-hidden="true"
         />
         <span className="opacity-0 select-none">O</span>
@@ -78,6 +80,17 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
     setMobileOpen(false)
   }, [pathname])
 
+  // Lock body scroll while mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = prev
+      }
+    }
+  }, [mobileOpen])
+
   return (
     <>
       <header
@@ -88,7 +101,7 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className={`flex items-center justify-between transition-all duration-300 ${
-              scrolled ? 'h-16' : 'h-20'
+              scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20'
             }`}
           >
             {/* Logo */}
@@ -135,9 +148,10 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
 
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2 rounded-md text-gray-600 hover:text-[#010744] hover:bg-gray-100 transition-colors"
+                className="lg:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md text-gray-600 hover:text-[#010744] hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] transition-colors"
                 aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
                 aria-expanded={mobileOpen}
+                aria-controls="mobile-nav"
               >
                 {mobileOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -148,13 +162,19 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-white pt-20">
-          <nav className="flex flex-col px-6 pt-6 gap-2" aria-label="Menu mobile">
+        <div
+          id="mobile-nav"
+          className="lg:hidden fixed inset-0 z-40 bg-white pt-16 sm:pt-20 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu principal"
+        >
+          <nav className="flex flex-col px-6 pt-4 pb-8 gap-1" aria-label="Menu mobile">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-lg font-semibold py-3 border-b border-gray-100 transition-colors ${
+                className={`flex items-center text-lg font-semibold py-4 border-b border-gray-100 transition-colors ${
                   pathname.startsWith(link.href)
                     ? 'text-[#010744]'
                     : 'text-gray-700 hover:text-[#010744]'
@@ -167,9 +187,9 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
               {phone && (
                 <a
                   href={`tel:${phone.replace(/\D/g, '')}`}
-                  className="flex items-center gap-2 text-gray-600"
+                  className="flex items-center justify-center gap-2 text-gray-700 py-3 border border-gray-300 rounded-lg font-medium"
                 >
-                  <Phone size={16} />
+                  <Phone size={18} />
                   {phone}
                 </a>
               )}

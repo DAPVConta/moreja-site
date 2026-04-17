@@ -51,9 +51,9 @@ export function HeroSearch() {
       {/* Search form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-b-xl rounded-tr-xl p-4 md:p-5 shadow-2xl"
+        className="bg-white rounded-b-xl rounded-tr-xl p-3 sm:p-4 md:p-5 shadow-2xl"
       >
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
           {/* Text search */}
           <div className="relative flex-1">
             <Search
@@ -62,11 +62,12 @@ export function HeroSearch() {
               aria-hidden="true"
             />
             <input
-              type="text"
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Busque por bairro, cidade ou palavra-chave..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm text-gray-700
+              placeholder="Bairro, cidade ou palavra-chave..."
+              autoCapitalize="words"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-base sm:text-sm text-gray-700
                          focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent
                          placeholder:text-gray-400"
               aria-label="Buscar imóveis"
@@ -77,7 +78,7 @@ export function HeroSearch() {
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
-            className="sm:w-48 px-4 py-3 border border-gray-200 rounded-lg text-sm text-gray-700
+            className="sm:w-48 px-4 py-3 border border-gray-200 rounded-lg text-base sm:text-sm text-gray-700
                        focus:outline-none focus:ring-2 focus:ring-[#010744] focus:border-transparent
                        bg-white cursor-pointer"
             aria-label="Tipo de imóvel"
@@ -93,9 +94,9 @@ export function HeroSearch() {
           {/* Search button */}
           <button
             type="submit"
-            className="btn-primary flex items-center justify-center gap-2 sm:px-8"
+            className="btn-primary flex items-center justify-center gap-2 sm:px-8 min-h-[48px]"
           >
-            <Search size={16} aria-hidden="true" />
+            <Search size={18} aria-hidden="true" />
             Buscar
           </button>
         </div>
