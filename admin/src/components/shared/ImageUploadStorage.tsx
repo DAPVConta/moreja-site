@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Upload, X, ExternalLink, ImageIcon, AlertCircle, CheckCircle2,
   Loader2, Link2, HardDriveUpload,
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ImageCropDialog } from './ImageCropDialog'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -34,47 +35,7 @@ export interface ImageUploadStorageProps {
   required?: boolean
 }
 
-// ── Image resize ───────────────────────────────────────────────────────────
-
-async function resizeImage(file: File, specs: ImageSpecs): Promise<Blob> {
-  const { width, height, mode = 'fit', quality = 0.88 } = specs
-  const bitmap = await createImageBitmap(file)
-  const srcW = bitmap.width
-  const srcH = bitmap.height
-
-  let destW = width, destH = height
-  let sx = 0, sy = 0, sw = srcW, sh = srcH
-
-  if (mode === 'fit') {
-    const ratio = Math.min(width / srcW, height / srcH)
-    destW = Math.round(srcW * ratio)
-    destH = Math.round(srcH * ratio)
-  } else if (mode === 'cover') {
-    const ratio = Math.max(width / srcW, height / srcH)
-    const scaledW = srcW * ratio, scaledH = srcH * ratio
-    sx = Math.round((scaledW - width) / (2 * ratio))
-    sy = Math.round((scaledH - height) / (2 * ratio))
-    sw = Math.round(width / ratio)
-    sh = Math.round(height / ratio)
-  }
-
-  const canvas = document.createElement('canvas')
-  canvas.width = destW
-  canvas.height = destH
-  const ctx = canvas.getContext('2d')!
-  ctx.imageSmoothingEnabled = true
-  ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, destW, destH)
-  bitmap.close()
-
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => { if (blob) resolve(blob); else reject(new Error('Encode failed')) },
-      'image/webp',
-      quality
-    )
-  })
-}
+// ── Helpers ────────────────────────────────────────────────────────────────
 
 function getPublicUrl(bucket: StorageBucket, path: string): string {
   const url = import.meta.env.VITE_SUPABASE_URL as string
@@ -101,25 +62,28 @@ export function ImageUploadStorage({
   const [dragOver, setDragOver] = useState(false)
   const [originalSize, setOriginalSize] = useState<string | null>(null)
   const [resizedSize, setResizedSize] = useState<string | null>(null)
+  const [cropOpen, setCropOpen] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string>('')
+  const [cropFileName, setCropFileName] = useState<string>('')
+  const [cropOriginalBytes, setCropOriginalBytes] = useState<number>(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    return () => { if (cropSrc) URL.revokeObjectURL(cropSrc) }
+  }, [cropSrc])
+
   const specsLabel = specs.label || `${specs.width} × ${specs.height} px`
-  const modeLabel = specs.mode === 'cover' ? 'recorte centralizado'
+  const modeLabel = specs.mode === 'cover' ? 'recorte e zoom manual'
     : specs.mode === 'exact' ? 'exato' : 'proporcional'
 
-  const processFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setError('Somente imagens são aceitas (JPG, PNG, WebP, GIF, SVG)')
-      return
-    }
+  const uploadBlob = useCallback(async (blob: Blob, originalName: string, originalBytes: number) => {
     setError(null)
     setUploading(true)
-    setOriginalSize(formatBytes(file.size))
+    setOriginalSize(formatBytes(originalBytes))
     try {
-      const blob = await resizeImage(file, specs)
       setResizedSize(formatBytes(blob.size))
       const timestamp = Date.now()
-      const safe = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40)
+      const safe = originalName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40)
       const path = `${folder}/${safe}_${timestamp}.webp`
       const { error: err } = await supabase.storage.from(bucket).upload(path, blob, {
         contentType: 'image/webp',
@@ -132,7 +96,23 @@ export function ImageUploadStorage({
     } finally {
       setUploading(false)
     }
-  }, [bucket, folder, specs, onChange])
+  }, [bucket, folder, onChange])
+
+  const processFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setError('Somente imagens são aceitas (JPG, PNG, WebP, GIF, SVG)')
+      return
+    }
+    setError(null)
+    // Abre o diálogo de recorte com a imagem local (crop + resize controlado pelo usuário).
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    const objectUrl = URL.createObjectURL(file)
+    setCropSrc(objectUrl)
+    setCropFileName(file.name)
+    setOriginalSize(formatBytes(file.size))
+    setCropOriginalBytes(file.size)
+    setCropOpen(true)
+  }, [cropSrc])
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -248,7 +228,8 @@ export function ImageUploadStorage({
               <img
                 src={value}
                 alt="Preview"
-                className="w-full object-cover max-h-52"
+                className="w-full block"
+                style={{ aspectRatio: `${specs.width} / ${specs.height}`, objectFit: 'cover' }}
                 onError={(e) => { (e.target as HTMLImageElement).src = '' }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
@@ -306,8 +287,13 @@ export function ImageUploadStorage({
 
       {/* Preview when in URL mode and value is set */}
       {mode === 'url' && value && (
-        <div className="relative group rounded-xl overflow-hidden border max-h-40">
-          <img src={value} alt="Preview" className="w-full object-cover max-h-40" />
+        <div className="relative group rounded-xl overflow-hidden border">
+          <img
+            src={value}
+            alt="Preview"
+            className="w-full block"
+            style={{ aspectRatio: `${specs.width} / ${specs.height}`, objectFit: 'cover' }}
+          />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             <Button type="button" size="sm" variant="destructive" onClick={handleRemove} className="h-8">
               <X className="w-3.5 h-3.5 mr-1.5" />
@@ -341,6 +327,18 @@ export function ImageUploadStorage({
         if (f) processFile(f)
         e.target.value = ''
       }} />
+
+      <ImageCropDialog
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        imageSrc={cropSrc}
+        targetWidth={specs.width}
+        targetHeight={specs.height}
+        quality={specs.quality ?? 0.88}
+        onApply={async (blob) => {
+          await uploadBlob(blob, cropFileName || 'image', cropOriginalBytes)
+        }}
+      />
     </div>
   )
 }

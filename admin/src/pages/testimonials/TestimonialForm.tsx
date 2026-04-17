@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { ImageUploadStorage } from '@/components/shared/ImageUploadStorage'
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,7 @@ const schema = z.object({
   role: z.string().optional(),
   text: z.string().min(10, 'Mínimo de 10 caracteres'),
   rating: z.number().int().min(1).max(5),
-  photo_url: z.string().url('URL inválida').or(z.literal('')),
+  photo_url: z.string().optional(),
   active: z.boolean(),
 })
 
@@ -199,9 +200,21 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
               name="photo_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL da Foto</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <ImageUploadStorage
+                      label="Foto"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      bucket="site"
+                      folder="testimonials"
+                      specs={{
+                        width: 400,
+                        height: 400,
+                        mode: 'cover',
+                        label: '400 × 400 px (quadrado)',
+                        hint: 'Foto do cliente. Ajuste o enquadramento e zoom antes de salvar.',
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

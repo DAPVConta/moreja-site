@@ -27,6 +27,7 @@ async function proxyFetch(resource: string, params: Record<string, string | numb
 }
 
 export async function fetchProperties(filters: PropertyFilters = {}): Promise<PropertyListResponse> {
+  let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch('imoveis', {
       finalidade: filters.finalidade,
@@ -43,34 +44,53 @@ export async function fetchProperties(filters: PropertyFilters = {}): Promise<Pr
     }) as PropertyListResponse
 
     if (data?.data?.length > 0) return data
+    reason = 'empty'
   } catch (err) {
-    console.error('fetchProperties error:', err)
+    reason = 'error'
+    console.error('[SUPREMO_PROXY_FALLBACK] fetchProperties falhou, indo para cache:', err)
   }
 
-  // Fallback: imóveis seedados localmente em properties_cache
-  return fetchLocalProperties(filters)
+  const fallback = await fetchLocalProperties(filters)
+  console.warn(
+    `[SUPREMO_PROXY_FALLBACK] fetchProperties servindo cache (motivo=${reason}, itens=${fallback.data.length})`,
+  )
+  return fallback
 }
 
 export async function fetchProperty(id: string): Promise<Property | null> {
+  let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch(`imoveis/${id}`, {})
     if (data && (data as Property).id) return data as Property
+    reason = 'empty'
   } catch (err) {
-    console.error('fetchProperty error:', err)
+    reason = 'error'
+    console.error('[SUPREMO_PROXY_FALLBACK] fetchProperty falhou, indo para cache:', err)
   }
 
-  return fetchLocalProperty(id)
+  const fallback = await fetchLocalProperty(id)
+  console.warn(
+    `[SUPREMO_PROXY_FALLBACK] fetchProperty(${id}) servindo cache (motivo=${reason}, encontrado=${!!fallback})`,
+  )
+  return fallback
 }
 
 export async function fetchEmpreendimento(id: string): Promise<Property | null> {
+  let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch(`empreendimentos/${id}`, {})
     if (data && (data as Property).id) return data as Property
+    reason = 'empty'
   } catch (err) {
-    console.error('fetchEmpreendimento error:', err)
+    reason = 'error'
+    console.error('[SUPREMO_PROXY_FALLBACK] fetchEmpreendimento falhou, indo para cache:', err)
   }
 
-  return fetchLocalProperty(id)
+  const fallback = await fetchLocalProperty(id)
+  console.warn(
+    `[SUPREMO_PROXY_FALLBACK] fetchEmpreendimento(${id}) servindo cache (motivo=${reason}, encontrado=${!!fallback})`,
+  )
+  return fallback
 }
 
 export async function fetchFeaturedProperties(): Promise<Property[]> {

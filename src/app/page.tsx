@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { fetchFeaturedProperties } from '@/lib/properties'
-import { getSiteStats, getTestimonials, getHomeSections } from '@/lib/site-config'
+import { getSiteStats, getTestimonials, getHomeSections, getBanners } from '@/lib/site-config'
 import { HeroSection } from '@/components/home/HeroSection'
 import { FeaturedProperties } from '@/components/home/FeaturedProperties'
 import { CategoryCards } from '@/components/home/CategoryCards'
@@ -13,6 +13,7 @@ import { ResidentialFeatured } from '@/components/home/ResidentialFeatured'
 import { CommercialFeatured } from '@/components/home/CommercialFeatured'
 import { FeaturedCities } from '@/components/home/FeaturedCities'
 import { LaunchesPreview } from '@/components/home/LaunchesPreview'
+import { BannersSection } from '@/components/home/BannersSection'
 
 function CtaAnunciarSection() {
   return (
@@ -38,11 +39,12 @@ function CtaAnunciarSection() {
 }
 
 export default async function HomePage() {
-  const [featuredProperties, stats, testimonials, sections] = await Promise.all([
+  const [featuredProperties, stats, testimonials, sections, homeBanners] = await Promise.all([
     fetchFeaturedProperties(),
     getSiteStats(),
     getTestimonials(),
     getHomeSections(),
+    getBanners('home'),
   ])
 
   // Helper: extrai config jsonb de cada seção (caso cadastrada no admin)
@@ -126,6 +128,16 @@ export default async function HomePage() {
         cities?: { name: string; slug: string; count?: string; image?: string }[]
       }
       return <FeaturedCities title={c.title} subtitle={c.subtitle} cities={c.cities} />
+    },
+    banners: () => {
+      const c = cfg('banners') as { autoplay?: boolean; interval_seconds?: number }
+      return (
+        <BannersSection
+          banners={homeBanners}
+          autoplay={c.autoplay ?? true}
+          intervalSeconds={c.interval_seconds ?? 5}
+        />
+      )
     },
     launches_preview: () => {
       const c = cfg('launches_preview') as {

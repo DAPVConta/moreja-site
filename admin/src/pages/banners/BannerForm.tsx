@@ -251,7 +251,7 @@ export function BannerForm({ open, onOpenChange, banner }: BannerFormProps) {
                         height: 600,
                         mode: 'cover',
                         label: '1440 × 600 px (desktop)',
-                        hint: 'Imagem de fundo do banner. Será recortada centralmente para 1440×600 px.',
+                        hint: 'Imagem de fundo do banner. Ajuste o enquadramento abaixo após o upload.',
                       }}
                     />
                   </FormControl>

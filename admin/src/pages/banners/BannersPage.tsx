@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, Eye, EyeOff, Save, Timer } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { Banner } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { BannerForm } from './BannerForm'
 
@@ -115,6 +118,9 @@ export default function BannersPage() {
           Novo Banner
         </Button>
       </div>
+
+      <CarouselSettings />
+
 
       {isLoading ? (
         <div className="space-y-3">
@@ -255,5 +261,106 @@ export default function BannersPage() {
         loading={deleteMutation.isPending}
       />
     </div>
+  )
+}
+
+// ── Configuração do carrossel (home_sections.config onde section_type='banners') ──
+function CarouselSettings() {
+  const queryClient = useQueryClient()
+  const [autoplay, setAutoplay] = useState(true)
+  const [intervalSeconds, setIntervalSeconds] = useState(5)
+
+  const { data: section, isLoading } = useQuery({
+    queryKey: ['home-sections', 'banners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('home_sections')
+        .select('id, config')
+        .eq('section_type', 'banners')
+        .maybeSingle()
+      if (error) throw error
+      return data as { id: string; config: Record<string, unknown> | null } | null
+    },
+  })
+
+  useEffect(() => {
+    const cfg = (section?.config ?? {}) as { autoplay?: boolean; interval_seconds?: number }
+    setAutoplay(cfg.autoplay ?? true)
+    setIntervalSeconds(cfg.interval_seconds ?? 5)
+  }, [section])
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!section) throw new Error('Seção "banners" não encontrada em home_sections')
+      const nextConfig = {
+        ...(section.config ?? {}),
+        autoplay,
+        interval_seconds: intervalSeconds,
+      }
+      const { error } = await supabase
+        .from('home_sections')
+        .update({ config: nextConfig })
+        .eq('id', section.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Configurações salvas!')
+      queryClient.invalidateQueries({ queryKey: ['home-sections', 'banners'] })
+    },
+    onError: (err: Error) => toast.error(`Erro: ${err.message}`),
+  })
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Timer className="w-4 h-4" />
+          Configurações do carrossel
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : !section ? (
+          <p className="text-sm text-muted-foreground">
+            Seção de banners não está ativa no layout da home. Ative-a em <strong>Layout da Home</strong> primeiro.
+          </p>
+        ) : (
+          <div className="flex flex-wrap items-end gap-6">
+            <div className="flex items-center gap-3">
+              <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+              <div>
+                <Label className="cursor-pointer">Avanço automático</Label>
+                <p className="text-xs text-muted-foreground">
+                  {autoplay ? 'Banners passam sozinhos' : 'Troca apenas manual (setas/pontos)'}
+                </p>
+              </div>
+            </div>
+
+            <div className="min-w-[180px]">
+              <Label className="text-xs">Tempo entre banners (segundos)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={60}
+                step={1}
+                value={intervalSeconds}
+                onChange={(e) => setIntervalSeconds(Math.max(1, Number(e.target.value) || 1))}
+                disabled={!autoplay}
+              />
+            </div>
+
+            <Button
+              onClick={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+              className="bg-[#010744] hover:bg-[#010744]/90 text-white"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {saveMutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
