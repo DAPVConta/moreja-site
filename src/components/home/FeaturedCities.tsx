@@ -41,16 +41,25 @@ export function FeaturedCities({
             <Link
               key={city.slug}
               href={`/comprar?cidade=${city.slug}`}
-              className="group relative overflow-hidden rounded-xl aspect-[3/4] block shadow-sm hover:shadow-xl transition-shadow"
+              className="group relative overflow-hidden rounded-xl aspect-[3/4] block shadow-sm hover:shadow-xl transition-shadow bg-[#010744]"
             >
-              {city.image && (
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url('${city.image}')` }}
-                  aria-hidden="true"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#010744] via-[#010744]/40 to-transparent" />
+              <div
+                className="absolute inset-0 flex items-center justify-center p-6 text-[#f2d22e] transition-transform duration-500 group-hover:scale-110"
+                aria-hidden="true"
+                style={{
+                  WebkitMaskImage: `url('/maps/${city.slug}.svg')`,
+                  maskImage: `url('/maps/${city.slug}.svg')`,
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain',
+                  backgroundColor: '#f2d22e',
+                  opacity: 0.85,
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#010744] via-[#010744]/60 to-transparent" />
 
               <div className="absolute inset-x-0 bottom-0 p-3 text-white">
                 <div className="flex items-start gap-1 mb-0.5">
