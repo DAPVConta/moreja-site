@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 232 97% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 232 97% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 232 97% 14%;
+
+    --primary: 232 97% 14%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 60 27% 90%;
+    --secondary-foreground: 232 97% 14%;
+
+    --muted: 60 27% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 50 88% 56%;
+    --accent-foreground: 232 97% 14%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 232 97% 14%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 232 97% 7%;
+    --foreground: 0 0% 98%;
+
+    --card: 232 97% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 232 97% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 50 88% 56%;
+    --primary-foreground: 232 97% 14%;
+
+    --secondary: 232 50% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 232 50% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 50 88% 56%;
+    --accent-foreground: 232 97% 14%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 232 50% 20%;
+    --input: 232 50% 20%;
+    --ring: 50 88% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

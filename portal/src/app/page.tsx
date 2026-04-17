@@ -1,0 +1,171 @@
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import { fetchFeaturedProperties } from '@/lib/properties'
+import { getSiteStats, getTestimonials, getHomeSections } from '@/lib/site-config'
+import { HeroSection } from '@/components/home/HeroSection'
+import { FeaturedProperties } from '@/components/home/FeaturedProperties'
+import { CategoryCards } from '@/components/home/CategoryCards'
+import { StatsSection } from '@/components/home/StatsSection'
+import { TestimonialsSection } from '@/components/home/TestimonialsSection'
+import { TrustStats } from '@/components/home/TrustStats'
+import { ValueProposition } from '@/components/home/ValueProposition'
+import { ResidentialFeatured } from '@/components/home/ResidentialFeatured'
+import { CommercialFeatured } from '@/components/home/CommercialFeatured'
+import { FeaturedCities } from '@/components/home/FeaturedCities'
+import { LaunchesPreview } from '@/components/home/LaunchesPreview'
+
+function CtaAnunciarSection() {
+  return (
+    <section className="py-20 bg-[#ededd1]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#010744] mb-4">
+          Quer vender ou alugar seu imóvel?
+        </h2>
+        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          Conte com a Morejá para encontrar o melhor negócio. Nossa equipe de
+          corretores está pronta para ajudar você.
+        </p>
+        <Link
+          href="/contato"
+          className="btn-primary inline-flex items-center gap-2 text-lg"
+        >
+          Anunciar meu imóvel
+          <ArrowRight size={20} />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+export default async function HomePage() {
+  const [featuredProperties, stats, testimonials, sections] = await Promise.all([
+    fetchFeaturedProperties(),
+    getSiteStats(),
+    getTestimonials(),
+    getHomeSections(),
+  ])
+
+  // Helper: extrai config jsonb de cada seção (caso cadastrada no admin)
+  const cfg = (type: string) =>
+    (sections.find((s) => s.section_type === type)?.config ?? {}) as Record<string, unknown>
+
+  // Mapa section_type -> componente renderizável
+  const sectionMap: Record<string, () => React.ReactNode> = {
+    hero_search: () => {
+      const c = cfg('hero_search') as {
+        title?: string; highlight?: string; subtitle?: string
+        bg_image?: string; bg_focal_x?: number; bg_focal_y?: number
+        overlay_opacity?: number
+      }
+      return (
+        <HeroSection
+          title={c.title}
+          highlight={c.highlight}
+          subtitle={c.subtitle}
+          bgImage={c.bg_image}
+          bgFocalX={c.bg_focal_x}
+          bgFocalY={c.bg_focal_y}
+          overlayOpacity={c.overlay_opacity}
+        />
+      )
+    },
+    featured_properties: () => <FeaturedProperties properties={featuredProperties} />,
+    category_cards: () => {
+      const c = cfg('category_cards') as {
+        title?: string; subtitle?: string
+        cards?: { title: string; description: string; href: string; bg: string }[]
+      }
+      return <CategoryCards title={c.title} subtitle={c.subtitle} cards={c.cards} />
+    },
+    stats: () => <StatsSection stats={stats} />,
+    testimonials: () => <TestimonialsSection testimonials={testimonials} />,
+    cta_anunciar: () => <CtaAnunciarSection />,
+    trust_stats: () => {
+      const c = cfg('trust_stats') as { title?: string; items?: { value: string; label: string }[] }
+      return <TrustStats title={c.title} items={c.items} />
+    },
+    value_proposition: () => {
+      const c = cfg('value_proposition') as {
+        eyebrow?: string; title?: string; body?: string; cta_label?: string; cta_href?: string
+      }
+      return (
+        <ValueProposition
+          eyebrow={c.eyebrow}
+          title={c.title}
+          body={c.body}
+          ctaLabel={c.cta_label}
+          ctaHref={c.cta_href}
+        />
+      )
+    },
+    residential_featured: () => {
+      const c = cfg('residential_featured') as { title?: string; subtitle?: string; href_all?: string }
+      return (
+        <ResidentialFeatured
+          properties={featuredProperties}
+          title={c.title}
+          subtitle={c.subtitle}
+          hrefAll={c.href_all}
+        />
+      )
+    },
+    commercial_featured: () => {
+      const c = cfg('commercial_featured') as { title?: string; subtitle?: string; href_all?: string }
+      return (
+        <CommercialFeatured
+          properties={featuredProperties}
+          title={c.title}
+          subtitle={c.subtitle}
+          hrefAll={c.href_all}
+        />
+      )
+    },
+    featured_cities: () => {
+      const c = cfg('featured_cities') as {
+        title?: string; subtitle?: string
+        cities?: { name: string; slug: string; count?: string; image?: string }[]
+      }
+      return <FeaturedCities title={c.title} subtitle={c.subtitle} cities={c.cities} />
+    },
+    launches_preview: () => {
+      const c = cfg('launches_preview') as {
+        title?: string; subtitle?: string; href_all?: string
+        launches?: {
+          id: string; name: string; developer?: string; location: string
+          status: string; delivery?: string; priceFrom?: string
+          image: string; href?: string
+        }[]
+      }
+      return (
+        <LaunchesPreview
+          title={c.title}
+          subtitle={c.subtitle}
+          hrefAll={c.href_all}
+          launches={c.launches}
+        />
+      )
+    },
+  }
+
+  // Fallback: se a tabela estiver vazia, renderiza ordem padrão
+  const ordered = sections.length > 0
+    ? sections
+    : [
+        { id: '1', section_type: 'hero_search', label: '', position: 0, active: true, config: {} },
+        { id: '2', section_type: 'featured_properties', label: '', position: 1, active: true, config: {} },
+        { id: '3', section_type: 'category_cards', label: '', position: 2, active: true, config: {} },
+        { id: '4', section_type: 'stats', label: '', position: 3, active: true, config: {} },
+        { id: '5', section_type: 'testimonials', label: '', position: 4, active: true, config: {} },
+        { id: '6', section_type: 'cta_anunciar', label: '', position: 5, active: true, config: {} },
+      ]
+
+  return (
+    <>
+      {ordered.map((s) => {
+        const render = sectionMap[s.section_type]
+        if (!render) return null
+        return <div key={s.id}>{render()}</div>
+      })}
+    </>
+  )
+}

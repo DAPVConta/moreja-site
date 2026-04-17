@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-raleway), sans-serif;
+  --color-navy: #010744;
+  --color-yellow-brand: #f2d22e;
+  --color-cream: #ededd1;
+}
+
+:root {
+  --navy: #010744;
+  --yellow: #f2d22e;
+  --cream: #ededd1;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans text-gray-800 antialiased;
+    background: #ffffff;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--navy);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f2d22e;
+  }
+
+  /* Text selection */
+  ::selection {
+    background: var(--yellow);
+    color: var(--navy);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#f2d22e] text-[#010744] font-semibold px-6 py-3 rounded-lg
+           hover:brightness-105 active:brightness-95
+           transition-all duration-200 cursor-pointer
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-[#010744] text-white font-semibold px-6 py-3 rounded-lg
+           hover:bg-[#0a1a6e] active:bg-[#000533]
+           transition-all duration-200 cursor-pointer
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply border-2 border-[#010744] text-[#010744] font-semibold px-6 py-3 rounded-lg
+           hover:bg-[#010744] hover:text-white
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-[#010744] mb-2;
+  }
+
+  .section-subtitle {
+    @apply text-gray-500 text-lg mb-10;
+  }
+
+  .card-shadow {
+    @apply shadow-md hover:shadow-xl transition-shadow duration-300;
+  }
+
+  /* Property card hover */
+  .property-card {
+    @apply rounded-xl overflow-hidden bg-white shadow-md
+           hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+}
+
+@layer utilities {
+  .text-navy {
+    color: var(--navy);
+  }
+  .bg-navy {
+    background-color: var(--navy);
+  }
+  .text-yellow-brand {
+    color: var(--yellow);
+  }
+  .bg-yellow-brand {
+    background-color: var(--yellow);
+  }
+  .bg-cream {
+    background-color: var(--cream);
+  }
+}
