@@ -9,12 +9,12 @@ const OUT_DIR = resolve(__dirname, '../public/maps')
 mkdirSync(OUT_DIR, { recursive: true })
 
 const CITIES = [
-  { slug: 'sao-paulo',    code: 3550308 },
-  { slug: 'guarulhos',    code: 3518800 },
-  { slug: 'santo-andre',  code: 3547809 },
-  { slug: 'sao-bernardo', code: 3548708 },
-  { slug: 'osasco',       code: 3534401 },
-  { slug: 'diadema',      code: 3513801 },
+  { slug: 'recife',    code: 2611606 },
+  { slug: 'olinda',    code: 2609600 },
+  { slug: 'jaboatao',  code: 2607901 },
+  { slug: 'paulista',  code: 2610707 },
+  { slug: 'caruaru',   code: 2604106 },
+  { slug: 'petrolina', code: 2611101 },
 ]
 
 const IBGE = (code) =>

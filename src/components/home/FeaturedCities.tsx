@@ -15,12 +15,12 @@ interface FeaturedCitiesProps {
 }
 
 const defaultCities: City[] = [
-  { name: 'São Paulo',    slug: 'sao-paulo',    count: '1.200+ imóveis', image: 'https://images.unsplash.com/photo-1543059080-f9b1272213d5?w=800&q=80' },
-  { name: 'Guarulhos',    slug: 'guarulhos',    count: '350+ imóveis',   image: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80' },
-  { name: 'Santo André',  slug: 'santo-andre',  count: '280+ imóveis',   image: 'https://images.unsplash.com/photo-1464938050520-ef2270bb8ce8?w=800&q=80' },
-  { name: 'São Bernardo', slug: 'sao-bernardo', count: '210+ imóveis',   image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80' },
-  { name: 'Osasco',       slug: 'osasco',       count: '180+ imóveis',   image: 'https://images.unsplash.com/photo-1444927714506-8492d94b5ba0?w=800&q=80' },
-  { name: 'Diadema',      slug: 'diadema',      count: '120+ imóveis',   image: 'https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=800&q=80' },
+  { name: 'Recife',      slug: 'recife' },
+  { name: 'Olinda',      slug: 'olinda' },
+  { name: 'Jaboatão dos Guararapes', slug: 'jaboatao' },
+  { name: 'Paulista',    slug: 'paulista' },
+  { name: 'Caruaru',     slug: 'caruaru' },
+  { name: 'Petrolina',   slug: 'petrolina' },
 ]
 
 export function FeaturedCities({
