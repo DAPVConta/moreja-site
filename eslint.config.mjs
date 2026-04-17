@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Não fazem parte do site Next.js:
+    "admin/**",
+    "scripts/**",
+    "supabase/**",
   ]),
 ]);
 
