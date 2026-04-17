@@ -28,8 +28,10 @@ function run(cmd, args, cwd) {
 
 console.log('▶ Build do admin CMS iniciado')
 
-// 1. Instala deps do admin (node_modules separado)
-run('npm', ['install', '--no-audit', '--no-fund'], adminDir)
+// 1. Instala deps do admin (node_modules separado).
+// --include=dev é obrigatório porque a Vercel roda build com NODE_ENV=production,
+// que por padrão pula devDependencies — e o vite vive lá.
+run('npm', ['install', '--include=dev', '--no-audit', '--no-fund'], adminDir)
 
 // 2. Builda o admin (gera admin/dist/)
 run('npm', ['run', 'build'], adminDir)
