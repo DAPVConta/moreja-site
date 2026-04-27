@@ -1,4 +1,5 @@
 import { HeroSearch } from './HeroSearch'
+import { HeroBackdrop } from './HeroBackdrop'
 
 interface HeroSectionProps {
   title?: string
@@ -22,43 +23,23 @@ export function HeroSection({
   bgFocalY = 50,
   overlayOpacity = 0.55,
 }: HeroSectionProps = {}) {
-  const hasImage = !!bgImage
-
   return (
     <section className="relative bg-[#010744] text-white overflow-hidden">
-      {hasImage ? (
-        <>
-          <div
-            className="absolute inset-0 bg-cover"
-            style={{
-              backgroundImage: `url('${bgImage}')`,
-              backgroundPosition: `${bgFocalX}% ${bgFocalY}%`,
-            }}
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(135deg, rgba(1,7,68,${overlayOpacity + 0.2}) 0%, rgba(1,7,68,${overlayOpacity}) 60%, rgba(26,31,110,${overlayOpacity - 0.05}) 100%)`,
-            }}
-            aria-hidden="true"
-          />
-        </>
-      ) : (
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-[#010744] via-[#010744] to-[#1a1f6e]"
-          aria-hidden="true"
-        />
-      )}
+      <HeroBackdrop
+        bgImage={bgImage}
+        bgFocalX={bgFocalX}
+        bgFocalY={bgFocalY}
+        overlayOpacity={overlayOpacity}
+      />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 md:py-28">
+      <div className="relative container-page py-14 sm:py-20 md:py-28 lg:py-32">
         <div className="text-center mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 sm:mb-6">
+          <h1 className="heading-h1 mb-4 sm:mb-6">
             {title}{' '}
             {highlight && <span className="text-[#f2d22e]">{highlight}</span>}
           </h1>
           {subtitle && (
-            <p className="text-base sm:text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="lead text-gray-200 max-w-2xl mx-auto">
               {subtitle}
             </p>
           )}
