@@ -3,6 +3,7 @@ import { Raleway } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { WhatsAppFab } from '@/components/layout/WhatsAppFab'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ThirdPartyScripts, GtmNoScript } from '@/components/seo/ThirdPartyScripts'
 import { getSiteConfig } from '@/lib/site-config'
@@ -201,6 +202,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           logoUrl={config.logo_footer_url || config.logo_url}
           companyName={config.company_name}
         />
+
+        <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
 
         {/* Third-party scripts — loaded afterInteractive, IDs from DB */}
         <ThirdPartyScripts />
