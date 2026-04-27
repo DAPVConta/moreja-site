@@ -1,4 +1,5 @@
 import { Globe, Award, Clock } from 'lucide-react'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
 interface TrustStatItem {
   value: string
@@ -48,7 +49,7 @@ export function TrustStats({
             >
               <div>{icons[i % icons.length]}</div>
               <p className="text-4xl md:text-5xl font-black text-[#f2d22e] leading-none">
-                {item.value}
+                <AnimatedNumber value={item.value} />
               </p>
               <p className="text-sm md:text-base text-white/80 leading-snug max-w-[220px]">
                 {item.label}

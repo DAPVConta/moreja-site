@@ -208,6 +208,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           companyName={config.company_name}
           phone={config.phone}
           email={config.email}
+          whatsapp={config.whatsapp_full || config.whatsapp}
         />
         <main id="main-content" className="flex-1">{children}</main>
         <Footer

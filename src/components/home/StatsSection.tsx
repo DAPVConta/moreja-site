@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 import type { SiteStat } from '@/types/site'
 import { Reveal } from '@/components/ui/Reveal'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 
 // Ícones modernos com stroke médio; alias antigos mantidos p/ compatibilidade
 const iconMap: Record<string, React.ReactNode> = {
@@ -76,7 +77,7 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
               </div>
 
               <p className="text-3xl sm:text-4xl md:text-5xl font-black text-[#010744] mb-1 tracking-tight leading-none">
-                {stat.value}
+                <AnimatedNumber value={stat.value} />
               </p>
               <p className="text-xs sm:text-sm text-gray-700 font-semibold tracking-wide">
                 {stat.label}

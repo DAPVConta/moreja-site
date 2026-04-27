@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { Menu, X, MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Menu, X, MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
+import { MobileSearchButton } from './MobileSearchButton'
 
 const navLinks = [
   { href: '/comprar', label: 'Comprar' },
@@ -63,6 +64,7 @@ interface HeaderProps {
   companyName?: string
   phone?: string
   email?: string
+  whatsapp?: string
   businessHours?: string
 }
 
@@ -71,11 +73,14 @@ export function Header({
   companyName,
   phone,
   email,
+  whatsapp,
   businessHours = 'Seg–Sex 8h–18h · Sáb 8h–12h',
 }: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [dragX, setDragX] = useState(0) // px deslocamento durante swipe
+  const dragStart = useRef<number | null>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -85,26 +90,48 @@ export function Header({
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [pathname])
 
-  // Lock body scroll while mobile menu is open
+  // Lock body scroll while mobile menu is open + ESC fecha
   useEffect(() => {
-    if (mobileOpen) {
-      const prev = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = prev
-      }
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
     }
   }, [mobileOpen])
 
+  // Handlers de swipe-right para fechar
+  function onTouchStart(e: React.TouchEvent) {
+    dragStart.current = e.touches[0].clientX
+  }
+  function onTouchMove(e: React.TouchEvent) {
+    if (dragStart.current == null) return
+    const dx = e.touches[0].clientX - dragStart.current
+    if (dx > 0) setDragX(dx) // só permite arrastar para a direita
+  }
+  function onTouchEnd() {
+    // Fechar se arrastou > 80px; senão volta ao lugar
+    if (dragX > 80) setMobileOpen(false)
+    setDragX(0)
+    dragStart.current = null
+  }
+
+  const whatsappDigits = whatsapp?.replace(/\D/g, '')
+
   return (
     <>
-      {/* ── Top bar (desktop) ─────────────────────────────────────────
-          Barra fina informacional acima do header. Não-sticky: sai
-          do viewport ao scroll, ficando só o header principal.
-          Hidden em < lg para preservar real estate mobile. */}
+      {/* ── Top bar (desktop) ───────────────────────────────────────── */}
       {(phone || email) && (
         <div
           className="hidden lg:block bg-[#010744] text-white/85 text-xs"
@@ -144,7 +171,7 @@ export function Header({
           scrolled ? 'shadow-md' : 'shadow-sm'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container-page">
           <div
             className={`flex items-center justify-between transition-all duration-300 ${
               scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20'
@@ -187,10 +214,12 @@ export function Header({
 
               <Link
                 href="/contato"
-                className="hidden md:inline-flex items-center btn-primary text-sm py-2 px-5"
+                className="hidden md:inline-flex btn-primary btn-sm"
               >
                 Fale Conosco
               </Link>
+
+              <MobileSearchButton />
 
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
@@ -206,46 +235,116 @@ export function Header({
         </div>
       </header>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          id="mobile-nav"
-          className="lg:hidden fixed inset-0 z-40 bg-white pt-16 sm:pt-20 overflow-y-auto"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu principal"
+      {/* ── Backdrop ─────────────────────────────────────────────────
+          Sempre montado (com pointer-events-none) para suportar fade
+          sem depender de mount/unmount. */}
+      <div
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+        className={`lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+
+      {/* ── Drawer mobile ─ slide-in da direita ─────────────────────
+          translateX(100%) quando fechado; quando abre, translateX(0).
+          Durante touchmove, dragX adiciona offset positivo (segue o
+          dedo). */}
+      <aside
+        id="mobile-nav"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu principal"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          transform: mobileOpen
+            ? `translateX(${dragX}px)`
+            : 'translateX(100%)',
+          transition: dragStart.current == null
+            ? 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'none',
+        }}
+        className={`lg:hidden fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl flex flex-col ${
+          mobileOpen ? '' : 'pointer-events-none'
+        }`}
+      >
+        {/* Header do drawer */}
+        <div className="flex items-center justify-between h-16 sm:h-20 px-5 border-b border-gray-100 shrink-0">
+          <MoRejaLogo variant="navy" logoUrl={logoUrl} companyName={companyName} />
+          <button
+            onClick={() => setMobileOpen(false)}
+            aria-label="Fechar menu"
+            className="inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md text-gray-600 hover:text-[#010744] hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Pull indicator (visual hint pra swipe) */}
+        <span
+          aria-hidden="true"
+          className="absolute top-1/2 left-2 -translate-y-1/2 w-1 h-12 rounded-full bg-gray-200"
+        />
+
+        {/* Lista de navegação */}
+        <nav
+          className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1"
+          aria-label="Menu mobile"
         >
-          <nav className="flex flex-col px-6 pt-4 pb-8 gap-1" aria-label="Menu mobile">
-            {navLinks.map((link) => (
+          {navLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href)
+            return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`flex items-center text-lg font-semibold py-4 border-b border-gray-100 transition-colors ${
-                  pathname.startsWith(link.href)
-                    ? 'text-[#010744]'
-                    : 'text-gray-700 hover:text-[#010744]'
+                  isActive ? 'text-[#010744]' : 'text-gray-700 hover:text-[#010744]'
                 }`}
               >
+                {isActive && (
+                  <span
+                    aria-hidden="true"
+                    className="w-1 h-6 rounded-full bg-[#f2d22e] mr-3"
+                  />
+                )}
                 {link.label}
               </Link>
-            ))}
-            <div className="mt-6 flex flex-col gap-3">
-              {phone && (
-                <a
-                  href={`tel:${phone.replace(/\D/g, '')}`}
-                  className="flex items-center justify-center gap-2 text-gray-700 py-3 border border-gray-300 rounded-lg font-medium"
-                >
-                  <Phone size={18} />
-                  {phone}
-                </a>
-              )}
-              <Link href="/contato" className="btn-primary text-center">
-                Fale Conosco
-              </Link>
-            </div>
-          </nav>
+            )
+          })}
+        </nav>
+
+        {/* Rodapé com ações primárias */}
+        <div
+          className="px-5 pt-4 pb-6 border-t border-gray-100 flex flex-col gap-3 shrink-0"
+          style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+        >
+          {whatsappDigits && (
+            <a
+              href={`https://wa.me/${whatsappDigits}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 h-12 rounded-lg bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold transition-colors"
+            >
+              <MessageCircle size={18} aria-hidden="true" />
+              WhatsApp
+            </a>
+          )}
+          {phone && (
+            <a
+              href={`tel:${phone.replace(/\D/g, '')}`}
+              className="flex items-center justify-center gap-2 h-12 rounded-lg border border-gray-300 text-gray-700 hover:border-[#010744] hover:text-[#010744] font-medium transition-colors"
+            >
+              <Phone size={18} />
+              {phone}
+            </a>
+          )}
+          <Link href="/contato" className="btn-primary">
+            Fale Conosco
+          </Link>
         </div>
-      )}
+      </aside>
     </>
   )
 }
