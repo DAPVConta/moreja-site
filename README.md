@@ -1,3 +1,4 @@
+# teste
 # Morejá — Portal + Admin
 
 Site institucional + CMS da **Morejá Imobiliária** no mesmo repositório.
