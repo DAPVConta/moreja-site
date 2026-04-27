@@ -5,6 +5,66 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
 import { MobileSearchButton } from './MobileSearchButton'
+import { HeaderMegaMenu } from './HeaderMegaMenu'
+
+const COMPRAR_COLUMNS = [
+  {
+    heading: 'Tipo de imóvel',
+    links: [
+      { label: 'Apartamentos', href: '/comprar?tipo=Apartamento' },
+      { label: 'Casas', href: '/comprar?tipo=Casa' },
+      { label: 'Casa em Condomínio', href: '/comprar?tipo=Casa%20de%20Condom%C3%ADnio' },
+      { label: 'Coberturas', href: '/comprar?tipo=Cobertura' },
+      { label: 'Terrenos', href: '/comprar?tipo=Terreno' },
+    ],
+  },
+  {
+    heading: 'Comercial',
+    links: [
+      { label: 'Salas comerciais', href: '/comprar?tipo=Sala%20Comercial' },
+      { label: 'Lojas', href: '/comprar?tipo=Comercial' },
+      { label: 'Galpões', href: '/comprar?tipo=Galp%C3%A3o' },
+    ],
+  },
+  {
+    heading: 'Por cidade',
+    links: [
+      { label: 'Recife', href: '/comprar?cidade=recife' },
+      { label: 'Olinda', href: '/comprar?cidade=olinda' },
+      { label: 'Jaboatão dos Guararapes', href: '/comprar?cidade=jaboatao' },
+      { label: 'Caruaru', href: '/comprar?cidade=caruaru' },
+      { label: 'Ver todas as cidades', href: '/comprar' },
+    ],
+  },
+]
+
+const ALUGAR_COLUMNS = [
+  {
+    heading: 'Residencial',
+    links: [
+      { label: 'Apartamentos', href: '/alugar?tipo=Apartamento' },
+      { label: 'Casas', href: '/alugar?tipo=Casa' },
+      { label: 'Studios e Kitnets', href: '/alugar?tipo=Studio' },
+    ],
+  },
+  {
+    heading: 'Comercial',
+    links: [
+      { label: 'Salas comerciais', href: '/alugar?tipo=Sala%20Comercial' },
+      { label: 'Lojas', href: '/alugar?tipo=Comercial' },
+      { label: 'Galpões', href: '/alugar?tipo=Galp%C3%A3o' },
+    ],
+  },
+  {
+    heading: 'Por faixa de preço',
+    links: [
+      { label: 'Até R$ 1.500/mês', href: '/alugar?preco_max=1500' },
+      { label: 'R$ 1.500 – R$ 3.000', href: '/alugar?preco_min=1500&preco_max=3000' },
+      { label: 'R$ 3.000 – R$ 5.000', href: '/alugar?preco_min=3000&preco_max=5000' },
+      { label: 'Acima de R$ 5.000', href: '/alugar?preco_min=5000' },
+    ],
+  },
+]
 
 const navLinks = [
   { href: '/comprar', label: 'Comprar' },
@@ -184,19 +244,45 @@ export function Header({
 
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center gap-8" aria-label="Navegação principal">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-sm font-semibold transition-colors duration-200 hover:text-[#f2d22e] ${
-                    pathname.startsWith(link.href)
-                      ? 'text-[#010744] border-b-2 border-[#f2d22e] pb-0.5'
-                      : 'text-gray-600'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <HeaderMegaMenu
+                label="Comprar"
+                href="/comprar"
+                columns={COMPRAR_COLUMNS}
+                active={pathname.startsWith('/comprar')}
+                highlight={{
+                  title: 'Imóveis em Recife',
+                  description: 'Apartamentos e casas no coração da capital pernambucana.',
+                  href: '/comprar?cidade=recife',
+                  image: 'https://images.unsplash.com/photo-1518883529677-4dcae62cf45e?w=600&q=70',
+                }}
+              />
+              <HeaderMegaMenu
+                label="Alugar"
+                href="/alugar"
+                columns={ALUGAR_COLUMNS}
+                active={pathname.startsWith('/alugar')}
+                highlight={{
+                  title: 'Locação rápida',
+                  description: 'Imóveis com aprovação ágil e sem fiador.',
+                  href: '/alugar',
+                  image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=70',
+                }}
+              />
+              {navLinks
+                .filter((l) => l.href !== '/comprar' && l.href !== '/alugar')
+                .map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`text-sm font-semibold transition-colors duration-200 hover:text-[#f2d22e] ${
+                      pathname.startsWith(link.href)
+                        ? 'text-[#010744] border-b-2 border-[#f2d22e] pb-0.5'
+                        : 'text-gray-600'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
             </nav>
 
             {/* CTA + hamburger */}
