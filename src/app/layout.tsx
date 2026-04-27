@@ -184,6 +184,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <style dangerouslySetInnerHTML={{ __html: brandCss }} />
       </head>
       <body className="min-h-full flex flex-col font-sans">
+        {/* Skip link — focável só via teclado (Tab no início da página).
+            Salta direto para <main id="main-content"> ignorando header/topbar. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100]
+                     focus:bg-[#010744] focus:text-white focus:px-4 focus:py-2 focus:rounded-lg
+                     focus:font-semibold focus-visible:outline-none focus-visible:ring-2
+                     focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2"
+        >
+          Pular para o conteúdo
+        </a>
+
         {/* GTM noscript — first element inside body */}
         <GtmNoScript />
 
@@ -197,7 +209,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           phone={config.phone}
           email={config.email}
         />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">{children}</main>
         <Footer
           logoUrl={config.logo_footer_url || config.logo_url}
           companyName={config.company_name}
