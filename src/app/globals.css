@@ -172,24 +172,70 @@
 }
 
 @layer components {
+  /* Base — compartilhada por todas as variantes.
+     min-h-[44px] garante tap target mobile (Apple HIG). */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3
+           transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed;
+    transition-duration: var(--motion-base);
+  }
+
   .btn-primary {
-    @apply bg-[#f2d22e] text-[#010744] font-semibold px-6 py-3 rounded-lg
+    @apply btn bg-[#f2d22e] text-[#010744]
            hover:brightness-105 active:brightness-95
-           transition-all duration-200 cursor-pointer
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2;
+           focus-visible:ring-[#f2d22e];
   }
 
   .btn-secondary {
-    @apply bg-[#010744] text-white font-semibold px-6 py-3 rounded-lg
+    @apply btn bg-[#010744] text-white
            hover:bg-[#0a1a6e] active:bg-[#000533]
-           transition-all duration-200 cursor-pointer
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2;
+           focus-visible:ring-[#010744];
   }
 
   .btn-outline {
-    @apply border-2 border-[#010744] text-[#010744] font-semibold px-6 py-3 rounded-lg
+    @apply btn border-2 border-[#010744] text-[#010744] bg-transparent
            hover:bg-[#010744] hover:text-white
-           transition-all duration-200 cursor-pointer;
+           focus-visible:ring-[#010744];
+  }
+
+  /* Ghost — sem fundo, ideal em barras claras e top bar */
+  .btn-ghost {
+    @apply btn bg-transparent text-[#010744]
+           hover:bg-[#010744]/5 active:bg-[#010744]/10
+           focus-visible:ring-[#010744];
+  }
+
+  /* Tamanhos — sobrepõem padding/min-height da .btn base */
+  .btn-sm {
+    @apply min-h-[36px] px-4 py-2 text-sm;
+  }
+
+  .btn-lg {
+    @apply min-h-[52px] px-8 py-3.5 text-base;
+  }
+
+  /* Loading state — spinner inline (consumidor adiciona aria-busy) */
+  .btn-loading {
+    @apply pointer-events-none opacity-80;
+  }
+  .btn-loading::before {
+    content: '';
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
+    animation: spin 0.7s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   .section-title {
