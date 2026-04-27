@@ -3,6 +3,7 @@ import {
   TrendingUp, HeartHandshake, ShieldCheck, MapPinned, Users2, Award,
 } from 'lucide-react'
 import type { SiteStat } from '@/types/site'
+import { Reveal } from '@/components/ui/Reveal'
 
 // Ícones modernos com stroke médio; alias antigos mantidos p/ compatibilidade
 const iconMap: Record<string, React.ReactNode> = {
@@ -52,10 +53,11 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
 
       <div className="container-page relative">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
-          {displayStats.map((stat) => (
-            <div
+          {displayStats.map((stat, i) => (
+            <Reveal
               key={stat.key}
-              className="group text-center animate-fade-in"
+              delay={i * 80}
+              className="group text-center"
             >
               {/* Icon in elegant circular badge */}
               <div className="flex justify-center mb-3 sm:mb-4">
@@ -84,7 +86,7 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
               <div className="flex justify-center mt-3">
                 <span className="h-0.5 w-8 rounded-full bg-[#f2d22e]/60 transition-all duration-300 group-hover:w-12 group-hover:bg-[#f2d22e]" />
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

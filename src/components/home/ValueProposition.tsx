@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Reveal } from '@/components/ui/Reveal'
 
 interface ValuePropositionProps {
   eyebrow?: string
@@ -28,7 +29,7 @@ export function ValueProposition({
       <div className="container-page">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: image */}
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
+          <Reveal className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
@@ -47,10 +48,10 @@ export function ValueProposition({
                 98% de clientes <br /> satisfeitos
               </p>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right: content */}
-          <div>
+          <Reveal delay={120}>
             {eyebrow && (
               <span className="inline-block text-xs font-bold tracking-widest uppercase text-[#f2d22e] mb-3">
                 {eyebrow}
@@ -73,13 +74,13 @@ export function ValueProposition({
             {ctaLabel && ctaHref && (
               <Link
                 href={ctaHref}
-                className="inline-flex items-center gap-2 btn-primary text-base"
+                className="btn-primary text-base"
               >
                 {ctaLabel}
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
             )}
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
