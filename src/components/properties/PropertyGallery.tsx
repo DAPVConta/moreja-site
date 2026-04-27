@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn, Images } from 'lucide-react'
 
 interface PropertyGalleryProps {
   fotos: string[]
@@ -17,14 +17,18 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
   const prev = () => setCurrent((c) => (c - 1 + fotos.length) % fotos.length)
   const next = () => setCurrent((c) => (c + 1) % fotos.length)
 
+  function openLightboxAt(index: number) {
+    setCurrent(index)
+    setLightbox(true)
+  }
+
   // Lock body scroll while lightbox is open
   useEffect(() => {
-    if (lightbox) {
-      const prev = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = prev
-      }
+    if (!lightbox) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
     }
   }, [lightbox])
 
@@ -51,7 +55,6 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
     const dx = t.clientX - touchStart.current.x
     const dy = t.clientY - touchStart.current.y
     touchStart.current = null
-    // threshold 40px horizontal, mostly horizontal motion
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
       if (dx < 0) next()
       else prev()
@@ -66,10 +69,82 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
     )
   }
 
+  // Mosaico desktop usa as 4 fotos seguintes à principal.
+  // Se faltarem fotos, a posição fica invisível e o grid se ajusta.
+  const mosaicThumbs = fotos.slice(1, 5)
+  const remainingCount = Math.max(0, fotos.length - 5)
+
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Main image */}
+      {/* ───────────── DESKTOP ─ Mosaico 1+4 ───────────── */}
+      <div className="hidden lg:block relative">
+        <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[16/9] rounded-2xl overflow-hidden">
+          {/* Foto principal — col-span-2 row-span-2 */}
+          <button
+            type="button"
+            onClick={() => openLightboxAt(0)}
+            className="relative col-span-2 row-span-2 cursor-zoom-in group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2"
+            aria-label="Abrir galeria em tela cheia"
+          >
+            <Image
+              src={fotos[0]}
+              alt={`${titulo} – foto principal`}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              priority
+              sizes="50vw"
+              draggable={false}
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+          </button>
+
+          {/* 4 thumbnails 2x2 — preencher com placeholder cinza se faltar */}
+          {mosaicThumbs.map((foto, i) => {
+            const isLastVisible = i === 3 && remainingCount > 0
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => openLightboxAt(i + 1)}
+                className="relative cursor-zoom-in group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2"
+                aria-label={`Ver foto ${i + 2}`}
+              >
+                <Image
+                  src={foto}
+                  alt={`${titulo} – foto ${i + 2}`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  sizes="25vw"
+                  draggable={false}
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                {isLastVisible && (
+                  <div className="absolute inset-0 bg-black/55 flex items-center justify-center text-white text-base font-semibold">
+                    +{remainingCount} fotos
+                  </div>
+                )}
+              </button>
+            )
+          })}
+
+          {/* Preencher slots vazios para manter o grid */}
+          {Array.from({ length: Math.max(0, 4 - mosaicThumbs.length) }).map((_, i) => (
+            <div key={`empty-${i}`} className="bg-gray-100" />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => openLightboxAt(0)}
+          className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm text-[#010744] font-semibold px-4 py-2 rounded-full shadow-md hover:bg-white transition-colors"
+        >
+          <Images size={16} aria-hidden="true" />
+          Ver todas as {fotos.length} fotos
+        </button>
+      </div>
+
+      {/* ───────────── MOBILE/TABLET ─ Imagem principal + carrossel de thumbs ───────────── */}
+      <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div
           className="relative aspect-[4/3] sm:aspect-[16/9] cursor-zoom-in group select-none"
           onClick={() => setLightbox(true)}
@@ -114,7 +189,6 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
           )}
         </div>
 
-        {/* Thumbnails */}
         {fotos.length > 1 && (
           <div className="flex gap-2 p-3 overflow-x-auto scrollbar-thin [-webkit-overflow-scrolling:touch]">
             {fotos.slice(0, 10).map((foto, i) => (
@@ -139,10 +213,10 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
         )}
       </div>
 
-      {/* Lightbox */}
+      {/* ───────────── Lightbox ───────────── */}
       {lightbox && (
         <div
-          className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center select-none"
+          className="fixed inset-0 z-[60] bg-black/95 flex flex-col select-none"
           onClick={() => setLightbox(false)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
@@ -150,35 +224,26 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
           aria-modal="true"
           aria-label="Galeria de fotos"
         >
-          <button
-            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 inline-flex items-center justify-center text-white hover:text-gray-300 bg-black/40 hover:bg-black/60 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
-            onClick={(e) => { e.stopPropagation(); setLightbox(false) }}
-            aria-label="Fechar"
-          >
-            <X className="w-7 h-7" />
-          </button>
-
-          {fotos.length > 1 && (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); prev() }}
-                className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/30 text-white rounded-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
-                aria-label="Foto anterior"
-              >
-                <ChevronLeft className="w-7 h-7" />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); next() }}
-                className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/30 text-white rounded-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
-                aria-label="Próxima foto"
-              >
-                <ChevronRight className="w-7 h-7" />
-              </button>
-            </>
-          )}
-
+          {/* Top bar do lightbox */}
           <div
-            className="relative w-full h-full max-w-6xl px-3 sm:px-16 py-12"
+            className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16 shrink-0 text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm sm:text-base font-medium">
+              {current + 1} <span className="text-white/50">/</span> {fotos.length}
+            </span>
+            <button
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
+              onClick={() => setLightbox(false)}
+              aria-label="Fechar galeria"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Imagem principal */}
+          <div
+            className="relative flex-1 px-3 sm:px-16"
             onClick={(e) => e.stopPropagation()}
           >
             <Image
@@ -187,12 +252,53 @@ export function PropertyGallery({ fotos, titulo }: PropertyGalleryProps) {
               fill
               className="object-contain"
               sizes="100vw"
+              priority
             />
+
+            {fotos.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/15 hover:bg-white/25 text-white rounded-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
+                  aria-label="Foto anterior"
+                >
+                  <ChevronLeft className="w-7 h-7" />
+                </button>
+                <button
+                  onClick={next}
+                  className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/15 hover:bg-white/25 text-white rounded-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]"
+                  aria-label="Próxima foto"
+                >
+                  <ChevronRight className="w-7 h-7" />
+                </button>
+              </>
+            )}
           </div>
 
-          <p className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs sm:text-sm px-3 py-1 rounded-full">
-            {current + 1} / {fotos.length}
-          </p>
+          {/* Tira de miniaturas no rodapé */}
+          {fotos.length > 1 && (
+            <div
+              className="shrink-0 px-3 sm:px-6 pb-4 pt-2"
+              onClick={(e) => e.stopPropagation()}
+              style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+            >
+              <div className="flex gap-2 overflow-x-auto scrollbar-thin [-webkit-overflow-scrolling:touch]">
+                {fotos.map((foto, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrent(i)}
+                    className={`relative w-16 h-12 sm:w-20 sm:h-14 shrink-0 rounded-md overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] ${
+                      i === current ? 'ring-2 ring-[#f2d22e] opacity-100' : 'opacity-50 hover:opacity-100'
+                    }`}
+                    aria-label={`Ver foto ${i + 1}`}
+                    aria-current={i === current ? 'true' : undefined}
+                  >
+                    <Image src={foto} alt="" fill className="object-cover" sizes="80px" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
