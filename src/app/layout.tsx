@@ -194,6 +194,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           logoUrl={config.logo_header_url || config.logo_url}
           companyName={config.company_name}
           phone={config.phone}
+          email={config.email}
         />
         <main className="flex-1">{children}</main>
         <Footer

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X, MapPin, Phone } from 'lucide-react'
+import { Menu, X, MapPin, Phone, Mail, Clock } from 'lucide-react'
 
 const navLinks = [
   { href: '/comprar', label: 'Comprar' },
@@ -62,9 +62,17 @@ interface HeaderProps {
   logoUrl?: string | null
   companyName?: string
   phone?: string
+  email?: string
+  businessHours?: string
 }
 
-export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
+export function Header({
+  logoUrl,
+  companyName,
+  phone,
+  email,
+  businessHours = 'Seg–Sex 8h–18h · Sáb 8h–12h',
+}: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -93,6 +101,44 @@ export function Header({ logoUrl, companyName, phone }: HeaderProps = {}) {
 
   return (
     <>
+      {/* ── Top bar (desktop) ─────────────────────────────────────────
+          Barra fina informacional acima do header. Não-sticky: sai
+          do viewport ao scroll, ficando só o header principal.
+          Hidden em < lg para preservar real estate mobile. */}
+      {(phone || email) && (
+        <div
+          className="hidden lg:block bg-[#010744] text-white/85 text-xs"
+          aria-label="Informações de contato"
+        >
+          <div className="container-page flex items-center justify-between h-9">
+            <div className="flex items-center gap-5">
+              {phone && (
+                <a
+                  href={`tel:${phone.replace(/\D/g, '')}`}
+                  className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
+                >
+                  <Phone size={13} aria-hidden="true" />
+                  <span>{phone}</span>
+                </a>
+              )}
+              {email && (
+                <a
+                  href={`mailto:${email}`}
+                  className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
+                >
+                  <Mail size={13} aria-hidden="true" />
+                  <span>{email}</span>
+                </a>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-white/70">
+              <Clock size={13} aria-hidden="true" />
+              <span>{businessHours}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header
         className={`sticky top-0 z-50 w-full bg-white transition-shadow duration-300 ${
           scrolled ? 'shadow-md' : 'shadow-sm'
