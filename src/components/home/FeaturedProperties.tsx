@@ -13,7 +13,7 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
     <section className="section bg-white">
       <div className="container-page">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
           <div>
             <h2 className="section-title">Imóveis em Destaque</h2>
             <p className="section-subtitle mb-0">
@@ -29,16 +29,35 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
           </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Carrossel snap-x em < sm; grid 2 cols em sm+; 3 cols em lg+.
+            -mx + px restaura a sangria nas bordas para o swipe casar
+            com o container-page sem cortar o card central. */}
+        <div
+          className="
+            -mx-4 sm:mx-0 px-4 sm:px-0
+            flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6
+            overflow-x-auto sm:overflow-visible
+            snap-x snap-mandatory sm:snap-none
+            scroll-smooth scrollbar-thin
+            pb-4 sm:pb-0
+          "
+        >
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto"
+                >
+                  <PropertyCardSkeleton />
+                </div>
+              ))
             : properties.map((property, index) => (
-                <PropertyCard
+                <div
                   key={property.id}
-                  property={property}
-                  priority={index < 3}
-                />
+                  className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto"
+                >
+                  <PropertyCard property={property} priority={index < 3} />
+                </div>
               ))}
         </div>
 

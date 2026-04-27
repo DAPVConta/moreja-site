@@ -52,10 +52,27 @@ export function CommercialFeatured({
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="
+            -mx-4 sm:mx-0 px-4 sm:px-0
+            flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6
+            overflow-x-auto sm:overflow-visible
+            snap-x snap-mandatory sm:snap-none
+            scroll-smooth scrollbar-thin
+            pb-4 sm:pb-0
+          "
+        >
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)
-            : commercials.map((p, i) => <PropertyCard key={p.id} property={p} priority={i < 3} />)}
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto">
+                  <PropertyCardSkeleton />
+                </div>
+              ))
+            : commercials.map((p, i) => (
+                <div key={p.id} className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto">
+                  <PropertyCard property={p} priority={i < 3} />
+                </div>
+              ))}
         </div>
 
         {commercials.length === 0 && !loading && (
