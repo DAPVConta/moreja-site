@@ -83,6 +83,20 @@
   --z-drawer:   60;
   --z-modal:    70;
   --z-toast:    80;
+
+  /* ── Tipografia fluida (clamp(min, vw, max)) ──
+     Cada nível cresce do mobile (min) ao desktop (max) sem breakpoints. */
+  --text-display: clamp(2.25rem, 1.4rem + 4.5vw, 4.5rem);  /*  36 → 72 */
+  --text-h1:      clamp(1.875rem, 1.2rem + 3.4vw, 3.75rem); /* 30 → 60 */
+  --text-h2:      clamp(1.625rem, 1.1rem + 2.4vw, 2.75rem); /* 26 → 44 */
+  --text-h3:      clamp(1.25rem, 0.95rem + 1.4vw, 2rem);    /* 20 → 32 */
+  --text-body-lg: clamp(1rem, 0.95rem + 0.4vw, 1.125rem);   /* 16 → 18 */
+  --text-body:    1rem;                                     /* 16     */
+  --text-caption: 0.75rem;                                  /* 12     */
+  --leading-tight:  1.1;
+  --leading-snug:   1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
 }
 
 @layer base {
@@ -179,11 +193,58 @@
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-[#010744] mb-2;
+    @apply font-bold text-[#010744] mb-2;
+    font-size: var(--text-h2);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
   }
 
   .section-subtitle {
-    @apply text-gray-500 text-lg mb-10;
+    @apply text-gray-500 mb-10;
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* Headings utilitários — usam tokens fluidos. */
+  .heading-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-tight);
+    @apply font-extrabold tracking-tight;
+    text-wrap: balance;
+  }
+
+  .heading-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-tight);
+    @apply font-extrabold tracking-tight;
+    text-wrap: balance;
+  }
+
+  .heading-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-tight);
+    @apply font-bold;
+    text-wrap: balance;
+  }
+
+  .heading-h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-snug);
+    @apply font-semibold;
+    text-wrap: balance;
+  }
+
+  .lead {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-relaxed);
+    @apply text-gray-600;
+    text-wrap: pretty;
+  }
+
+  /* Eyebrow — label discreto sobre títulos */
+  .eyebrow {
+    @apply inline-block text-xs font-bold tracking-widest uppercase text-[#f2d22e] mb-3;
   }
 
   .card-shadow {
