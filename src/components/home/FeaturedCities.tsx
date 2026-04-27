@@ -29,8 +29,8 @@ export function FeaturedCities({
   cities = defaultCities,
 }: FeaturedCitiesProps) {
   return (
-    <section className="py-20 bg-[#ededd1]/40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section bg-[#ededd1]/40">
+      <div className="container-page">
         <div className="text-center mb-12">
           <h2 className="section-title">{title}</h2>
           <p className="section-subtitle">{subtitle}</p>

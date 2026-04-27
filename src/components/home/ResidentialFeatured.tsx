@@ -28,8 +28,8 @@ export function ResidentialFeatured({
     .slice(0, 6)
 
   return (
-    <section className="py-20 bg-[#fafbff]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section bg-[#fafbff]">
+      <div className="container-page">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-[#010744] bg-[#f2d22e]/30 rounded-full px-3 py-1 mb-3">

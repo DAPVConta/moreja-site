@@ -39,7 +39,7 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
   const displayStats = stats.length > 0 ? stats : defaultStats
 
   return (
-    <section className="bg-[#ededd1] py-14 sm:py-20 relative overflow-hidden">
+    <section className="section bg-[#ededd1] relative overflow-hidden">
       {/* Decorative pattern */}
       <div
         aria-hidden="true"
@@ -50,7 +50,7 @@ export function StatsSection({ stats = defaultStats }: StatsSectionProps) {
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-page relative">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
           {displayStats.map((stat) => (
             <div

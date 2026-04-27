@@ -60,8 +60,8 @@ export function LaunchesPreview({
   launches = defaultLaunches,
 }: LaunchesPreviewProps) {
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section bg-white">
+      <div className="container-page">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white bg-gradient-to-r from-[#010744] to-[#1a1f6e] rounded-full px-3 py-1 mb-3">

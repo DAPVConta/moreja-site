@@ -24,8 +24,8 @@ export function ValueProposition({
   ctaHref = '/sobre',
 }: ValuePropositionProps) {
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section bg-white">
+      <div className="container-page">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: image */}
           <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">

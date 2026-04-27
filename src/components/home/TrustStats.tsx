@@ -27,7 +27,7 @@ export function TrustStats({
   items = defaultItems,
 }: TrustStatsProps) {
   return (
-    <section className="bg-[#010744] text-white py-20 relative overflow-hidden">
+    <section className="section bg-[#010744] text-white relative overflow-hidden">
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-[0.05] pointer-events-none"
@@ -36,7 +36,7 @@ export function TrustStats({
             'radial-gradient(circle at 20% 20%, #f2d22e 0, transparent 40%), radial-gradient(circle at 80% 80%, #f2d22e 0, transparent 40%)',
         }}
       />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-page relative">
         <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-12">
           {title}
         </h2>
