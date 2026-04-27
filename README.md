@@ -82,3 +82,5 @@ O site consome imóveis via `functions/v1/supremo-proxy` (edge function), que:
 
 Se o proxy retornar vazio (em dev), `src/lib/properties.ts` cai automaticamente
 para os imóveis seedados em `properties_cache`.
+
+## teste
