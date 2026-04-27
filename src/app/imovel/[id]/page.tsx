@@ -4,8 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, ChevronLeft } from 'lucide-react'
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
+import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
+import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
@@ -23,7 +25,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = `${property.titulo} - ${property.bairro}, ${property.cidade} | Morejá`
-  const description = property.descricao.slice(0, 160)
+  // Strip HTML para meta description (texto puro)
+  const description = property.descricao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   const image = property.fotos[0]
   const url = `${SITE_URL}/imovel/${id}`
 
@@ -194,25 +197,41 @@ export default async function ImovelPage({ params }: PageProps) {
               {/* Description */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Descrição</h2>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
-                  {property.descricao}
-                </div>
+                {looksLikeHtml(property.descricao) ? (
+                  <div
+                    className="prose-property text-gray-700 leading-relaxed text-sm"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.descricao) }}
+                  />
+                ) : (
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
+                    {property.descricao}
+                  </div>
+                )}
               </div>
 
               {/* Location */}
-              {property.endereco && (
+              {(property.endereco || (property.latitude && property.longitude)) && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-3">Localização</h2>
-                  <div className="flex items-start gap-2 text-gray-700 text-sm">
-                    <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
-                    <span>
-                      {property.endereco}
-                      {property.numero && `, ${property.numero}`}
-                      {property.complemento && ` – ${property.complemento}`}
-                      {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
-                      {property.cep && ` – CEP ${property.cep}`}
-                    </span>
-                  </div>
+                  {property.endereco && (
+                    <div className="flex items-start gap-2 text-gray-700 text-sm mb-4">
+                      <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
+                      <span>
+                        {property.endereco}
+                        {property.numero && `, ${property.numero}`}
+                        {property.complemento && ` – ${property.complemento}`}
+                        {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
+                        {property.cep && ` – CEP ${property.cep}`}
+                      </span>
+                    </div>
+                  )}
+                  <PropertyMap
+                    lat={property.latitude}
+                    lng={property.longitude}
+                    address={[property.endereco, property.numero, property.bairro, property.cidade, property.estado]
+                      .filter(Boolean)
+                      .join(', ')}
+                  />
                 </div>
               )}
 
