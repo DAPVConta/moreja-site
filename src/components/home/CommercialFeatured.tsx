@@ -32,8 +32,8 @@ export function CommercialFeatured({
     .slice(0, 6)
 
   return (
-    <section className="py-20 bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section bg-white border-t border-gray-100">
+      <div className="container-page">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white bg-[#010744] rounded-full px-3 py-1 mb-3">

@@ -24,22 +24,40 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
   if (testimonials.length === 0) return null
 
   return (
-    <section className="py-20 bg-[#010744]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+    <section className="section bg-[#010744]">
+      <div className="container-page">
+        <div className="text-center mb-10 md:mb-12">
+          <h2 className="heading-h2 text-white mb-2">
             O que nossos clientes dizem
           </h2>
-          <p className="text-gray-300 text-lg">
+          <p className="lead text-gray-300">
             A satisfação dos nossos clientes é nossa maior conquista
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.slice(0, 3).map((t) => (
+        {/* Mobile: carrossel snap-x; desktop: grid 2/3 cols.
+            Scroll-padding alinha o card ao container-page. */}
+        <div
+          className="
+            -mx-4 sm:-mx-6 px-4 sm:px-6
+            flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6
+            overflow-x-auto md:overflow-visible
+            snap-x snap-mandatory md:snap-none
+            scroll-smooth scrollbar-thin
+            pb-4 md:pb-0
+          "
+        >
+          {testimonials.slice(0, 6).map((t) => (
             <article
               key={t.id}
-              className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-6 flex flex-col gap-4"
+              className="
+                snap-center md:snap-align-none
+                shrink-0 md:shrink
+                w-[85%] sm:w-[60%] md:w-auto
+                bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl
+                p-6 flex flex-col gap-4
+                hover:border-white/20 transition-colors
+              "
             >
               <StarRating rating={t.rating} />
               <blockquote className="text-gray-200 text-sm leading-relaxed flex-1">
@@ -53,7 +71,10 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-[#f2d22e] flex items-center justify-center text-[#010744] font-bold text-sm">
+                  <div
+                    className="w-10 h-10 rounded-full bg-[#f2d22e] flex items-center justify-center text-[#010744] font-bold text-sm"
+                    aria-hidden="true"
+                  >
                     {t.name.charAt(0).toUpperCase()}
                   </div>
                 )}

@@ -1,16 +1,102 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — fonte única de verdade.
+   Cores tema continuam em :root (sobrescritas pelo SSR com base
+   no site_config). Tudo o mais (escala, spacing, motion) fica
+   estático aqui.
+   ───────────────────────────────────────────────────────────── */
+
 @theme inline {
   --font-sans: var(--font-raleway), sans-serif;
+
+  /* Marca (defaults; podem ser sobrescritos por site_config no SSR) */
   --color-navy: #010744;
   --color-yellow-brand: #f2d22e;
   --color-cream: #ededd1;
+
+  /* Escala navy completa */
+  --color-navy-50:  #e8e9f5;
+  --color-navy-100: #c5c7e6;
+  --color-navy-200: #9fa2d5;
+  --color-navy-300: #767bc4;
+  --color-navy-400: #5660b7;
+  --color-navy-500: #3645aa;
+  --color-navy-600: #2f3da0;
+  --color-navy-700: #263294;
+  --color-navy-800: #1c2889;
+  --color-navy-900: #010744;
 }
 
 :root {
+  /* ── Marca (sobrescritos no SSR pelo brandCss em layout.tsx) ── */
   --navy: #010744;
   --yellow: #f2d22e;
   --cream: #ededd1;
+
+  /* ── Escala navy ── */
+  --navy-50:  #e8e9f5;
+  --navy-100: #c5c7e6;
+  --navy-200: #9fa2d5;
+  --navy-300: #767bc4;
+  --navy-400: #5660b7;
+  --navy-500: #3645aa;
+  --navy-600: #2f3da0;
+  --navy-700: #263294;
+  --navy-800: #1c2889;
+  --navy-900: #010744;
+
+  /* ── Spacing semântico ── */
+  --space-section-y:   3.5rem;   /* 56px — mobile */
+  --space-section-y-md: 5rem;    /* 80px — tablet */
+  --space-section-y-lg: 6rem;    /* 96px — desktop */
+  --space-page-x:      1rem;     /* 16px — mobile */
+  --space-page-x-sm:   1.5rem;   /* 24px */
+  --space-page-x-lg:   2rem;     /* 32px */
+  --space-card-p:      1.25rem;  /* 20px */
+
+  /* ── Border radius ── */
+  --radius-xs:   0.25rem;   /* 4px  — chips, badges */
+  --radius-sm:   0.5rem;    /* 8px  — inputs, botões compactos */
+  --radius-md:   0.75rem;   /* 12px — botões padrão */
+  --radius-lg:   1rem;      /* 16px — cards */
+  --radius-xl:   1.25rem;   /* 20px — cards grandes */
+  --radius-2xl:  1.5rem;    /* 24px — heroes, mosaicos */
+  --radius-full: 9999px;
+
+  /* ── Sombras (3 níveis + tema) ── */
+  --shadow-sm:    0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-xl:    0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+  --shadow-brand: 0 12px 32px -8px rgb(1 7 68 / 0.25);
+
+  /* ── Motion ── */
+  --motion-fast:  150ms;
+  --motion-base:  200ms;
+  --motion-slow:  300ms;
+  --motion-slower: 500ms;
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Z-index ── */
+  --z-header:   50;
+  --z-drawer:   60;
+  --z-modal:    70;
+  --z-toast:    80;
+
+  /* ── Tipografia fluida (clamp(min, vw, max)) ──
+     Cada nível cresce do mobile (min) ao desktop (max) sem breakpoints. */
+  --text-display: clamp(2.25rem, 1.4rem + 4.5vw, 4.5rem);  /*  36 → 72 */
+  --text-h1:      clamp(1.875rem, 1.2rem + 3.4vw, 3.75rem); /* 30 → 60 */
+  --text-h2:      clamp(1.625rem, 1.1rem + 2.4vw, 2.75rem); /* 26 → 44 */
+  --text-h3:      clamp(1.25rem, 0.95rem + 1.4vw, 2rem);    /* 20 → 32 */
+  --text-body-lg: clamp(1rem, 0.95rem + 0.4vw, 1.125rem);   /* 16 → 18 */
+  --text-body:    1rem;                                     /* 16     */
+  --text-caption: 0.75rem;                                  /* 12     */
+  --leading-tight:  1.1;
+  --leading-snug:   1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
 }
 
 @layer base {
@@ -86,32 +172,143 @@
 }
 
 @layer components {
+  /* Botões — base inline em cada variante (Tailwind v4 não permite
+     @apply de classes definidas no mesmo @layer components).
+     min-h-[44px] garante tap target mobile (Apple HIG). */
   .btn-primary {
-    @apply bg-[#f2d22e] text-[#010744] font-semibold px-6 py-3 rounded-lg
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-[#f2d22e] text-[#010744]
            hover:brightness-105 active:brightness-95
-           transition-all duration-200 cursor-pointer
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2;
+           focus-visible:ring-[#f2d22e];
+    transition-duration: var(--motion-base);
   }
 
   .btn-secondary {
-    @apply bg-[#010744] text-white font-semibold px-6 py-3 rounded-lg
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-[#010744] text-white
            hover:bg-[#0a1a6e] active:bg-[#000533]
-           transition-all duration-200 cursor-pointer
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2;
+           focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
   }
 
   .btn-outline {
-    @apply border-2 border-[#010744] text-[#010744] font-semibold px-6 py-3 rounded-lg
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           border-2 border-[#010744] text-[#010744] bg-transparent
            hover:bg-[#010744] hover:text-white
-           transition-all duration-200 cursor-pointer;
+           focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
+  }
+
+  /* Ghost — sem fundo, ideal em barras claras e top bar */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-transparent text-[#010744]
+           hover:bg-[#010744]/5 active:bg-[#010744]/10
+           focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
+  }
+
+  /* Tamanhos — combine com .btn-* (ex: class="btn-primary btn-sm") */
+  .btn-sm {
+    @apply min-h-[36px] px-4 py-2 text-sm;
+  }
+
+  .btn-lg {
+    @apply min-h-[52px] px-8 py-3.5 text-base;
+  }
+
+  /* Loading state — spinner inline (consumidor adiciona aria-busy) */
+  .btn-loading {
+    @apply pointer-events-none opacity-80;
+  }
+  .btn-loading::before {
+    content: '';
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
+    animation: spin 0.7s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-[#010744] mb-2;
+    @apply font-bold text-[#010744] mb-2;
+    font-size: var(--text-h2);
+    line-height: var(--leading-tight);
+    text-wrap: balance;
   }
 
   .section-subtitle {
-    @apply text-gray-500 text-lg mb-10;
+    @apply text-gray-500 mb-10;
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* Headings utilitários — usam tokens fluidos. */
+  .heading-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-tight);
+    @apply font-extrabold tracking-tight;
+    text-wrap: balance;
+  }
+
+  .heading-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-tight);
+    @apply font-extrabold tracking-tight;
+    text-wrap: balance;
+  }
+
+  .heading-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-tight);
+    @apply font-bold;
+    text-wrap: balance;
+  }
+
+  .heading-h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-snug);
+    @apply font-semibold;
+    text-wrap: balance;
+  }
+
+  .lead {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-relaxed);
+    @apply text-gray-600;
+    text-wrap: pretty;
+  }
+
+  /* Eyebrow — label discreto sobre títulos */
+  .eyebrow {
+    @apply inline-block text-xs font-bold tracking-widest uppercase text-[#f2d22e] mb-3;
   }
 
   .card-shadow {
@@ -127,6 +324,21 @@
   /* Skeleton loader */
   .skeleton {
     @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* ── Layout primitives ──
+     .container-page — largura máxima centralizada e padding responsivo.
+     .section        — ritmo vertical padrão das seções (mobile→desktop). */
+  .container-page {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-14 sm:py-20 lg:py-24;
+  }
+
+  .section-tight {
+    @apply py-10 sm:py-14 lg:py-16;
   }
 }
 
