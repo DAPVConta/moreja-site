@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
+import { MobileSearchButton } from './MobileSearchButton'
 
 const navLinks = [
   { href: '/comprar', label: 'Comprar' },
@@ -217,6 +218,8 @@ export function Header({
               >
                 Fale Conosco
               </Link>
+
+              <MobileSearchButton />
 
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
