@@ -34,9 +34,12 @@ export function Reveal({
     const el = ref.current
     if (!el) return
 
+    // Fallback: browsers sem IntersectionObserver (~<2% de cobertura)
+    // mostram o conteúdo imediatamente sem animação. rAF defere a
+    // atualização para fora do corpo do effect (lint react-hooks).
     if (typeof IntersectionObserver === 'undefined') {
-      setShown(true)
-      return
+      const id = requestAnimationFrame(() => setShown(true))
+      return () => cancelAnimationFrame(id)
     }
 
     const observer = new IntersectionObserver(

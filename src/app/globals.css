@@ -172,45 +172,63 @@
 }
 
 @layer components {
-  /* Base — compartilhada por todas as variantes.
+  /* Botões — base inline em cada variante (Tailwind v4 não permite
+     @apply de classes definidas no mesmo @layer components).
      min-h-[44px] garante tap target mobile (Apple HIG). */
-  .btn {
+  .btn-primary {
     @apply inline-flex items-center justify-center gap-2
            font-semibold rounded-lg cursor-pointer select-none
-           min-h-[44px] px-6 py-3
-           transition-all
+           min-h-[44px] px-6 py-3 transition-all
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
            active:scale-[0.98]
-           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed;
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-[#f2d22e] text-[#010744]
+           hover:brightness-105 active:brightness-95
+           focus-visible:ring-[#f2d22e];
     transition-duration: var(--motion-base);
   }
 
-  .btn-primary {
-    @apply btn bg-[#f2d22e] text-[#010744]
-           hover:brightness-105 active:brightness-95
-           focus-visible:ring-[#f2d22e];
-  }
-
   .btn-secondary {
-    @apply btn bg-[#010744] text-white
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-[#010744] text-white
            hover:bg-[#0a1a6e] active:bg-[#000533]
            focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
   }
 
   .btn-outline {
-    @apply btn border-2 border-[#010744] text-[#010744] bg-transparent
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           border-2 border-[#010744] text-[#010744] bg-transparent
            hover:bg-[#010744] hover:text-white
            focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
   }
 
   /* Ghost — sem fundo, ideal em barras claras e top bar */
   .btn-ghost {
-    @apply btn bg-transparent text-[#010744]
+    @apply inline-flex items-center justify-center gap-2
+           font-semibold rounded-lg cursor-pointer select-none
+           min-h-[44px] px-6 py-3 transition-all
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           active:scale-[0.98]
+           disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed
+           bg-transparent text-[#010744]
            hover:bg-[#010744]/5 active:bg-[#010744]/10
            focus-visible:ring-[#010744];
+    transition-duration: var(--motion-base);
   }
 
-  /* Tamanhos — sobrepõem padding/min-height da .btn base */
+  /* Tamanhos — combine com .btn-* (ex: class="btn-primary btn-sm") */
   .btn-sm {
     @apply min-h-[36px] px-4 py-2 text-sm;
   }
