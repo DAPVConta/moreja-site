@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
 
 interface WhatsAppFabProps {
@@ -11,6 +12,13 @@ interface WhatsAppFabProps {
 }
 
 /**
+ * Rotas que possuem sua própria bottom action bar — escondem o FAB
+ * em mobile para não competir; em desktop o FAB segue visível
+ * (a bar é lg:hidden).
+ */
+const BOTTOM_BAR_ROUTES = ['/imovel/', '/empreendimentos/']
+
+/**
  * Botão flutuante de WhatsApp visível em todas as páginas após o
  * usuário rolar > 200px (evita competir com o hero). Aparece com
  * fade + scale; respeita prefers-reduced-motion via tokens.
@@ -19,7 +27,10 @@ export function WhatsAppFab({
   whatsapp,
   message = 'Olá! Vim pelo site da Morejá e gostaria de mais informações.',
 }: WhatsAppFabProps) {
+  const pathname = usePathname()
   const [visible, setVisible] = useState(false)
+
+  const onPageWithBottomBar = BOTTOM_BAR_ROUTES.some((p) => pathname.startsWith(p))
 
   useEffect(() => {
     if (!whatsapp) return
@@ -49,6 +60,7 @@ export function WhatsAppFab({
         text-white shadow-xl shadow-green-500/30
         transition-all duration-300 ease-out
         focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-300
+        ${onPageWithBottomBar ? 'hidden lg:flex' : ''}
         ${visible ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-75 pointer-events-none'}
       `}
       style={{

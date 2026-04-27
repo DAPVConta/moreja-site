@@ -4,9 +4,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, ChevronLeft } from 'lucide-react'
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
+import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
+import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
+import { SaveButton } from '@/components/properties/SaveButton'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -23,7 +26,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = `${property.titulo} - ${property.bairro}, ${property.cidade} | Morejá`
-  const description = property.descricao.slice(0, 160)
+  // Strip HTML para meta description (texto puro)
+  const description = property.descricao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   const image = property.fotos[0]
   const url = `${SITE_URL}/imovel/${id}`
 
@@ -194,25 +198,41 @@ export default async function ImovelPage({ params }: PageProps) {
               {/* Description */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Descrição</h2>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
-                  {property.descricao}
-                </div>
+                {looksLikeHtml(property.descricao) ? (
+                  <div
+                    className="prose-property text-gray-700 leading-relaxed text-sm"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.descricao) }}
+                  />
+                ) : (
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
+                    {property.descricao}
+                  </div>
+                )}
               </div>
 
               {/* Location */}
-              {property.endereco && (
+              {(property.endereco || (property.latitude && property.longitude)) && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-3">Localização</h2>
-                  <div className="flex items-start gap-2 text-gray-700 text-sm">
-                    <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
-                    <span>
-                      {property.endereco}
-                      {property.numero && `, ${property.numero}`}
-                      {property.complemento && ` – ${property.complemento}`}
-                      {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
-                      {property.cep && ` – CEP ${property.cep}`}
-                    </span>
-                  </div>
+                  {property.endereco && (
+                    <div className="flex items-start gap-2 text-gray-700 text-sm mb-4">
+                      <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
+                      <span>
+                        {property.endereco}
+                        {property.numero && `, ${property.numero}`}
+                        {property.complemento && ` – ${property.complemento}`}
+                        {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
+                        {property.cep && ` – CEP ${property.cep}`}
+                      </span>
+                    </div>
+                  )}
+                  <PropertyMap
+                    lat={property.latitude}
+                    lng={property.longitude}
+                    address={[property.endereco, property.numero, property.bairro, property.cidade, property.estado]
+                      .filter(Boolean)
+                      .join(', ')}
+                  />
                 </div>
               )}
 
@@ -299,14 +319,20 @@ export default async function ImovelPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Mobile sticky action bar */}
-        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-3 py-2.5 flex gap-2 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+        {/* Mobile sticky action bar — pedaço 6.4
+            3 botões: Salvar (toggle), WhatsApp, Ligar.
+            Padding-bottom respeita safe-area-inset-bottom no iOS. */}
+        <div
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-3 py-2.5 flex gap-2"
+          style={{ paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom))' }}
+        >
+          <SaveButton propertyId={property.id} />
           {property.corretor_whatsapp && (
             <a
               href={`https://wa.me/55${property.corretor_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Tenho interesse no imóvel "${property.titulo}" (ref. ${property.codigo}).`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 active:bg-green-600 text-white h-12 rounded-lg font-semibold text-sm"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-green-500 active:bg-green-600 text-white h-12 rounded-lg font-semibold text-sm transition-colors active:scale-[0.98]"
               aria-label="Contatar por WhatsApp"
             >
               <MessageCircle className="w-5 h-5" />
@@ -315,7 +341,7 @@ export default async function ImovelPage({ params }: PageProps) {
           )}
           <a
             href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm"
+            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm transition-colors active:scale-[0.98] active:bg-[#000533]"
             aria-label="Ligar para a corretora"
           >
             <Phone className="w-5 h-5" />

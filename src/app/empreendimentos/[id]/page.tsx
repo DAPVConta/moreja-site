@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, ChevronLeft, Phone, MessageCircle } from 'lucide-react'
 import { fetchEmpreendimento, fetchEmpreendimentos, formatPrice } from '@/lib/properties'
+import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
+import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { ShareButtonClient } from '@/components/properties/ShareButtonClient'
 
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!property) return { title: 'Empreendimento não encontrado | Morejá' }
 
   const title = `${property.titulo} | Empreendimento Morejá`
-  const description = property.descricao.slice(0, 160)
+  const description = property.descricao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   const image = property.fotos[0]
 
   return {
@@ -100,10 +102,41 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
                 <div className="text-2xl sm:text-3xl font-bold text-[#010744] mb-5 sm:mb-6">
                   A partir de {formatPrice(property.preco)}
                 </div>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
-                  {property.descricao}
-                </div>
+                {looksLikeHtml(property.descricao) ? (
+                  <div
+                    className="prose-property text-gray-700 leading-relaxed text-sm"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.descricao) }}
+                  />
+                ) : (
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
+                    {property.descricao}
+                  </div>
+                )}
               </div>
+
+              {(property.endereco || (property.latitude && property.longitude)) && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3">Localização</h2>
+                  {property.endereco && (
+                    <div className="flex items-start gap-2 text-gray-700 text-sm mb-4">
+                      <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
+                      <span>
+                        {property.endereco}
+                        {property.numero && `, ${property.numero}`}
+                        {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
+                        {property.cep && ` – CEP ${property.cep}`}
+                      </span>
+                    </div>
+                  )}
+                  <PropertyMap
+                    lat={property.latitude}
+                    lng={property.longitude}
+                    address={[property.endereco, property.numero, property.bairro, property.cidade, property.estado]
+                      .filter(Boolean)
+                      .join(', ')}
+                  />
+                </div>
+              )}
 
               {property.tour_virtual && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
