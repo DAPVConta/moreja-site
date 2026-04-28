@@ -91,11 +91,34 @@ async function pushOne(lead: LeadRow): Promise<{ ok: boolean; supremo_id?: strin
   }
 }
 
+/**
+ * Verifica se o JWT do header tem role='service_role' decodificando o payload.
+ * Mais robusto que byte-comparison contra Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+ * — Supabase Gateway já valida a assinatura do JWT (Verify JWT enabled), então
+ * basta confirmar que é uma key de service_role e não user/anon.
+ */
+function isServiceRoleJwt(authHeader: string): boolean {
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+  if (!token) return false
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return false
+    // base64url → base64
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded)) as { role?: string }
+    return payload.role === 'service_role'
+  } catch {
+    return false
+  }
+}
+
 Deno.serve(async (req: Request) => {
-  // Auth gate: só aceita chamadas com service_role
+  // Auth gate: só aceita chamadas com service_role JWT (validação por claim,
+  // não byte-match)
   const authHeader = req.headers.get('authorization') ?? ''
-  if (!authHeader.includes(SUPABASE_SERVICE_ROLE_KEY)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+  if (!isServiceRoleJwt(authHeader)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized — service_role required' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     })
