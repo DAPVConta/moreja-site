@@ -17,8 +17,7 @@
 | 8a | Seções RE/MAX no público | ✅ |
 | 8b | Admin SPA refactor (parcial) | ✅ páginas-chave / 🔜 polish |
 | 9 | Security hardening pleno | ✅ CSP nonce + Turnstile + CORS allowlist + retention |
-| 9 | Security hardening pleno | 🔜 |
-| 10 | Performance & QA final | 🔜 |
+| 10 | Performance & QA | ✅ ISR strategy + next/image migration final |
 | 11 | Diferenciadores opcionais (AI search, mapa interativo) | 🔜 opcional |
 
 ---
@@ -96,6 +95,19 @@
 - PixelEvents extendido com event_id + sendBeacon CAPI
 - PropertyViewTracker plugado em /imovel e /empreendimentos
 - ManageConsentLink no Footer
+
+### Performance & QA (Bloco 10)
+- **ISR strategy** declarada por rota:
+  - `/` (home) — `revalidate = 300` (5min)
+  - `/sobre` — `revalidate = 3600` (1h, conteúdo raramente muda)
+  - `/comprar`, `/alugar`, `/empreendimentos` — listas dinâmicas, dependem de Supremo proxy (que tem cache 10min)
+  - `/imovel/[id]`, `/empreendimentos/[id]` — SSG via generateStaticParams
+- **proxyFetch** com revalidate dinâmico por tipo de resource: lists 5min, detail 30min, units 1h (camada extra além do cache do edge function)
+- **bg-image → next/image** migration completa:
+  - `CategoryCards.tsx` — usava `style={{ backgroundImage: ... }}`, agora `<Image fill sizes>`
+  - `ValueProposition.tsx` — mesmo tratamento
+  - HeroBackdrop, BannersSection, FeaturedCities, LaunchesPreview, BlogPreview, TeamSection já estavam usando next/image desde os blocos anteriores
+- Build final: 18 rotas, middleware ativo, CSP nonce funcionando, todos os pixels gateados por consent
 
 ### Security hardening pleno (Bloco 9)
 - **Middleware CSP com nonce per-request** — `src/middleware.ts` gera nonce hex base64 por request, propaga via header `x-nonce`, layout/scripts inline lêem via next/headers e aplicam nonce em `<script>` e `<style>` inline. CSP tem `script-src 'strict-dynamic' 'nonce-XXX'` + allowlist de hosts (Supremo, Supabase, GA4, Meta, Clarity, Hotjar, etc.)

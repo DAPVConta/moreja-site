@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
 export interface CategoryCard {
@@ -62,11 +63,13 @@ export function CategoryCards({
               href={cat.href}
               className="group relative overflow-hidden rounded-2xl aspect-[4/5] md:aspect-[3/4] block"
             >
-              {/* Background image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url('${cat.bg}')` }}
-                aria-hidden="true"
+              {/* Background image — next/image otimizado (LCP-aware) */}
+              <Image
+                src={cat.bg}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#010744]/90 via-[#010744]/40 to-transparent" />

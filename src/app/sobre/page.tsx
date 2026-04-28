@@ -7,6 +7,9 @@ import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
+// /sobre raramente muda — revalidate 1h
+export const revalidate = 3600
+
 export async function generateMetadata(): Promise<Metadata> {
   const meta = await buildRouteMetadata('/sobre', {
     title: 'Sobre a Morejá Imobiliária | Quem Somos',

@@ -1,6 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { fetchFeaturedProperties } from '@/lib/properties'
+
+// ISR: revalidate da home a cada 5min — cobre updates em featured properties,
+// banners, testimonials, sections sem rebuild do app.
+export const revalidate = 300
 import {
   getSiteStats,
   getTestimonials,

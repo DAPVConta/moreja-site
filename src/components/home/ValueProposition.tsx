@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Reveal } from '@/components/ui/Reveal'
 
@@ -30,13 +31,12 @@ export function ValueProposition({
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: image */}
           <Reveal className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80')",
-              }}
-              aria-hidden="true"
+            <Image
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-[#010744]/60 via-transparent to-transparent" />
             {/* Floating badge */}

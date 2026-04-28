@@ -5,7 +5,21 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/supremo-proxy`
 
-async function proxyFetch(resource: string, params: Record<string, string | number | undefined>) {
+/**
+ * ISR strategy:
+ *   • Lists (/comprar, /alugar, /empreendimentos) — 5min revalidate
+ *   • Detail (/imovel/[id], /empreendimentos/[id]) — 30min revalidate
+ *   • Units (tipologias) — 1h revalidate
+ *
+ * O Supremo proxy edge function tem cache próprio (10min lists / 2h detail —
+ * Bloco 7), então o Next.js ISR é uma camada adicional p/ reduzir invocations
+ * do edge function.
+ */
+async function proxyFetch(
+  resource: string,
+  params: Record<string, string | number | undefined>,
+  options?: { revalidate?: number }
+) {
   const searchParams = new URLSearchParams({ resource })
 
   for (const [key, value] of Object.entries(params)) {
@@ -14,9 +28,14 @@ async function proxyFetch(resource: string, params: Record<string, string | numb
     }
   }
 
+  // Default revalidate por tipo (override via options)
+  const isUnits = /\/(unidades|tipologias)$/.test(resource)
+  const isDetail = !isUnits && /\/[^/]+$/.test(resource)
+  const defaultRevalidate = isUnits ? 3600 : isDetail ? 1800 : 300
+
   const res = await fetch(`${PROXY_URL}?${searchParams.toString()}`, {
     headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-    next: { revalidate: 300 }, // 5 min cache on server
+    next: { revalidate: options?.revalidate ?? defaultRevalidate },
   })
 
   if (!res.ok) {
