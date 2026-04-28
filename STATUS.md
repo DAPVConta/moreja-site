@@ -18,7 +18,8 @@
 | 8b | Admin SPA refactor (parcial) | ✅ páginas-chave / 🔜 polish |
 | 9 | Security hardening pleno | ✅ CSP nonce + Turnstile + CORS allowlist + retention |
 | 10 | Performance & QA | ✅ ISR strategy + next/image migration final |
-| 11 | Diferenciadores opcionais (AI search, mapa interativo) | 🔜 opcional |
+| 11a | Diferenciadores parte 1 | ✅ Recently viewed + Comparador + FAQ |
+| 11b | Diferenciadores remanescentes (AI search, mapa interativo, push) | 🔜 opcional |
 
 ---
 
@@ -95,6 +96,13 @@
 - PixelEvents extendido com event_id + sendBeacon CAPI
 - PropertyViewTracker plugado em /imovel e /empreendimentos
 - ManageConsentLink no Footer
+
+### Diferenciadores parte 1 (Bloco 11a)
+- **Recently Viewed** — `lib/recently-viewed.ts` com localStorage (até 12 imóveis), `RecentlyViewedTracker` plug em /imovel/[id] e /empreendimentos/[id], `RecentlyViewedSection` na home (renderiza nada se vazio — SSR-safe via mount-after-hydration)
+- **Comparador** — `lib/compare.ts` com sessionStorage (até 3 imóveis), `CompareToggle` no PropertyCard (botão flutuante sobre foto), `CompareFloatingBar` global no layout (só aparece com 1+ items) com link para /comparar
+- **`/comparar`** — tabela side-by-side com Tipo · Finalidade · Área · Quartos · Banheiros · Vagas · Condomínio · IPTU · Preço m² + destaque automático do "vencedor" por linha (max para área/quartos/banheiros/vagas; min para condomínio/IPTU/preço m²) com badge ✓ verde
+- **FAQ Accordion** — componente server-side com `<details>`/`<summary>` nativo (zero JS, acessível via teclado), schema FAQPage embed para rich snippet do Google, 6 FAQs default (avaliação, comissão, documentos, simulação, cobertura, segmentos), 1ª aberta por default
+- 2 entradas novas no `sectionMap` da home: `recently_viewed`, `faq` — admin pode ativar/reordenar via `home_sections`
 
 ### Performance & QA (Bloco 10)
 - **ISR strategy** declarada por rota:

@@ -14,6 +14,7 @@ import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { SaveButton } from '@/components/properties/SaveButton'
 import { IdleCallbackPrompt } from '@/components/properties/IdleCallbackPrompt'
 import { MortgageSimulatorCTA } from '@/components/properties/MortgageSimulatorCTA'
+import { RecentlyViewedTracker } from '@/components/properties/RecentlyViewedTracker'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -85,6 +86,7 @@ export default async function ImovelPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/imovel/${id}`} />
+      <RecentlyViewedTracker property={property} />
       <PropertyViewTracker
         property={{
           id: property.id,

@@ -7,6 +7,7 @@ import { getSiteConfig } from '@/lib/site-config'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
+import { RecentlyViewedTracker } from '@/components/properties/RecentlyViewedTracker'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
@@ -64,6 +65,7 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/empreendimentos/${id}`} />
+      <RecentlyViewedTracker property={property} />
       <PropertyViewTracker
         property={{
           id: property.id,

@@ -30,6 +30,8 @@ import { TeamSection } from '@/components/home/TeamSection'
 import { PropertyValuationCTA } from '@/components/home/PropertyValuationCTA'
 import { BlogPreview } from '@/components/home/BlogPreview'
 import { CoverageMap } from '@/components/home/CoverageMap'
+import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
+import { FaqAccordion } from '@/components/home/FaqAccordion'
 
 function CtaAnunciarSection() {
   return (
@@ -257,6 +259,17 @@ export default async function HomePage() {
           regions={c.regions ?? []}
         />
       )
+    },
+    recently_viewed: () => {
+      const c = cfg('recently_viewed') as { title?: string; subtitle?: string }
+      return <RecentlyViewedSection title={c.title} subtitle={c.subtitle} />
+    },
+    faq: () => {
+      const c = cfg('faq') as {
+        title?: string; subtitle?: string
+        items?: { question: string; answer: string }[]
+      }
+      return <FaqAccordion title={c.title} subtitle={c.subtitle} items={c.items} />
     },
   }
 

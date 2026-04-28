@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab'
 import { PwaInstallPrompt } from '@/components/layout/PwaInstallPrompt'
+import { CompareFloatingBar } from '@/components/properties/CompareFloatingBar'
 import { JsonLd } from '@/components/seo/JsonLd'
 import {
   ThirdPartyScripts,
@@ -272,6 +273,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
 
         <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
+
+        {/* Pílula flutuante p/ comparador (só aparece com 1+ items) */}
+        <CompareFloatingBar />
 
         {/* PWA install banner — só aparece após 3+ pageviews, dismissable 30 dias */}
         <PwaInstallPrompt />

@@ -7,6 +7,7 @@ import { MapPin, Bed, Bath, Car, Maximize2, ChevronLeft, ChevronRight } from 'lu
 import type { Property } from '@/types/property'
 import { formatPrice, formatArea } from '@/lib/format'
 import { SaveButton } from './SaveButton'
+import { CompareToggle } from './CompareToggle'
 import { Badge } from '@/components/ui/Badge'
 
 interface PropertyCardProps {
@@ -62,9 +63,28 @@ export function PropertyCard({
       className="group relative overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300
                  hover:-translate-y-1 hover:shadow-xl"
     >
-      {/* Save button — z-acima do Link, não dispara navegação */}
-      <div className="absolute right-3 top-3 z-20">
+      {/* Save + Compare buttons — z-acima do Link, não disparam navegação */}
+      <div className="absolute right-3 top-3 z-20 flex flex-col gap-2">
         <SaveButton propertyId={property.id} variant="icon" />
+        <CompareToggle
+          property={{
+            id: property.id,
+            titulo: property.titulo,
+            preco: property.preco,
+            finalidade: property.finalidade,
+            tipo: property.tipo,
+            bairro: property.bairro,
+            cidade: property.cidade,
+            area_total: property.area_total,
+            quartos: property.quartos,
+            banheiros: property.banheiros,
+            vagas: property.vagas ?? 0,
+            fotos: property.fotos,
+            href: `/imovel/${property.id}`,
+            preco_condominio: property.preco_condominio,
+            preco_iptu: property.preco_iptu,
+          }}
+        />
       </div>
 
       <Link href={`/imovel/${property.id}`} className="block">
