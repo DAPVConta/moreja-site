@@ -13,6 +13,7 @@ import { ResidentialFeatured } from '@/components/home/ResidentialFeatured'
 import { CommercialFeatured } from '@/components/home/CommercialFeatured'
 import { FeaturedCities } from '@/components/home/FeaturedCities'
 import { LaunchesPreview } from '@/components/home/LaunchesPreview'
+import { LaunchesWaitlist } from '@/components/home/LaunchesWaitlist'
 import { BannersSection } from '@/components/home/BannersSection'
 
 function CtaAnunciarSection() {
@@ -154,6 +155,21 @@ export default async function HomePage() {
           subtitle={c.subtitle}
           hrefAll={c.href_all}
           launches={c.launches}
+        />
+      )
+    },
+    launches_waitlist: () => {
+      const c = cfg('launches_waitlist') as {
+        eyebrow?: string; title?: string; subtitle?: string
+        lancamento_id?: string | null; benefits?: string[]
+      }
+      return (
+        <LaunchesWaitlist
+          eyebrow={c.eyebrow}
+          title={c.title}
+          subtitle={c.subtitle}
+          lancamentoId={c.lancamento_id ?? null}
+          benefits={c.benefits}
         />
       )
     },

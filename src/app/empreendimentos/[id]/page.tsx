@@ -5,6 +5,7 @@ import { MapPin, ChevronLeft, Phone, MessageCircle } from 'lucide-react'
 import { fetchEmpreendimento, fetchEmpreendimentos, formatPrice } from '@/lib/properties'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
+import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
@@ -58,6 +59,14 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/empreendimentos/${id}`} />
+      <PropertyViewTracker
+        property={{
+          id: property.id,
+          titulo: property.titulo,
+          preco: property.preco,
+          tipo: property.tipo,
+        }}
+      />
 
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}

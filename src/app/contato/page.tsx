@@ -2,19 +2,27 @@ import type { Metadata } from 'next'
 import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { ContactForm } from '@/components/contact/ContactForm'
+import { buildRouteMetadata } from '@/lib/site-config'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
-export const metadata: Metadata = {
-  title: 'Contato | Morejá Imobiliária',
-  description:
-    'Entre em contato com a Morejá Imobiliária. Telefone, WhatsApp, e-mail e formulário online. Atendimento personalizado para compra, venda e locação de imóveis.',
-  alternates: { canonical: '/contato' },
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const meta = await buildRouteMetadata('/contato', {
     title: 'Contato | Morejá Imobiliária',
-    description: 'Fale com a Morejá. Estamos prontos para te atender.',
-    url: `${SITE_URL}/contato`,
-  },
+    description:
+      'Entre em contato com a Morejá Imobiliária. Telefone, WhatsApp, e-mail e formulário online. Atendimento personalizado para compra, venda e locação de imóveis.',
+  })
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: { canonical: meta.canonical },
+    openGraph: {
+      title: meta.title,
+      description: meta.ogDescription,
+      url: meta.canonical,
+      images: meta.ogImage ? [{ url: meta.ogImage }] : undefined,
+    },
+  }
 }
 
 const HORARIOS = [

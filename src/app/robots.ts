@@ -8,7 +8,25 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/'],
+        disallow: [
+          '/api/',
+          '/_next/',
+          '/admin',
+          '/admin/',
+          // Filter pages: já marcamos noindex via metadata, mas também
+          // bloqueamos crawl pra não desperdiçar budget
+          '/comprar?*',
+          '/alugar?*',
+          '/empreendimentos?*',
+        ],
+      },
+      {
+        userAgent: 'GPTBot',
+        disallow: '/',
+      },
+      {
+        userAgent: 'CCBot',
+        disallow: '/',
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable: safe zone é o círculo central de 80% (r=205). Tudo fora pode ser cortado pelo SO. -->
+  <rect width="512" height="512" fill="#010744"/>
+  <g transform="translate(256 240)">
+    <path d="M0,-100 C-38,-100 -68,-70 -68,-32 C-68,16 -8,70 0,84 C8,70 68,16 68,-32 C68,-70 38,-100 0,-100 Z M0,-12 a22,22 0 1,0 0.001,0 Z"
+          fill="#f2d22e" fill-rule="evenodd"/>
+  </g>
+  <text x="256" y="380" font-family="system-ui, sans-serif" font-weight="900"
+        font-size="84" text-anchor="middle" fill="#f2d22e" letter-spacing="-2">MOREJÁ</text>
+</svg>

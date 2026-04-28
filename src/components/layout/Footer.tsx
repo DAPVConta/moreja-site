@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, ChevronDown, MessageCircle } from 'lucide-react'
 import { MoRejaLogo } from './Header'
 import { NewsletterForm } from './NewsletterForm'
 import { TrustBadges } from './TrustBadges'
+import { ManageConsentLink } from '@/components/seo/CookieConsent'
 
 // Social media SVG icons (lucide-react doesn't have brand icons)
 function IconInstagram() {
@@ -348,7 +349,11 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 text-xs text-gray-400 text-center sm:text-left">
           <p>© {new Date().getFullYear()} Morejá Imobiliária. Todos os direitos reservados.</p>
-          <p>CRECI-SP 00000-J</p>
+          <div className="flex items-center gap-3">
+            <ManageConsentLink className="hover:text-[#f2d22e] transition-colors cursor-pointer" />
+            <span aria-hidden="true">·</span>
+            <p>CRECI-SP 00000-J</p>
+          </div>
         </div>
       </div>
     </footer>

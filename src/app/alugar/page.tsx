@@ -2,19 +2,38 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { PropertyGrid } from '@/components/properties/PropertyGrid'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import { buildRouteMetadata } from '@/lib/site-config'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
-export const metadata: Metadata = {
-  title: 'Alugar Imóveis | Morejá Imobiliária',
-  description:
-    'Encontre apartamentos, casas e imóveis comerciais para alugar. Locação residencial e comercial com as melhores condições.',
-  alternates: { canonical: '/alugar' },
-  openGraph: {
-    title: 'Imóveis para Alugar | Morejá Imobiliária',
-    description: 'Encontre o imóvel ideal para alugar na Morejá Imobiliária.',
-    url: `${SITE_URL}/alugar`,
-  },
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}): Promise<Metadata> {
+  const params = await searchParams
+  const meta = await buildRouteMetadata('/alugar', {
+    title: 'Alugar Imóveis | Morejá Imobiliária',
+    description:
+      'Encontre apartamentos, casas e imóveis comerciais para alugar. Locação residencial e comercial com as melhores condições.',
+  })
+
+  const hasFilters = Object.keys(params).some(
+    (k) => !['utm_source', 'utm_medium', 'utm_campaign', 'source'].includes(k)
+  )
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: { canonical: meta.canonical },
+    robots: hasFilters ? { index: false, follow: true } : { index: true, follow: true },
+    openGraph: {
+      title: meta.title,
+      description: meta.ogDescription,
+      url: meta.canonical,
+      images: meta.ogImage ? [{ url: meta.ogImage }] : undefined,
+    },
+  }
 }
 
 interface SearchParams {

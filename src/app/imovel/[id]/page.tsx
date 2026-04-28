@@ -6,10 +6,13 @@ import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, Chevro
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
+import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { SaveButton } from '@/components/properties/SaveButton'
+import { IdleCallbackPrompt } from '@/components/properties/IdleCallbackPrompt'
+import { MortgageSimulatorCTA } from '@/components/properties/MortgageSimulatorCTA'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -77,6 +80,14 @@ export default async function ImovelPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/imovel/${id}`} />
+      <PropertyViewTracker
+        property={{
+          id: property.id,
+          titulo: property.titulo,
+          preco: property.preco,
+          tipo: property.tipo,
+        }}
+      />
 
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}
@@ -305,6 +316,15 @@ export default async function ImovelPage({ params }: PageProps) {
                   </div>
                 )}
 
+                {/* Mortgage simulator — só p/ Venda */}
+                {property.finalidade === 'Venda' && property.preco > 0 && (
+                  <MortgageSimulatorCTA
+                    preco={property.preco}
+                    cidade={property.cidade}
+                    estado={property.estado}
+                  />
+                )}
+
                 {/* Lead Form */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                   <h3 className="font-semibold text-gray-900 mb-4">Tenho interesse neste imóvel</h3>
@@ -318,6 +338,13 @@ export default async function ImovelPage({ params }: PageProps) {
             </aside>
           </div>
         </div>
+
+        {/* Idle callback prompt — abre após 45s de dwell time, sem nag agressivo */}
+        <IdleCallbackPrompt
+          imovelId={property.id}
+          imovelCodigo={property.codigo}
+          imovelTitulo={property.titulo}
+        />
 
         {/* Mobile sticky action bar — pedaço 6.4
             3 botões: Salvar (toggle), WhatsApp, Ligar.

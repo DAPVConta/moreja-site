@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 interface HeroBackdropProps {
@@ -58,16 +59,26 @@ export function HeroBackdrop({
 
   return (
     <>
-      {/* bg ampliado em 110% para esconder a translateY até 120px */}
+      {/* bg ampliado em 110% para esconder a translateY até 120px.
+          next/image com priority + fetchPriority="high" — otimização de LCP:
+          o navegador descobre a imagem direto do HTML inicial e baixa em
+          paralelo (vs. background-image que só dispara após CSS parse). */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 -bottom-32 bg-cover will-change-transform"
-        style={{
-          backgroundImage: `url('${bgImage}')`,
-          backgroundPosition: `${bgFocalX}% ${bgFocalY}%`,
-          transform: `translate3d(0, ${offset}px, 0)`,
-        }}
-      />
+        className="absolute inset-x-0 top-0 -bottom-32 will-change-transform overflow-hidden"
+        style={{ transform: `translate3d(0, ${offset}px, 0)` }}
+      >
+        <Image
+          src={bgImage}
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          className="object-cover"
+          style={{ objectPosition: `${bgFocalX}% ${bgFocalY}%` }}
+        />
+      </div>
       <div
         aria-hidden="true"
         className="absolute inset-0"
