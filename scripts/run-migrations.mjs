@@ -30,6 +30,7 @@ const MIGRATIONS = [
   '006_home_sections.sql',
   '007_branding_extensions.sql',
   '008_home_sections_remax.sql',
+  '009_admin_users_and_security_hotfix.sql',
 ]
 
 const client = new Client({

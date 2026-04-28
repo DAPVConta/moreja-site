@@ -40,13 +40,15 @@ Deno.serve(async (req: Request) => {
     )
   }
 
-  const name = sanitize(body.name)
+  // Accept both English (legacy) and Portuguese (current frontend) field names.
+  // ContactForm.tsx and LeadFormInline.tsx post: nome, email, telefone, mensagem, origem, imovel_id, imovel_codigo
+  const name = sanitize(body.name ?? body.nome)
   const email = sanitize(body.email)
-  const phone = sanitize(body.phone)
-  const message = sanitize(body.message)
-  const property_id = sanitize(body.property_id)
-  const property_title = sanitize(body.property_title)
-  const source = sanitize(body.source) || 'contato'
+  const phone = sanitize(body.phone ?? body.telefone)
+  const message = sanitize(body.message ?? body.mensagem)
+  const property_id = sanitize(body.property_id ?? body.imovel_id)
+  const property_title = sanitize(body.property_title ?? body.imovel_codigo ?? body.imovel_titulo)
+  const source = sanitize(body.source ?? body.origem) || 'contato'
 
   // Validation
   if (!name) {
