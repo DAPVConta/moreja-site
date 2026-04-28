@@ -25,12 +25,14 @@ interface MegaMenuProps {
   }
   /** Marca o trigger como ativo (rota atual está em `href`). */
   active?: boolean
+  /** Passed from Header to adapt colors in liquid-glass transparent state. */
+  isScrolled?: boolean
 }
 
 const OPEN_DELAY_MS = 120
 const CLOSE_DELAY_MS = 250
 
-export function HeaderMegaMenu({ label, href, columns, highlight, active }: MegaMenuProps) {
+export function HeaderMegaMenu({ label, href, columns, highlight, active, isScrolled = true }: MegaMenuProps) {
   const [open, setOpen] = useState(false)
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -87,9 +89,16 @@ export function HeaderMegaMenu({ label, href, columns, highlight, active }: Mega
         href={href}
         aria-haspopup="true"
         aria-expanded={open}
-        className={`inline-flex items-center gap-1 text-sm font-semibold transition-colors duration-200 hover:text-[#f2d22e] ${
-          active ? 'text-[#010744] border-b-2 border-[#f2d22e] pb-0.5' : 'text-gray-600'
-        }`}
+        className={[
+          'inline-flex items-center gap-1 text-sm font-semibold transition-colors duration-200',
+          isScrolled
+            ? active
+              ? 'text-[#010744] border-b-2 border-[#f2d22e] pb-0.5'
+              : 'text-gray-600 hover:text-[#010744]'
+            : active
+            ? 'text-white border-b-2 border-[#f2d22e] pb-0.5'
+            : 'text-white/80 hover:text-white',
+        ].join(' ')}
       >
         {label}
         <ChevronDown
