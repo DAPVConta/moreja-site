@@ -11,6 +11,8 @@ interface LeadFormInlineProps {
   imovelId: string
   imovelCodigo: string
   imovelTitulo: string
+  /** 'imovel' (default) ou 'empreendimento' — aplica prefix VEM_ no Supremo */
+  propertyKind?: 'imovel' | 'empreendimento'
   turnstileSiteKey?: string
 }
 
@@ -21,6 +23,7 @@ export function LeadFormInline({
   imovelId,
   imovelCodigo,
   imovelTitulo,
+  propertyKind = 'imovel',
   turnstileSiteKey,
 }: LeadFormInlineProps) {
   const [nome, setNome] = useState('')
@@ -82,7 +85,8 @@ export function LeadFormInline({
           mensagem,
           imovel_id: imovelId,
           imovel_codigo: imovelCodigo,
-          origem: 'pagina_imovel',
+          property_kind: propertyKind,
+          origem: propertyKind === 'empreendimento' ? 'pagina_empreendimento' : 'pagina_imovel',
           event_id,
           ...tracking,
         }),

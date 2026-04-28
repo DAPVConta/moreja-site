@@ -46,6 +46,7 @@ interface LeadInput {
   message?: string; mensagem?: string
   property_id?: string; imovel_id?: string
   property_title?: string; imovel_codigo?: string; imovel_titulo?: string
+  property_kind?: 'imovel' | 'empreendimento'  // novo — diferencia VEM_ no Supremo
   source?: string; origem?: string
   // Tracking enrichment
   event_id?: string
@@ -81,7 +82,14 @@ async function hashString(input: string): Promise<string> {
  *
  * Endpoint Supremo:
  *   POST /v1/leads
- *   Body: { nome, email, ddd, telefone, mensagem, id_imovel?, id_empreendimento?, origem, sit_id }
+ *   Body schema (oficial):
+ *     name (req), email (req), phone (req — DDD+telefone juntos, sem DDI)
+ *     id_imovel (opt — número p/ imóvel; "VEM_<id>" p/ empreendimento)
+ *     resposta (opt — mensagem do form)
+ *     ddi (opt — default "+55")
+ *     calor (opt — "frio"|"morno"|"quente", default "frio")
+ *     id_lead (opt — UUID p/ dedup)
+ *     nome_campanha (opt — usamos source + utm_campaign)
  */
 async function pushToSupremo(lead: {
   name: string
@@ -89,44 +97,52 @@ async function pushToSupremo(lead: {
   phone: string
   message: string
   property_id: string
+  property_kind?: 'imovel' | 'empreendimento'
   source: string
   utm_source?: string
   utm_campaign?: string
+  event_id?: string
 }): Promise<{ ok: boolean; supremo_id?: string; error?: string }> {
   if (!SUPREMO_JWT) return { ok: false, error: 'supremo_jwt_missing' }
 
-  // Splita telefone em DDD + número (Supremo costuma exigir)
-  const digits = lead.phone.replace(/\D/g, '')
-  let ddd = ''
-  let telefone = digits
-  if (digits.length >= 10) {
-    // Considera DDI 55 prefixo opcional
-    const start = digits.startsWith('55') && digits.length >= 12 ? 2 : 0
-    ddd = digits.slice(start, start + 2)
-    telefone = digits.slice(start + 2)
-  }
+  // Phone: só dígitos, removendo DDI 55 se vier
+  const digitsRaw = lead.phone.replace(/\D/g, '')
+  const phone = digitsRaw.startsWith('55') && digitsRaw.length >= 12
+    ? digitsRaw.slice(2)
+    : digitsRaw
 
-  // property_id pode vir como código ("MOJ-1234") ou id numérico
-  const isNumericId = /^\d+$/.test(lead.property_id)
-
-  const body: Record<string, unknown> = {
-    nome: lead.name,
-    email: lead.email,
-    ddd,
-    telefone,
-    mensagem: lead.message,
-    origem: `site_moreja:${lead.source}`,
-    sit_id: SUPREMO_SIT_ID || undefined,
-  }
+  // property_id: empreendimento usa prefixo VEM_, imóvel usa o ID numérico direto.
+  // Se property_id já vier com VEM_ no começo, mantém. Caso contrário, infere
+  // pelo property_kind (default 'imovel').
+  let id_imovel: string | undefined
   if (lead.property_id) {
-    if (isNumericId) {
-      body.id_imovel = lead.property_id
+    if (lead.property_id.toUpperCase().startsWith('VEM_')) {
+      id_imovel = lead.property_id
+    } else if (lead.property_kind === 'empreendimento') {
+      id_imovel = `VEM_${lead.property_id}`
     } else {
-      body.codigo_imovel = lead.property_id
+      // imóvel — só dígitos
+      id_imovel = lead.property_id.replace(/\D/g, '') || undefined
     }
   }
-  if (lead.utm_source) body.utm_source = lead.utm_source
-  if (lead.utm_campaign) body.utm_campaign = lead.utm_campaign
+
+  const body: Record<string, unknown> = {
+    name: lead.name,
+    email: lead.email,
+    phone,
+    calor: 'frio',
+    ddi: '+55',
+  }
+  if (lead.message) body.resposta = lead.message
+  if (id_imovel) body.id_imovel = id_imovel
+  if (lead.event_id) body.id_lead = lead.event_id // dedup CAPI ↔ Supremo
+
+  // nome_campanha enriquecida (Supremo cria a campanha se não existir)
+  const campaignParts = ['Site Morejá', lead.source]
+  if (lead.utm_campaign) campaignParts.push(lead.utm_campaign)
+  body.nome_campanha = campaignParts.filter(Boolean).join(' · ')
+
+  if (lead.utm_source) body.nome_origem = lead.utm_source
 
   try {
     const controller = new AbortController()
@@ -191,6 +207,13 @@ Deno.serve(async (req: Request) => {
     300
   )
   const source = sanitize(body.source ?? body.origem, 100) || 'contato'
+  // property_kind explícito do client; fallback infere pelo source
+  const property_kind: 'imovel' | 'empreendimento' =
+    body.property_kind === 'empreendimento'
+      ? 'empreendimento'
+      : source.includes('empreendimento') || source.includes('lancamento')
+        ? 'empreendimento'
+        : 'imovel'
 
   // Tracking enrichment
   const event_id = sanitize(body.event_id, 100)
@@ -268,8 +291,8 @@ Deno.serve(async (req: Request) => {
   // 2) Fire-and-await POST p/ Supremo. Limite de timeout pequeno (6s) — se
   //    falhar, marcamos retry e o pg_cron / função supremo-retry pega depois.
   const supremoResult = await pushToSupremo({
-    name, email, phone, message, property_id, source,
-    utm_source, utm_campaign,
+    name, email, phone, message, property_id, property_kind, source,
+    utm_source, utm_campaign, event_id,
   })
 
   // 3) Atualiza lead com resultado da sync

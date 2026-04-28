@@ -199,6 +199,7 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
                     imovelId={property.id}
                     imovelCodigo={property.codigo}
                     imovelTitulo={property.titulo}
+                    propertyKind="empreendimento"
                     turnstileSiteKey={turnstileSiteKey}
                   />
                 </div>

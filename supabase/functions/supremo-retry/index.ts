@@ -34,37 +34,53 @@ interface LeadRow {
   source: string
   utm_source: string | null
   utm_campaign: string | null
+  event_id: string | null
   supremo_attempts: number
 }
 
 async function pushOne(lead: LeadRow): Promise<{ ok: boolean; supremo_id?: string; error?: string }> {
   if (!SUPREMO_JWT) return { ok: false, error: 'supremo_jwt_missing' }
 
-  const phoneDigits = (lead.phone ?? '').replace(/\D/g, '')
-  let ddd = ''
-  let telefone = phoneDigits
-  if (phoneDigits.length >= 10) {
-    const start = phoneDigits.startsWith('55') && phoneDigits.length >= 12 ? 2 : 0
-    ddd = phoneDigits.slice(start, start + 2)
-    telefone = phoneDigits.slice(start + 2)
+  // Schema oficial Supremo: { name, email, phone (DDD+telefone juntos),
+  // resposta?, id_imovel? ("VEM_<id>" p/ empreendimento), ddi?, calor?, id_lead?,
+  // nome_campanha?, nome_origem? }
+  const digitsRaw = (lead.phone ?? '').replace(/\D/g, '')
+  const phone = digitsRaw.startsWith('55') && digitsRaw.length >= 12
+    ? digitsRaw.slice(2)
+    : digitsRaw
+
+  // Detecta empreendimento pelo source (lead pode ter sido salvo antes do
+  // schema property_kind ser introduzido).
+  const isEmpreendimento =
+    lead.source.includes('empreendimento') || lead.source.includes('lancamento')
+
+  let id_imovel: string | undefined
+  if (lead.property_id) {
+    if (lead.property_id.toUpperCase().startsWith('VEM_')) {
+      id_imovel = lead.property_id
+    } else if (isEmpreendimento) {
+      id_imovel = `VEM_${lead.property_id.replace(/\D/g, '')}`
+    } else {
+      id_imovel = lead.property_id.replace(/\D/g, '') || undefined
+    }
   }
 
-  const isNumericId = lead.property_id && /^\d+$/.test(lead.property_id)
   const body: Record<string, unknown> = {
-    nome: lead.name,
+    name: lead.name,
     email: lead.email,
-    ddd,
-    telefone,
-    mensagem: lead.message ?? '',
-    origem: `site_moreja:${lead.source}`,
-    sit_id: SUPREMO_SIT_ID || undefined,
+    phone,
+    calor: 'frio',
+    ddi: '+55',
   }
-  if (lead.property_id) {
-    if (isNumericId) body.id_imovel = lead.property_id
-    else body.codigo_imovel = lead.property_id
-  }
-  if (lead.utm_source) body.utm_source = lead.utm_source
-  if (lead.utm_campaign) body.utm_campaign = lead.utm_campaign
+  if (lead.message) body.resposta = lead.message
+  if (id_imovel) body.id_imovel = id_imovel
+  if (lead.event_id) body.id_lead = lead.event_id
+
+  const campaignParts = ['Site Morejá', lead.source]
+  if (lead.utm_campaign) campaignParts.push(lead.utm_campaign)
+  body.nome_campanha = campaignParts.filter(Boolean).join(' · ')
+
+  if (lead.utm_source) body.nome_origem = lead.utm_source
 
   try {
     const controller = new AbortController()
@@ -134,7 +150,7 @@ Deno.serve(async (req: Request) => {
 
   let query = supabase
     .from('leads')
-    .select('id, name, email, phone, message, property_id, source, utm_source, utm_campaign, supremo_attempts')
+    .select('id, name, email, phone, message, property_id, source, utm_source, utm_campaign, event_id, supremo_attempts')
     .in('supremo_status', ['pending', 'retry'])
     .lt('supremo_attempts', MAX_ATTEMPTS)
     .order('created_at', { ascending: true })
