@@ -2,21 +2,31 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Award, Users, Home, TrendingUp } from 'lucide-react'
-import { getBrokers, getTestimonials } from '@/lib/site-config'
+import { getBrokers, getTestimonials, buildRouteMetadata } from '@/lib/site-config'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
-export const metadata: Metadata = {
-  title: 'Sobre a Morejá Imobiliária | Quem Somos',
-  description:
-    'Conheça a Morejá Imobiliária. Nossa história, valores, equipe de corretores e compromisso com os clientes. Especialistas em imóveis residenciais e comerciais.',
-  alternates: { canonical: '/sobre' },
-  openGraph: {
-    title: 'Sobre a Morejá Imobiliária',
-    description: 'Nossa história, equipe e compromisso com você.',
-    url: `${SITE_URL}/sobre`,
-  },
+// /sobre raramente muda — revalidate 1h
+export const revalidate = 3600
+
+export async function generateMetadata(): Promise<Metadata> {
+  const meta = await buildRouteMetadata('/sobre', {
+    title: 'Sobre a Morejá Imobiliária | Quem Somos',
+    description:
+      'Conheça a Morejá Imobiliária. Nossa história, valores, equipe de corretores e compromisso com os clientes. Especialistas em imóveis residenciais e comerciais.',
+  })
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: { canonical: meta.canonical },
+    openGraph: {
+      title: meta.title,
+      description: meta.ogDescription,
+      url: meta.canonical,
+      images: meta.ogImage ? [{ url: meta.ogImage }] : undefined,
+    },
+  }
 }
 
 const DIFERENCIAIS = [

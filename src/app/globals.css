@@ -8,7 +8,8 @@
    ───────────────────────────────────────────────────────────── */
 
 @theme inline {
-  --font-sans: var(--font-raleway), sans-serif;
+  --font-sans: var(--font-inter), var(--font-raleway), system-ui, sans-serif;
+  --font-display: var(--font-raleway), var(--font-inter), system-ui, sans-serif;
 
   /* Marca (defaults; podem ser sobrescritos por site_config no SSR) */
   --color-navy: #010744;
@@ -69,6 +70,8 @@
   --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
   --shadow-xl:    0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.06);
   --shadow-brand: 0 12px 32px -8px rgb(1 7 68 / 0.25);
+  --shadow-brand-lg: 0 24px 48px -12px rgb(1 7 68 / 0.35);
+  --shadow-yellow-glow: 0 8px 24px -6px rgb(242 210 46 / 0.40);
 
   /* ── Motion ── */
   --motion-fast:  150ms;
@@ -86,17 +89,44 @@
 
   /* ── Tipografia fluida (clamp(min, vw, max)) ──
      Cada nível cresce do mobile (min) ao desktop (max) sem breakpoints. */
-  --text-display: clamp(2.25rem, 1.4rem + 4.5vw, 4.5rem);  /*  36 → 72 */
-  --text-h1:      clamp(1.875rem, 1.2rem + 3.4vw, 3.75rem); /* 30 → 60 */
-  --text-h2:      clamp(1.625rem, 1.1rem + 2.4vw, 2.75rem); /* 26 → 44 */
-  --text-h3:      clamp(1.25rem, 0.95rem + 1.4vw, 2rem);    /* 20 → 32 */
-  --text-body-lg: clamp(1rem, 0.95rem + 0.4vw, 1.125rem);   /* 16 → 18 */
-  --text-body:    1rem;                                     /* 16     */
-  --text-caption: 0.75rem;                                  /* 12     */
+  --text-display-xl: clamp(3rem, 2rem + 6vw, 6rem);          /* 48 → 96 — hero statement */
+  --text-display: clamp(2.25rem, 1.4rem + 4.5vw, 4.5rem);    /* 36 → 72 */
+  --text-h1:      clamp(1.875rem, 1.2rem + 3.4vw, 3.75rem);  /* 30 → 60 */
+  --text-h2:      clamp(1.625rem, 1.1rem + 2.4vw, 2.75rem);  /* 26 → 44 */
+  --text-h3:      clamp(1.25rem, 0.95rem + 1.4vw, 2rem);     /* 20 → 32 */
+  --text-body-lg: clamp(1rem, 0.95rem + 0.4vw, 1.125rem);    /* 16 → 18 */
+  --text-body:    1rem;                                      /* 16     */
+  --text-caption: 0.75rem;                                   /* 12     */
   --leading-tight:  1.1;
   --leading-snug:   1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.65;
+
+  /* ── Tema: superfícies semânticas (sobrescritas em [data-theme="dark"]) ── */
+  --surface-0:       #ffffff;             /* fundo página */
+  --surface-1:       #f8f9fb;             /* fundo card sutil */
+  --surface-2:       #ededd1;             /* fundo cream */
+  --surface-inverse: #010744;             /* fundo navy (CTA banners) */
+  --text-primary:    #1f2937;             /* gray-800 */
+  --text-secondary:  #4b5563;             /* gray-600 */
+  --text-muted:      #9ca3af;             /* gray-400 */
+  --text-inverse:    #ffffff;
+  --border-subtle:   rgb(0 0 0 / 0.08);
+  --border-strong:   rgb(0 0 0 / 0.16);
+}
+
+/* Dark mode — ativado via [data-theme="dark"] no <html> ou <body>. */
+[data-theme="dark"] {
+  --surface-0:       #0a0e2a;
+  --surface-1:       #11163a;
+  --surface-2:       #1a1f4a;
+  --surface-inverse: #f2d22e;
+  --text-primary:    #f5f6fa;
+  --text-secondary:  #cbd0e4;
+  --text-muted:      #8990b3;
+  --text-inverse:    #010744;
+  --border-subtle:   rgb(255 255 255 / 0.08);
+  --border-strong:   rgb(255 255 255 / 0.16);
 }
 
 @layer base {
@@ -271,6 +301,14 @@
   }
 
   /* Headings utilitários — usam tokens fluidos. */
+  .heading-display-xl {
+    font-size: var(--text-display-xl);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+    @apply font-extrabold;
+    text-wrap: balance;
+  }
+
   .heading-display {
     font-size: var(--text-display);
     line-height: var(--leading-tight);

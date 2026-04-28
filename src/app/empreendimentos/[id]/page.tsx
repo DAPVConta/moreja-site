@@ -3,8 +3,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, ChevronLeft, Phone, MessageCircle } from 'lucide-react'
 import { fetchEmpreendimento, fetchEmpreendimentos, formatPrice } from '@/lib/properties'
+import { getSiteConfig } from '@/lib/site-config'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
+import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
+import { RecentlyViewedTracker } from '@/components/properties/RecentlyViewedTracker'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
@@ -45,7 +48,11 @@ export async function generateStaticParams() {
 
 export default async function EmpreendimentoPage({ params }: PageProps) {
   const { id } = await params
-  const property = await fetchEmpreendimento(id)
+  const [property, siteConfig] = await Promise.all([
+    fetchEmpreendimento(id),
+    getSiteConfig(),
+  ])
+  const turnstileSiteKey = siteConfig.turnstile_site_key?.trim() || undefined
   if (!property) notFound()
 
   return (
@@ -58,6 +65,15 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/empreendimentos/${id}`} />
+      <RecentlyViewedTracker property={property} />
+      <PropertyViewTracker
+        property={{
+          id: property.id,
+          titulo: property.titulo,
+          preco: property.preco,
+          tipo: property.tipo,
+        }}
+      />
 
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}
@@ -183,6 +199,8 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
                     imovelId={property.id}
                     imovelCodigo={property.codigo}
                     imovelTitulo={property.titulo}
+                    propertyKind="empreendimento"
+                    turnstileSiteKey={turnstileSiteKey}
                   />
                 </div>
               </div>

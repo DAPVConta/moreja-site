@@ -32,6 +32,16 @@ export interface SiteConfig {
   tertiary_color: string
   hero_image: string
 
+  // Tema (migration 011) — light/dark
+  theme_default: 'light' | 'dark' | 'system'
+  primary_color_dark: string
+  accent_color_dark: string
+  tertiary_color_dark: string
+  logo_dark_url: string | null
+  favicon_dark_url: string | null
+  font_heading: string
+  font_body: string
+
   // Rastreamento & Analytics
   gtm_id: string                  // GTM-XXXXXXX
   fb_pixel_id: string             // Meta (Facebook) Pixel
@@ -40,6 +50,25 @@ export interface SiteConfig {
   tiktok_pixel_id: string         // TikTok Pixel
   google_site_verification: string // Google Search Console
   bing_verification: string        // Bing Webmaster
+
+  // Migration 012 — analytics extras
+  ga4_measurement_id: string
+  ga4_api_secret: string
+  clarity_id: string
+  hotjar_id: string
+  hotjar_version: string
+  meta_capi_access_token: string
+  meta_capi_test_event_code: string
+  default_og_template: string
+  consent_mode_enabled: boolean
+  consent_default_state: 'granted' | 'denied'
+  cookiebot_id: string
+  pinterest_tag_id: string
+  bing_uet_id: string
+
+  // Migration 024 — Cloudflare Turnstile
+  turnstile_site_key: string
+  turnstile_secret_key: string
 }
 
 export interface SiteStat {

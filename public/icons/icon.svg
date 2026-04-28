@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#010744"/>
+  <g transform="translate(256 256)">
+    <!-- Map pin (yellow) -->
+    <path d="M0,-130 C-50,-130 -90,-90 -90,-40 C-90,20 -10,90 0,110 C10,90 90,20 90,-40 C90,-90 50,-130 0,-130 Z M0,-20 a30,30 0 1,0 0.001,0 Z"
+          fill="#f2d22e" fill-rule="evenodd"/>
+    <!-- M letter (yellow) below -->
+  </g>
+  <text x="256" y="430" font-family="system-ui, sans-serif" font-weight="900"
+        font-size="120" text-anchor="middle" fill="#f2d22e" letter-spacing="-2">M</text>
+</svg>

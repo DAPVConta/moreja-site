@@ -5,7 +5,21 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/supremo-proxy`
 
-async function proxyFetch(resource: string, params: Record<string, string | number | undefined>) {
+/**
+ * ISR strategy:
+ *   • Lists (/comprar, /alugar, /empreendimentos) — 5min revalidate
+ *   • Detail (/imovel/[id], /empreendimentos/[id]) — 30min revalidate
+ *   • Units (tipologias) — 1h revalidate
+ *
+ * O Supremo proxy edge function tem cache próprio (10min lists / 2h detail —
+ * Bloco 7), então o Next.js ISR é uma camada adicional p/ reduzir invocations
+ * do edge function.
+ */
+async function proxyFetch(
+  resource: string,
+  params: Record<string, string | number | undefined>,
+  options?: { revalidate?: number }
+) {
   const searchParams = new URLSearchParams({ resource })
 
   for (const [key, value] of Object.entries(params)) {
@@ -14,9 +28,14 @@ async function proxyFetch(resource: string, params: Record<string, string | numb
     }
   }
 
+  // Default revalidate por tipo (override via options)
+  const isUnits = /\/(unidades|tipologias)$/.test(resource)
+  const isDetail = !isUnits && /\/[^/]+$/.test(resource)
+  const defaultRevalidate = isUnits ? 3600 : isDetail ? 1800 : 300
+
   const res = await fetch(`${PROXY_URL}?${searchParams.toString()}`, {
     headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-    next: { revalidate: 300 }, // 5 min cache on server
+    next: { revalidate: options?.revalidate ?? defaultRevalidate },
   })
 
   if (!res.ok) {
@@ -204,12 +223,21 @@ async function fetchLocalProperty(id: string): Promise<Property | null> {
 export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promise<PropertyListResponse> {
   try {
     const data = await proxyFetch('empreendimentos', {
+      finalidade: filters.finalidade,
+      tipo: filters.tipo,
+      bairro: filters.bairro,
       cidade: filters.cidade,
+      preco_min: filters.preco_min,
+      preco_max: filters.preco_max,
+      area_min: filters.area_min,
+      area_max: filters.area_max,
+      quartos: filters.quartos,
       q: filters.q,
+      order: filters.order,
+      destaque: filters.destaque ? '1' : undefined,
       page: filters.page ?? 1,
       limit: filters.limit ?? 12,
     })
-
     return data as PropertyListResponse
   } catch (err) {
     console.error('fetchEmpreendimentos error:', err)
@@ -217,15 +245,35 @@ export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promi
   }
 }
 
-export function formatPrice(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
+/**
+ * Tipologias / unidades de um empreendimento.
+ * Endpoint Supremo: /empreendimentos/{id}/unidades (ou /tipologias).
+ */
+export interface EmpreendimentoUnit {
+  id: string
+  nome: string
+  area: number
+  quartos: number
+  suites: number
+  banheiros: number
+  vagas: number
+  preco: number
+  planta_url?: string
 }
 
-export function formatArea(value: number): string {
-  return `${value.toLocaleString('pt-BR')} m²`
+export async function fetchUnits(empId: string): Promise<EmpreendimentoUnit[]> {
+  try {
+    const data = await proxyFetch(`empreendimentos/${empId}/unidades`, {})
+    if (data && Array.isArray((data as { data?: unknown[] }).data)) {
+      return (data as { data: EmpreendimentoUnit[] }).data
+    }
+    return []
+  } catch (err) {
+    console.error(`fetchUnits(${empId}) error:`, err)
+    return []
+  }
 }
+
+// Re-export para manter compatibilidade com chamadas existentes
+// (server components que chamam formatPrice/formatArea daqui).
+export { formatPrice, formatArea } from './format'

@@ -1,18 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Send, Check } from 'lucide-react'
+import { collectLeadTracking } from '@/lib/lead-tracking'
+import { trackLead } from '@/components/seo/PixelEvents'
+import { TurnstileWidget, Honeypot } from '@/components/seo/TurnstileWidget'
+import { verifyTurnstileToken, passedMinTimeToSubmit } from '@/lib/turnstile'
 
 interface LeadFormInlineProps {
   imovelId: string
   imovelCodigo: string
   imovelTitulo: string
+  /** 'imovel' (default) ou 'empreendimento' — aplica prefix VEM_ no Supremo */
+  propertyKind?: 'imovel' | 'empreendimento'
+  turnstileSiteKey?: string
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFormInlineProps) {
+export function LeadFormInline({
+  imovelId,
+  imovelCodigo,
+  imovelTitulo,
+  propertyKind = 'imovel',
+  turnstileSiteKey,
+}: LeadFormInlineProps) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -22,15 +35,43 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const formMountedAt = useRef<number>(Date.now())
 
-  async function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    formMountedAt.current = Date.now()
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!nome.trim() || !email.trim()) return
+
+    const fd = new FormData(e.currentTarget)
+    if (fd.get('website')) {
+      setSuccess(true) // honeypot trip
+      return
+    }
+    if (!passedMinTimeToSubmit(formMountedAt.current)) {
+      setError('Aguarde alguns instantes antes de enviar.')
+      return
+    }
 
     setLoading(true)
     setError('')
 
+    if (turnstileSiteKey) {
+      const verify = await verifyTurnstileToken(turnstileToken, 'lead-form-inline')
+      if (!verify.ok) {
+        setError('Verificação de segurança falhou. Tente novamente.')
+        setLoading(false)
+        return
+      }
+    }
+
     try {
+      const event_id = trackLead('pagina_imovel', { email, phone: telefone })
+      const tracking = collectLeadTracking()
+
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-lead`, {
         method: 'POST',
         headers: {
@@ -44,12 +85,18 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
           mensagem,
           imovel_id: imovelId,
           imovel_codigo: imovelCodigo,
-          origem: 'pagina_imovel',
+          property_kind: propertyKind,
+          origem: propertyKind === 'empreendimento' ? 'pagina_empreendimento' : 'pagina_imovel',
+          event_id,
+          ...tracking,
         }),
       })
 
       if (!res.ok) throw new Error('Erro ao enviar')
       setSuccess(true)
+      try {
+        sessionStorage.setItem(`moreja:lead-sent:${imovelId}`, '1')
+      } catch { /* ignore */ }
     } catch {
       setError('Erro ao enviar. Tente novamente.')
     } finally {
@@ -117,9 +164,19 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
         className={`${inputCls} resize-none`}
       />
       {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+      <Honeypot />
+      {turnstileSiteKey && (
+        <TurnstileWidget
+          sitekey={turnstileSiteKey}
+          action="lead-form-inline"
+          size="compact"
+          onVerify={setTurnstileToken}
+          onExpired={() => setTurnstileToken('')}
+        />
+      )}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (!!turnstileSiteKey && !turnstileToken)}
         className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2"
       >
         <Send className="w-4 h-4" />

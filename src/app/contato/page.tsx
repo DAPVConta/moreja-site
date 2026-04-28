@@ -2,19 +2,27 @@ import type { Metadata } from 'next'
 import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { ContactForm } from '@/components/contact/ContactForm'
+import { buildRouteMetadata, getSiteConfig } from '@/lib/site-config'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
-export const metadata: Metadata = {
-  title: 'Contato | Morejá Imobiliária',
-  description:
-    'Entre em contato com a Morejá Imobiliária. Telefone, WhatsApp, e-mail e formulário online. Atendimento personalizado para compra, venda e locação de imóveis.',
-  alternates: { canonical: '/contato' },
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const meta = await buildRouteMetadata('/contato', {
     title: 'Contato | Morejá Imobiliária',
-    description: 'Fale com a Morejá. Estamos prontos para te atender.',
-    url: `${SITE_URL}/contato`,
-  },
+    description:
+      'Entre em contato com a Morejá Imobiliária. Telefone, WhatsApp, e-mail e formulário online. Atendimento personalizado para compra, venda e locação de imóveis.',
+  })
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: { canonical: meta.canonical },
+    openGraph: {
+      title: meta.title,
+      description: meta.ogDescription,
+      url: meta.canonical,
+      images: meta.ogImage ? [{ url: meta.ogImage }] : undefined,
+    },
+  }
 }
 
 const HORARIOS = [
@@ -23,7 +31,9 @@ const HORARIOS = [
   { dia: 'Domingo', hora: 'Fechado' },
 ]
 
-export default function ContatoPage() {
+export default async function ContatoPage() {
+  const config = await getSiteConfig()
+  const turnstileSiteKey = config.turnstile_site_key?.trim() || undefined
   const phone = process.env.NEXT_PUBLIC_PHONE ?? ''
   const email = process.env.NEXT_PUBLIC_EMAIL ?? 'contato@moreja.com.br'
   const address = process.env.NEXT_PUBLIC_ADDRESS ?? ''
@@ -143,7 +153,7 @@ export default function ContatoPage() {
             {/* Contact Form */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">Envie uma mensagem</h2>
-              <ContactForm />
+              <ContactForm turnstileSiteKey={turnstileSiteKey} />
             </div>
           </div>
         </div>
