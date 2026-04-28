@@ -19,9 +19,11 @@ CREATE INDEX IF NOT EXISTS ui_strings_key_idx ON ui_strings (key);
 
 ALTER TABLE ui_strings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_ui_strings" ON ui_strings;
 CREATE POLICY "public_read_ui_strings"
   ON ui_strings FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "admin_all_ui_strings" ON ui_strings;
 CREATE POLICY "admin_all_ui_strings"
   ON ui_strings FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 

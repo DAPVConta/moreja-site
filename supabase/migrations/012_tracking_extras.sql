@@ -67,9 +67,11 @@ CREATE INDEX IF NOT EXISTS tracking_scripts_active_idx
 
 ALTER TABLE tracking_scripts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_tracking_scripts" ON tracking_scripts;
 CREATE POLICY "public_read_active_tracking_scripts"
   ON tracking_scripts FOR SELECT USING (active = true);
 
+DROP POLICY IF EXISTS "admin_all_tracking_scripts" ON tracking_scripts;
 CREATE POLICY "admin_all_tracking_scripts"
   ON tracking_scripts FOR ALL
   USING (is_admin())

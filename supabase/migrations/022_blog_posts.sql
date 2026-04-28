@@ -37,9 +37,11 @@ CREATE INDEX IF NOT EXISTS posts_category_idx
 
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_published_posts" ON posts;
 CREATE POLICY "public_read_published_posts"
   ON posts FOR SELECT USING (status = 'published');
 
+DROP POLICY IF EXISTS "admin_all_posts" ON posts;
 CREATE POLICY "admin_all_posts"
   ON posts FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 

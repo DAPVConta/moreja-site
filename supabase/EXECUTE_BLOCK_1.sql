@@ -1,27 +1,14 @@
 -- ════════════════════════════════════════════════════════════════
 -- EXECUTE_BLOCK_1.sql — Cole TODO este arquivo no Supabase SQL Editor
 --
--- Inclui as migrations 009 (Bloco 0 — security hotfix) + 010-020
--- (Bloco 1 — DB foundation). Tudo idempotente: pode rodar várias
--- vezes sem dar erro.
+-- Inclui as migrations 009 (Bloco 0) + 010-020 (Bloco 1).
+-- 100% IDEMPOTENTE — pode rodar quantas vezes quiser sem dar erro.
 --
 -- Como aplicar:
 --   1. Supabase Dashboard → SQL Editor → New Query
 --   2. Cole o conteúdo INTEIRO deste arquivo
 --   3. Run
---   4. Verifique no fim: deve aparecer "RESUMO" com a contagem das
---      tabelas novas. Se algum NOTICE de erro aparecer, copie
---      a mensagem e cole aqui no chat.
---
--- Após aplicar:
---   • Verifique que pelo menos um admin existe em `admin_users`:
---       SELECT * FROM admin_users;
---     Se vazio, adicione manualmente:
---       INSERT INTO admin_users (user_id, role)
---       SELECT id, 'owner' FROM auth.users WHERE email = 'SEU_EMAIL'
---       ON CONFLICT (user_id) DO UPDATE SET role = 'owner';
---   • Em Dashboard → Authentication → Providers → Email,
---     desligue "Enable email signup" (se estiver ligado).
+--   4. RAISE NOTICE de resumo aparece no final em "Notices"
 -- ════════════════════════════════════════════════════════════════
 
 
@@ -65,11 +52,13 @@ CREATE INDEX IF NOT EXISTS admin_users_role_idx ON admin_users (role);
 
 -- Service-role is the only writer. Owners can read the full list (for the
 -- "Admin users" admin page). Other roles read only their own row.
+DROP POLICY IF EXISTS "service_role_write_admin_users" ON admin_users;
 CREATE POLICY "service_role_write_admin_users"
   ON admin_users FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "owners_read_admin_users" ON admin_users;
 CREATE POLICY "owners_read_admin_users"
   ON admin_users FOR SELECT
   USING (
@@ -79,6 +68,7 @@ CREATE POLICY "owners_read_admin_users"
     )
   );
 
+DROP POLICY IF EXISTS "self_read_admin_users" ON admin_users;
 CREATE POLICY "self_read_admin_users"
   ON admin_users FOR SELECT
   USING (user_id = auth.uid());
@@ -134,33 +124,36 @@ DROP POLICY IF EXISTS "public_insert_leads" ON leads;
 
 -- Keep admin_all_leads for dashboard reads/updates.
 -- Add a service_role write policy so the edge function can keep inserting.
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'leads' AND policyname = 'service_role_write_leads'
-  ) THEN
-    EXECUTE $POLICY$
-      CREATE POLICY "service_role_write_leads"
-        ON leads FOR ALL
-        USING (auth.role() = 'service_role')
-        WITH CHECK (auth.role() = 'service_role')
-    $POLICY$;
-  END IF;
-END $$;
+DROP POLICY IF EXISTS "service_role_write_leads" ON leads;
+CREATE POLICY "service_role_write_leads"
+  ON leads FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- =====================
 -- Basic input-size CHECK constraints on leads
 -- (defence in depth — the edge function already sanitizes/truncates,
 --  but RLS-bypassing service_role mistakes are still possible)
+-- Idempotente via NOT EXISTS check em pg_constraint.
 -- =====================
-ALTER TABLE leads
-  ADD CONSTRAINT leads_name_length CHECK (length(name) BETWEEN 1 AND 200),
-  ADD CONSTRAINT leads_email_length CHECK (length(email) BETWEEN 3 AND 320),
-  ADD CONSTRAINT leads_phone_length CHECK (phone IS NULL OR length(phone) <= 40),
-  ADD CONSTRAINT leads_message_length CHECK (message IS NULL OR length(message) <= 5000),
-  ADD CONSTRAINT leads_email_format
-    CHECK (email ~* '^[^[:space:]]+@[^[:space:]]+\.[^[:space:]]+$');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_name_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_name_length CHECK (length(name) BETWEEN 1 AND 200);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_email_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_email_length CHECK (length(email) BETWEEN 3 AND 320);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_phone_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_phone_length CHECK (phone IS NULL OR length(phone) <= 40);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_message_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_message_length CHECK (message IS NULL OR length(message) <= 5000);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_email_format') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_email_format CHECK (email ~* '^[^[:space:]]+@[^[:space:]]+\.[^[:space:]]+$');
+  END IF;
+END $$;
 
 COMMENT ON TABLE admin_users IS
   'Authoritative source for admin role membership. Replaces the previous '
@@ -198,9 +191,11 @@ CREATE INDEX IF NOT EXISTS audit_log_record_idx    ON audit_log (table_name, rec
 
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "admin_read_audit_log" ON audit_log;
 CREATE POLICY "admin_read_audit_log"
   ON audit_log FOR SELECT USING (is_admin());
 
+DROP POLICY IF EXISTS "service_role_write_audit_log" ON audit_log;
 CREATE POLICY "service_role_write_audit_log"
   ON audit_log FOR ALL
   USING (auth.role() = 'service_role')
@@ -375,9 +370,11 @@ CREATE INDEX IF NOT EXISTS tracking_scripts_active_idx
 
 ALTER TABLE tracking_scripts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_tracking_scripts" ON tracking_scripts;
 CREATE POLICY "public_read_active_tracking_scripts"
   ON tracking_scripts FOR SELECT USING (active = true);
 
+DROP POLICY IF EXISTS "admin_all_tracking_scripts" ON tracking_scripts;
 CREATE POLICY "admin_all_tracking_scripts"
   ON tracking_scripts FOR ALL
   USING (is_admin())
@@ -427,9 +424,11 @@ CREATE TABLE IF NOT EXISTS seo_routes (
 
 ALTER TABLE seo_routes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_seo_routes" ON seo_routes;
 CREATE POLICY "public_read_seo_routes"
   ON seo_routes FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "admin_all_seo_routes" ON seo_routes;
 CREATE POLICY "admin_all_seo_routes"
   ON seo_routes FOR ALL
   USING (is_admin())
@@ -515,13 +514,17 @@ CREATE INDEX IF NOT EXISTS nav_items_active_idx
 ALTER TABLE nav_menus ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nav_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_nav_menus" ON nav_menus;
 CREATE POLICY "public_read_active_nav_menus"
   ON nav_menus FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_nav_menus" ON nav_menus;
 CREATE POLICY "admin_all_nav_menus"
   ON nav_menus FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "public_read_active_nav_items" ON nav_items;
 CREATE POLICY "public_read_active_nav_items"
   ON nav_items FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_nav_items" ON nav_items;
 CREATE POLICY "admin_all_nav_items"
   ON nav_items FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -595,13 +598,17 @@ CREATE INDEX IF NOT EXISTS footer_links_column_idx
 ALTER TABLE footer_columns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE footer_links   ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_footer_columns" ON footer_columns;
 CREATE POLICY "public_read_active_footer_columns"
   ON footer_columns FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_footer_columns" ON footer_columns;
 CREATE POLICY "admin_all_footer_columns"
   ON footer_columns FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "public_read_active_footer_links" ON footer_links;
 CREATE POLICY "public_read_active_footer_links"
   ON footer_links FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_footer_links" ON footer_links;
 CREATE POLICY "admin_all_footer_links"
   ON footer_links FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -708,9 +715,11 @@ CREATE INDEX IF NOT EXISTS page_revisions_page_idx
 
 ALTER TABLE page_revisions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "admin_all_page_revisions" ON page_revisions;
 CREATE POLICY "admin_all_page_revisions"
   ON page_revisions FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "service_role_write_page_revisions" ON page_revisions;
 CREATE POLICY "service_role_write_page_revisions"
   ON page_revisions FOR ALL
   USING (auth.role() = 'service_role')
@@ -774,9 +783,11 @@ CREATE INDEX IF NOT EXISTS ui_strings_key_idx ON ui_strings (key);
 
 ALTER TABLE ui_strings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_ui_strings" ON ui_strings;
 CREATE POLICY "public_read_ui_strings"
   ON ui_strings FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "admin_all_ui_strings" ON ui_strings;
 CREATE POLICY "admin_all_ui_strings"
   ON ui_strings FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -915,8 +926,10 @@ CREATE INDEX IF NOT EXISTS favorites_user_idx
 
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "self_read_favorites" ON favorites;
 CREATE POLICY "self_read_favorites"
   ON favorites FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "self_write_favorites" ON favorites;
 CREATE POLICY "self_write_favorites"
   ON favorites FOR ALL
   USING (auth.uid() = user_id)
@@ -947,17 +960,21 @@ CREATE INDEX IF NOT EXISTS saved_searches_email_idx
 
 ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "self_read_saved_searches" ON saved_searches;
 CREATE POLICY "self_read_saved_searches"
   ON saved_searches FOR SELECT
   USING (auth.uid() = user_id OR is_admin());
+DROP POLICY IF EXISTS "self_write_saved_searches" ON saved_searches;
 CREATE POLICY "self_write_saved_searches"
   ON saved_searches FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "service_role_write_saved_searches" ON saved_searches;
 CREATE POLICY "service_role_write_saved_searches"
   ON saved_searches FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_read_saved_searches" ON saved_searches;
 CREATE POLICY "admin_read_saved_searches"
   ON saved_searches FOR SELECT USING (is_admin());
 
@@ -978,8 +995,10 @@ CREATE INDEX IF NOT EXISTS property_price_history_idx
 
 ALTER TABLE property_price_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_price_history" ON property_price_history;
 CREATE POLICY "public_read_price_history"
   ON property_price_history FOR SELECT USING (true);
+DROP POLICY IF EXISTS "service_role_write_price_history" ON property_price_history;
 CREATE POLICY "service_role_write_price_history"
   ON property_price_history FOR ALL
   USING (auth.role() = 'service_role')
@@ -1005,10 +1024,12 @@ CREATE TABLE IF NOT EXISTS lancamentos_waitlist (
 
 ALTER TABLE lancamentos_waitlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_write_waitlist" ON lancamentos_waitlist;
 CREATE POLICY "service_role_write_waitlist"
   ON lancamentos_waitlist FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_read_waitlist" ON lancamentos_waitlist;
 CREATE POLICY "admin_read_waitlist"
   ON lancamentos_waitlist FOR SELECT USING (is_admin());
 
@@ -1045,10 +1066,12 @@ CREATE INDEX IF NOT EXISTS valuation_requests_status_idx
 
 ALTER TABLE valuation_requests ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_write_valuation" ON valuation_requests;
 CREATE POLICY "service_role_write_valuation"
   ON valuation_requests FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_all_valuation" ON valuation_requests;
 CREATE POLICY "admin_all_valuation"
   ON valuation_requests FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -1084,8 +1107,10 @@ CREATE INDEX IF NOT EXISTS neighborhood_guides_status_idx
 
 ALTER TABLE neighborhood_guides ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_published_neighborhood_guides" ON neighborhood_guides;
 CREATE POLICY "public_read_published_neighborhood_guides"
   ON neighborhood_guides FOR SELECT USING (status = 'published');
+DROP POLICY IF EXISTS "admin_all_neighborhood_guides" ON neighborhood_guides;
 CREATE POLICY "admin_all_neighborhood_guides"
   ON neighborhood_guides FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -1110,6 +1135,7 @@ CREATE TRIGGER neighborhood_guides_set_updated_at
 -- properties_cache — restringir leitura a linhas não-expiradas
 -- =====================
 DROP POLICY IF EXISTS "public_read_cache" ON properties_cache;
+DROP POLICY IF EXISTS "public_read_active_cache" ON properties_cache;
 CREATE POLICY "public_read_active_cache"
   ON properties_cache FOR SELECT
   USING (expires_at IS NULL OR expires_at > now());
@@ -1138,6 +1164,7 @@ CREATE OR REPLACE VIEW public_site_config AS
 -- A view não precisa de RLS própria; herda da tabela. Mas garantimos
 -- que SELECT na tabela bruta exige admin para keys sensíveis.
 DROP POLICY IF EXISTS "public_read_site_config" ON site_config;
+DROP POLICY IF EXISTS "public_read_safe_site_config" ON site_config;
 CREATE POLICY "public_read_safe_site_config"
   ON site_config FOR SELECT
   USING (
@@ -1206,56 +1233,33 @@ BEGIN
 END $$;
 
 -- ════════════════════════════════════════════════════════════════
--- RESUMO — Verificação rápida
+-- RESUMO
 -- ════════════════════════════════════════════════════════════════
-
 DO $RESUMO$
 DECLARE
-  v_admin_count       int;
-  v_audit_table       int;
-  v_tracking_scripts  int;
-  v_seo_routes        int;
-  v_nav_menus         int;
-  v_footer_columns    int;
-  v_page_revisions    int;
-  v_ui_strings        int;
-  v_favorites         int;
-  v_saved_searches    int;
-  v_lancamentos_wl    int;
-  v_valuation         int;
-  v_neighborhood      int;
+  v_admin_count    int;
+  v_audit_table    int;
+  v_seo_routes     int;
+  v_nav_menus      int;
+  v_footer_columns int;
+  v_ui_strings     int;
 BEGIN
   SELECT count(*) INTO v_admin_count       FROM admin_users;
   SELECT count(*) INTO v_audit_table       FROM information_schema.tables WHERE table_name = 'audit_log';
-  SELECT count(*) INTO v_tracking_scripts  FROM information_schema.tables WHERE table_name = 'tracking_scripts';
   SELECT count(*) INTO v_seo_routes        FROM seo_routes;
   SELECT count(*) INTO v_nav_menus         FROM nav_menus;
   SELECT count(*) INTO v_footer_columns    FROM footer_columns;
-  SELECT count(*) INTO v_page_revisions    FROM information_schema.tables WHERE table_name = 'page_revisions';
   SELECT count(*) INTO v_ui_strings        FROM ui_strings;
-  SELECT count(*) INTO v_favorites         FROM information_schema.tables WHERE table_name = 'favorites';
-  SELECT count(*) INTO v_saved_searches    FROM information_schema.tables WHERE table_name = 'saved_searches';
-  SELECT count(*) INTO v_lancamentos_wl    FROM information_schema.tables WHERE table_name = 'lancamentos_waitlist';
-  SELECT count(*) INTO v_valuation         FROM information_schema.tables WHERE table_name = 'valuation_requests';
-  SELECT count(*) INTO v_neighborhood      FROM information_schema.tables WHERE table_name = 'neighborhood_guides';
 
-  RAISE NOTICE '';
   RAISE NOTICE '═════════════════════════════════════════════════════════════';
-  RAISE NOTICE 'BLOCO 0 + 1 — Aplicação completa. Resumo:';
+  RAISE NOTICE 'BLOCO 0 + 1 — APLICADO. Resumo:';
   RAISE NOTICE '═════════════════════════════════════════════════════════════';
-  RAISE NOTICE '  admin_users (linhas) ...... %', v_admin_count;
-  RAISE NOTICE '  audit_log (table) ......... % (esperado 1)', v_audit_table;
-  RAISE NOTICE '  tracking_scripts (table) .. % (esperado 1)', v_tracking_scripts;
-  RAISE NOTICE '  seo_routes (linhas) ....... % (esperado >= 7)', v_seo_routes;
-  RAISE NOTICE '  nav_menus (linhas) ........ % (esperado >= 2)', v_nav_menus;
-  RAISE NOTICE '  footer_columns (linhas) ... % (esperado >= 4)', v_footer_columns;
-  RAISE NOTICE '  page_revisions (table) .... % (esperado 1)', v_page_revisions;
-  RAISE NOTICE '  ui_strings (linhas) ....... % (esperado >= 22)', v_ui_strings;
-  RAISE NOTICE '  favorites (table) ......... % (esperado 1)', v_favorites;
-  RAISE NOTICE '  saved_searches (table) .... % (esperado 1)', v_saved_searches;
-  RAISE NOTICE '  lancamentos_waitlist ...... % (esperado 1)', v_lancamentos_wl;
-  RAISE NOTICE '  valuation_requests ........ % (esperado 1)', v_valuation;
-  RAISE NOTICE '  neighborhood_guides ....... % (esperado 1)', v_neighborhood;
+  RAISE NOTICE '  admin_users (linhas)     %', v_admin_count;
+  RAISE NOTICE '  audit_log (table)        % (esperado 1)', v_audit_table;
+  RAISE NOTICE '  seo_routes (linhas)      % (esperado >= 7)', v_seo_routes;
+  RAISE NOTICE '  nav_menus (linhas)       % (esperado >= 2)', v_nav_menus;
+  RAISE NOTICE '  footer_columns (linhas)  % (esperado >= 4)', v_footer_columns;
+  RAISE NOTICE '  ui_strings (linhas)      % (esperado >= 22)', v_ui_strings;
   RAISE NOTICE '═════════════════════════════════════════════════════════════';
 
   IF v_admin_count = 0 THEN

@@ -26,9 +26,11 @@ CREATE INDEX IF NOT EXISTS audit_log_record_idx    ON audit_log (table_name, rec
 
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "admin_read_audit_log" ON audit_log;
 CREATE POLICY "admin_read_audit_log"
   ON audit_log FOR SELECT USING (is_admin());
 
+DROP POLICY IF EXISTS "service_role_write_audit_log" ON audit_log;
 CREATE POLICY "service_role_write_audit_log"
   ON audit_log FOR ALL
   USING (auth.role() = 'service_role')

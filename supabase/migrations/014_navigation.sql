@@ -40,13 +40,17 @@ CREATE INDEX IF NOT EXISTS nav_items_active_idx
 ALTER TABLE nav_menus ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nav_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_nav_menus" ON nav_menus;
 CREATE POLICY "public_read_active_nav_menus"
   ON nav_menus FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_nav_menus" ON nav_menus;
 CREATE POLICY "admin_all_nav_menus"
   ON nav_menus FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "public_read_active_nav_items" ON nav_items;
 CREATE POLICY "public_read_active_nav_items"
   ON nav_items FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_nav_items" ON nav_items;
 CREATE POLICY "admin_all_nav_items"
   ON nav_items FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 

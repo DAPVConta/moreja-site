@@ -50,9 +50,11 @@ CREATE INDEX IF NOT EXISTS page_revisions_page_idx
 
 ALTER TABLE page_revisions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "admin_all_page_revisions" ON page_revisions;
 CREATE POLICY "admin_all_page_revisions"
   ON page_revisions FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "service_role_write_page_revisions" ON page_revisions;
 CREATE POLICY "service_role_write_page_revisions"
   ON page_revisions FOR ALL
   USING (auth.role() = 'service_role')

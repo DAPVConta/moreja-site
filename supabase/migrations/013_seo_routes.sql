@@ -21,9 +21,11 @@ CREATE TABLE IF NOT EXISTS seo_routes (
 
 ALTER TABLE seo_routes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_seo_routes" ON seo_routes;
 CREATE POLICY "public_read_seo_routes"
   ON seo_routes FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "admin_all_seo_routes" ON seo_routes;
 CREATE POLICY "admin_all_seo_routes"
   ON seo_routes FOR ALL
   USING (is_admin())

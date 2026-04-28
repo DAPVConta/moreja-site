@@ -30,13 +30,17 @@ CREATE INDEX IF NOT EXISTS footer_links_column_idx
 ALTER TABLE footer_columns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE footer_links   ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_active_footer_columns" ON footer_columns;
 CREATE POLICY "public_read_active_footer_columns"
   ON footer_columns FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_footer_columns" ON footer_columns;
 CREATE POLICY "admin_all_footer_columns"
   ON footer_columns FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
+DROP POLICY IF EXISTS "public_read_active_footer_links" ON footer_links;
 CREATE POLICY "public_read_active_footer_links"
   ON footer_links FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "admin_all_footer_links" ON footer_links;
 CREATE POLICY "admin_all_footer_links"
   ON footer_links FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 

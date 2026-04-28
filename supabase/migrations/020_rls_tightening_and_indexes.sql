@@ -11,6 +11,7 @@
 -- properties_cache — restringir leitura a linhas não-expiradas
 -- =====================
 DROP POLICY IF EXISTS "public_read_cache" ON properties_cache;
+DROP POLICY IF EXISTS "public_read_active_cache" ON properties_cache;
 CREATE POLICY "public_read_active_cache"
   ON properties_cache FOR SELECT
   USING (expires_at IS NULL OR expires_at > now());
@@ -39,6 +40,7 @@ CREATE OR REPLACE VIEW public_site_config AS
 -- A view não precisa de RLS própria; herda da tabela. Mas garantimos
 -- que SELECT na tabela bruta exige admin para keys sensíveis.
 DROP POLICY IF EXISTS "public_read_site_config" ON site_config;
+DROP POLICY IF EXISTS "public_read_safe_site_config" ON site_config;
 CREATE POLICY "public_read_safe_site_config"
   ON site_config FOR SELECT
   USING (

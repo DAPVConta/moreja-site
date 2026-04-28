@@ -35,11 +35,13 @@ CREATE INDEX IF NOT EXISTS admin_users_role_idx ON admin_users (role);
 
 -- Service-role is the only writer. Owners can read the full list (for the
 -- "Admin users" admin page). Other roles read only their own row.
+DROP POLICY IF EXISTS "service_role_write_admin_users" ON admin_users;
 CREATE POLICY "service_role_write_admin_users"
   ON admin_users FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "owners_read_admin_users" ON admin_users;
 CREATE POLICY "owners_read_admin_users"
   ON admin_users FOR SELECT
   USING (
@@ -49,6 +51,7 @@ CREATE POLICY "owners_read_admin_users"
     )
   );
 
+DROP POLICY IF EXISTS "self_read_admin_users" ON admin_users;
 CREATE POLICY "self_read_admin_users"
   ON admin_users FOR SELECT
   USING (user_id = auth.uid());
@@ -104,33 +107,36 @@ DROP POLICY IF EXISTS "public_insert_leads" ON leads;
 
 -- Keep admin_all_leads for dashboard reads/updates.
 -- Add a service_role write policy so the edge function can keep inserting.
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'leads' AND policyname = 'service_role_write_leads'
-  ) THEN
-    EXECUTE $POLICY$
-      CREATE POLICY "service_role_write_leads"
-        ON leads FOR ALL
-        USING (auth.role() = 'service_role')
-        WITH CHECK (auth.role() = 'service_role')
-    $POLICY$;
-  END IF;
-END $$;
+DROP POLICY IF EXISTS "service_role_write_leads" ON leads;
+CREATE POLICY "service_role_write_leads"
+  ON leads FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- =====================
 -- Basic input-size CHECK constraints on leads
 -- (defence in depth — the edge function already sanitizes/truncates,
 --  but RLS-bypassing service_role mistakes are still possible)
+-- Idempotente via NOT EXISTS check em pg_constraint.
 -- =====================
-ALTER TABLE leads
-  ADD CONSTRAINT leads_name_length CHECK (length(name) BETWEEN 1 AND 200),
-  ADD CONSTRAINT leads_email_length CHECK (length(email) BETWEEN 3 AND 320),
-  ADD CONSTRAINT leads_phone_length CHECK (phone IS NULL OR length(phone) <= 40),
-  ADD CONSTRAINT leads_message_length CHECK (message IS NULL OR length(message) <= 5000),
-  ADD CONSTRAINT leads_email_format
-    CHECK (email ~* '^[^[:space:]]+@[^[:space:]]+\.[^[:space:]]+$');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_name_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_name_length CHECK (length(name) BETWEEN 1 AND 200);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_email_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_email_length CHECK (length(email) BETWEEN 3 AND 320);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_phone_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_phone_length CHECK (phone IS NULL OR length(phone) <= 40);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_message_length') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_message_length CHECK (message IS NULL OR length(message) <= 5000);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'leads_email_format') THEN
+    ALTER TABLE leads ADD CONSTRAINT leads_email_format CHECK (email ~* '^[^[:space:]]+@[^[:space:]]+\.[^[:space:]]+$');
+  END IF;
+END $$;
 
 COMMENT ON TABLE admin_users IS
   'Authoritative source for admin role membership. Replaces the previous '

@@ -27,8 +27,10 @@ CREATE INDEX IF NOT EXISTS favorites_user_idx
 
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "self_read_favorites" ON favorites;
 CREATE POLICY "self_read_favorites"
   ON favorites FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "self_write_favorites" ON favorites;
 CREATE POLICY "self_write_favorites"
   ON favorites FOR ALL
   USING (auth.uid() = user_id)
@@ -59,17 +61,21 @@ CREATE INDEX IF NOT EXISTS saved_searches_email_idx
 
 ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "self_read_saved_searches" ON saved_searches;
 CREATE POLICY "self_read_saved_searches"
   ON saved_searches FOR SELECT
   USING (auth.uid() = user_id OR is_admin());
+DROP POLICY IF EXISTS "self_write_saved_searches" ON saved_searches;
 CREATE POLICY "self_write_saved_searches"
   ON saved_searches FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "service_role_write_saved_searches" ON saved_searches;
 CREATE POLICY "service_role_write_saved_searches"
   ON saved_searches FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_read_saved_searches" ON saved_searches;
 CREATE POLICY "admin_read_saved_searches"
   ON saved_searches FOR SELECT USING (is_admin());
 
@@ -90,8 +96,10 @@ CREATE INDEX IF NOT EXISTS property_price_history_idx
 
 ALTER TABLE property_price_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_price_history" ON property_price_history;
 CREATE POLICY "public_read_price_history"
   ON property_price_history FOR SELECT USING (true);
+DROP POLICY IF EXISTS "service_role_write_price_history" ON property_price_history;
 CREATE POLICY "service_role_write_price_history"
   ON property_price_history FOR ALL
   USING (auth.role() = 'service_role')
@@ -117,10 +125,12 @@ CREATE TABLE IF NOT EXISTS lancamentos_waitlist (
 
 ALTER TABLE lancamentos_waitlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_write_waitlist" ON lancamentos_waitlist;
 CREATE POLICY "service_role_write_waitlist"
   ON lancamentos_waitlist FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_read_waitlist" ON lancamentos_waitlist;
 CREATE POLICY "admin_read_waitlist"
   ON lancamentos_waitlist FOR SELECT USING (is_admin());
 
@@ -157,10 +167,12 @@ CREATE INDEX IF NOT EXISTS valuation_requests_status_idx
 
 ALTER TABLE valuation_requests ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_write_valuation" ON valuation_requests;
 CREATE POLICY "service_role_write_valuation"
   ON valuation_requests FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "admin_all_valuation" ON valuation_requests;
 CREATE POLICY "admin_all_valuation"
   ON valuation_requests FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
@@ -196,8 +208,10 @@ CREATE INDEX IF NOT EXISTS neighborhood_guides_status_idx
 
 ALTER TABLE neighborhood_guides ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public_read_published_neighborhood_guides" ON neighborhood_guides;
 CREATE POLICY "public_read_published_neighborhood_guides"
   ON neighborhood_guides FOR SELECT USING (status = 'published');
+DROP POLICY IF EXISTS "admin_all_neighborhood_guides" ON neighborhood_guides;
 CREATE POLICY "admin_all_neighborhood_guides"
   ON neighborhood_guides FOR ALL USING (is_admin()) WITH CHECK (is_admin());
 
