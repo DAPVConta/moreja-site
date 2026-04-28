@@ -439,4 +439,54 @@
   .bg-cream {
     background-color: var(--cream);
   }
+
+  /* ── Mesh gradient backgrounds ──────────────────────────────────────────────
+     Three subtle radial-gradient meshes that layer brand accents over a solid
+     base colour. Hotspot opacity never exceeds 8% to avoid visual noise.
+
+     Usage: add the class to any section wrapper, e.g.:
+       <section className="bg-mesh-cream section"> … </section>
+  ────────────────────────────────────────────────────────────────────────── */
+
+  /* Cream base — navy hint top-left, yellow hint bottom-right */
+  .bg-mesh-cream {
+    background-color: #ededd1;
+    background-image:
+      radial-gradient(600px circle at 15% 20%,  rgb(1 7 68 / 0.04) 0%, transparent 70%),
+      radial-gradient(600px circle at 85% 80%,  rgb(242 210 46 / 0.06) 0%, transparent 70%);
+  }
+
+  /* Navy base — yellow hint top-right, white hint bottom-left */
+  .bg-mesh-navy {
+    background-color: #010744;
+    background-image:
+      radial-gradient(600px circle at 80% 15%,  rgb(242 210 46 / 0.08) 0%, transparent 70%),
+      radial-gradient(600px circle at 20% 85%,  rgb(255 255 255 / 0.04) 0%, transparent 70%);
+  }
+
+  /* White base — single cream radial at bottom-center */
+  .bg-mesh-white {
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(700px circle at 50% 100%, rgb(237 237 209 / 0.06) 0%, transparent 70%);
+  }
+}
+
+/* ── AnimatedChip pulse keyframe ─────────────────────────────────────────────
+   Used by AnimatedChip's `animated-chip-pulse` class.
+   The global `prefers-reduced-motion` rule in @layer base already sets
+   animation-duration to 0.01ms for all animations, which effectively
+   disables this animation without any extra media query here.
+──────────────────────────────────────────────────────────────────────────── */
+@keyframes chip-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(242 210 46 / 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgb(242 210 46 / 0.25);
+  }
+}
+
+.animated-chip-pulse {
+  animation: chip-pulse 2s ease-in-out infinite;
 }
