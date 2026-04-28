@@ -7,22 +7,22 @@
 -- Os secrets (URL do projeto + service_role_key) são lidos do
 -- supabase_vault (extensão default do Supabase, criptografada at rest).
 --
--- ⚠ ANTES de aplicar, seed os secrets no Vault (rode UMA VEZ via SQL
--- Editor com sessão de owner — é seguro porque vault é encrypted):
+-- ⚠ ANTES de aplicar, seed os secrets no Vault. Use o pattern upsert
+-- (vault.create_secret falha em duplicate; use update_secret se já
+-- existir):
 --
---   SELECT vault.create_secret(
---     'https://yxlepgmlhcnqhwshymup.supabase.co',
---     'project_url',
---     'Supabase project URL para functions internas'
---   );
---   SELECT vault.create_secret(
---     'COLE_SEU_SERVICE_ROLE_KEY_AQUI',
---     'service_role_key',
---     'Service role key para chamar edge functions a partir de cron'
---   );
+-- DO $$
+-- DECLARE existing_id uuid;
+-- BEGIN
+--   SELECT id INTO existing_id FROM vault.secrets WHERE name='project_url';
+--   IF existing_id IS NULL THEN
+--     PERFORM vault.create_secret('https://SEU.supabase.co','project_url','URL');
+--   ELSE
+--     PERFORM vault.update_secret(existing_id,'https://SEU.supabase.co','project_url','URL');
+--   END IF;
+-- END $$;
 --
--- Se já existem (re-aplicação), o create_secret retorna o id existente
--- — não duplica.
+-- (idem p/ name='service_role_key' com a JWT da Settings → API → service_role)
 -- ────────────────────────────────────────────────────────────────
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;

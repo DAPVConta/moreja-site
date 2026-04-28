@@ -4,24 +4,34 @@
 -- Inclui as migrations 021..024 (Blocos 7 e 9).
 -- 100% IDEMPOTENTE — pode rodar quantas vezes quiser.
 --
--- ⚠ ANTES de rodar este arquivo: seed os secrets no supabase_vault
--- (rode UMA VEZ no SQL Editor, separado deste arquivo):
+-- ⚠ ANTES de rodar este arquivo: seed os secrets no supabase_vault.
+-- Use o pattern upsert (idempotente — não falha se já existir):
 --
---   SELECT vault.create_secret(
---     'https://yxlepgmlhcnqhwshymup.supabase.co',
---     'project_url',
---     'URL do projeto Supabase p/ funções internas'
---   );
+-- DO $$
+-- DECLARE existing_id uuid;
+-- BEGIN
+--   SELECT id INTO existing_id FROM vault.secrets WHERE name = 'project_url';
+--   IF existing_id IS NULL THEN
+--     PERFORM vault.create_secret('https://SEU_PROJETO.supabase.co', 'project_url', 'URL do projeto');
+--   ELSE
+--     PERFORM vault.update_secret(existing_id, 'https://SEU_PROJETO.supabase.co', 'project_url', 'URL do projeto');
+--   END IF;
+-- END $$;
 --
---   SELECT vault.create_secret(
---     'COLE_SEU_SERVICE_ROLE_KEY_AQUI',
---     'service_role_key',
---     'Service role JWT — usado pelo cron supremo-retry'
---   );
+-- DO $$
+-- DECLARE existing_id uuid;
+-- BEGIN
+--   SELECT id INTO existing_id FROM vault.secrets WHERE name = 'service_role_key';
+--   IF existing_id IS NULL THEN
+--     PERFORM vault.create_secret('COLE_SUA_KEY_AQUI', 'service_role_key', 'Service role');
+--   ELSE
+--     PERFORM vault.update_secret(existing_id, 'COLE_SUA_KEY_AQUI', 'service_role_key', 'Service role');
+--   END IF;
+-- END $$;
 --
--- Onde achar a service_role_key: Supabase Dashboard → Settings → API →
--- "service_role" (secret). É um JWT que começa com eyJ... — não confundir
--- com anon key.
+-- Verifique o estado atual com:  SELECT name FROM vault.secrets;
+-- Onde achar service_role_key: Supabase Dashboard → Settings → API →
+-- "service_role" (secret). JWT começando com eyJ...
 --
 -- Depois cole este arquivo inteiro e Run.
 -- ════════════════════════════════════════════════════════════════
