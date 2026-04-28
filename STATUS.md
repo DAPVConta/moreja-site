@@ -16,6 +16,7 @@
 | 7 | Supremo CRM hardening | ✅ código / ⏳ deploy edge fns |
 | 8a | Seções RE/MAX no público | ✅ |
 | 8b | Admin SPA refactor (parcial) | ✅ páginas-chave / 🔜 polish |
+| 9 | Security hardening pleno | ✅ CSP nonce + Turnstile + CORS allowlist + retention |
 | 9 | Security hardening pleno | 🔜 |
 | 10 | Performance & QA final | 🔜 |
 | 11 | Diferenciadores opcionais (AI search, mapa interativo) | 🔜 opcional |
@@ -95,6 +96,15 @@
 - PixelEvents extendido com event_id + sendBeacon CAPI
 - PropertyViewTracker plugado em /imovel e /empreendimentos
 - ManageConsentLink no Footer
+
+### Security hardening pleno (Bloco 9)
+- **Middleware CSP com nonce per-request** — `src/middleware.ts` gera nonce hex base64 por request, propaga via header `x-nonce`, layout/scripts inline lêem via next/headers e aplicam nonce em `<script>` e `<style>` inline. CSP tem `script-src 'strict-dynamic' 'nonce-XXX'` + allowlist de hosts (Supremo, Supabase, GA4, Meta, Clarity, Hotjar, etc.)
+- **Cloudflare Turnstile** — bot detection sem PII (free, alternativa ao reCAPTCHA). Migration 024 adiciona `turnstile_site_key/secret_key`. Componente `TurnstileWidget` lazy-load do script global. `/api/turnstile-verify` route SHA validation server-side com IP correlation. Plugado em ContactForm + LeadFormInline (imovel + empreendimentos)
+- **Honeypot field** — campo invisível "website" que humanos não preenchem; submissão silenciosa para bots
+- **Min-time-to-submit** — bloqueia submissão em < 2s desde mount (humano leva mais)
+- **CORS allowlist** nas edge functions — substituiu `*` por origin-based (env `ALLOWED_ORIGINS` + regex p/ *.vercel.app previews)
+- **Migration 023 rate_limit_buckets** — tabela persistente substituindo Map em memória das edge functions; pg_cron cleanup hourly
+- **Migration 023 audit retention** — pg_cron daily 03h limpa `audit_log` > 90 dias
 
 ### Admin SPA — páginas-chave (Bloco 8b)
 - **Sidebar** reorganizada em 4 grupos: Conteúdo / Leads / Configuração / Sistema

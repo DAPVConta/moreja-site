@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { headers } from 'next/headers'
 import { Raleway, Inter } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
@@ -134,6 +135,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // getSiteConfig is React.cache() — called multiple times but hits DB only once per request
   const config = await getSiteConfig()
+  // Lê nonce gerado pelo middleware (CSP per-request) — usado em todos os
+  // <script>/<style> inline pra autorizar via 'nonce-XXX' na CSP.
+  const headerStore = await headers()
+  const nonce = headerStore.get('x-nonce') ?? undefined
 
   const organizationSchema = {
     '@context': 'https://schema.org',
@@ -225,10 +230,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
         <link rel="dns-prefetch" href="https://www.clarity.ms" />
         <link rel="dns-prefetch" href="https://static.hotjar.com" />
-        <style dangerouslySetInnerHTML={{ __html: brandCss }} />
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+        <style nonce={nonce} dangerouslySetInnerHTML={{ __html: brandCss }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
         {/* Consent Mode v2 init — DEFAULT 'denied' antes de qualquer pixel */}
-        <ConsentModeInit />
+        <ConsentModeInit nonce={nonce} />
       </head>
       <body className="min-h-full flex flex-col font-sans">
         {/* Skip link — focável só via teclado (Tab no início da página).

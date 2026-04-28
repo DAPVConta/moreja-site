@@ -12,8 +12,14 @@
  *   4. Custom scripts body_end
  */
 import Script from 'next/script'
+import { headers } from 'next/headers'
 import { getSiteConfig } from '@/lib/site-config'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+
+async function getNonce(): Promise<string | undefined> {
+  const h = await headers()
+  return h.get('x-nonce') ?? undefined
+}
 
 interface TrackingScript {
   id: string
@@ -43,8 +49,9 @@ async function getTrackingScripts(
 /**
  * ConsentModeInit — script inline SYNC que precisa rodar antes de qualquer
  * tag de tracking. Define defaults 'denied' p/ Consent Mode v2.
+ * Aceita nonce do middleware CSP para autorizar inline.
  */
-export function ConsentModeInit() {
+export function ConsentModeInit({ nonce }: { nonce?: string }) {
   const inlineScript = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -86,6 +93,7 @@ export function ConsentModeInit() {
     <Script
       id="consent-mode-init"
       strategy="beforeInteractive"
+      nonce={nonce}
       dangerouslySetInnerHTML={{ __html: inlineScript }}
     />
   )
@@ -93,6 +101,7 @@ export function ConsentModeInit() {
 
 export async function ThirdPartyScripts() {
   const config = await getSiteConfig()
+  const nonce = await getNonce()
 
   const gtmId = config.gtm_id?.trim() || null
   const ga4Id = config.ga4_measurement_id?.trim() || null
@@ -110,7 +119,7 @@ export async function ThirdPartyScripts() {
     <>
       {/* ── Custom scripts (head) — controlados pelo admin ─────────────── */}
       {customHead.map((s) => (
-        <Script
+        <Script nonce={nonce}
           key={s.id}
           id={`custom-head-${s.id}`}
           strategy="afterInteractive"
@@ -120,7 +129,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── Google Tag Manager ─────────────────────────────────────────── */}
       {gtmId && (
-        <Script
+        <Script nonce={nonce}
           id="gtm-script"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -139,12 +148,12 @@ export async function ThirdPartyScripts() {
       {/* ── GA4 standalone (sem precisar de GTM) ──────────────────────── */}
       {ga4Id && (
         <>
-          <Script
+          <Script nonce={nonce}
             id="ga4-script"
             strategy="afterInteractive"
             src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
           />
-          <Script
+          <Script nonce={nonce}
             id="ga4-init"
             strategy="afterInteractive"
             dangerouslySetInnerHTML={{
@@ -162,7 +171,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── Meta (Facebook) Pixel — respeita Consent Mode ad_storage ────── */}
       {fbPixelId && (
-        <Script
+        <Script nonce={nonce}
           id="fb-pixel"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -188,7 +197,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── LinkedIn Insight Tag ───────────────────────────────────────── */}
       {linkedinPartnerId && (
-        <Script
+        <Script nonce={nonce}
           id="linkedin-insight"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -210,7 +219,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── TikTok Pixel ──────────────────────────────────────────────── */}
       {tiktokPixelId && (
-        <Script
+        <Script nonce={nonce}
           id="tiktok-pixel"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -239,7 +248,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── Microsoft Clarity (analytics — heatmaps + recordings) ─────── */}
       {clarityId && (
-        <Script
+        <Script nonce={nonce}
           id="clarity-script"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -260,7 +269,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── Hotjar ────────────────────────────────────────────────────── */}
       {hotjarId && (
-        <Script
+        <Script nonce={nonce}
           id="hotjar-script"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
@@ -285,7 +294,7 @@ export async function ThirdPartyScripts() {
 
       {/* ── Custom scripts (body_end) — controlados pelo admin ─────────── */}
       {customBodyEnd.map((s) => (
-        <Script
+        <Script nonce={nonce}
           key={s.id}
           id={`custom-body-end-${s.id}`}
           strategy="lazyOnload"
@@ -324,10 +333,12 @@ export async function GtmNoScript() {
 export async function BodyStartScripts() {
   const customBodyStart = await getTrackingScripts('body_start')
   if (customBodyStart.length === 0) return null
+  const nonce = await getNonce()
   return (
     <>
       {customBodyStart.map((s) => (
         <Script
+          nonce={nonce}
           key={s.id}
           id={`custom-body-start-${s.id}`}
           strategy="afterInteractive"

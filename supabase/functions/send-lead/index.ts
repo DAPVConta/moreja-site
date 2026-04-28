@@ -1,9 +1,26 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+// Allowlist (defina via env ALLOWED_ORIGINS=comma-separated; fallback ao
+// domínio canonical + previews do Vercel)
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://moreja.com.br,https://www.moreja.com.br')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? ''
+  // Permite domínio canonical, www, e subdomínios *.vercel.app (PR previews)
+  const allow =
+    ALLOWED_ORIGINS.includes(origin) ||
+    /^https:\/\/[a-z0-9-]+(\.dapvcontas-projects)?\.vercel\.app$/i.test(origin)
+      ? origin
+      : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  }
 }
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -141,6 +158,8 @@ async function pushToSupremo(lead: {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = corsHeadersFor(req)
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }

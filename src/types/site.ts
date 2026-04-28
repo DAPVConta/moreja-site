@@ -65,6 +65,10 @@ export interface SiteConfig {
   cookiebot_id: string
   pinterest_tag_id: string
   bing_uet_id: string
+
+  // Migration 024 — Cloudflare Turnstile
+  turnstile_site_key: string
+  turnstile_secret_key: string
 }
 
 export interface SiteStat {

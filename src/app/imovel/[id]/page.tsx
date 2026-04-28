@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, ChevronLeft } from 'lucide-react'
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
+import { getSiteConfig } from '@/lib/site-config'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
 import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
@@ -61,7 +62,11 @@ export async function generateStaticParams() {
 
 export default async function ImovelPage({ params }: PageProps) {
   const { id } = await params
-  const property = await fetchProperty(id)
+  const [property, siteConfig] = await Promise.all([
+    fetchProperty(id),
+    getSiteConfig(),
+  ])
+  const turnstileSiteKey = siteConfig.turnstile_site_key?.trim() || undefined
 
   if (!property) notFound()
 
@@ -332,6 +337,7 @@ export default async function ImovelPage({ params }: PageProps) {
                     imovelId={property.id}
                     imovelCodigo={property.codigo}
                     imovelTitulo={property.titulo}
+                    turnstileSiteKey={turnstileSiteKey}
                   />
                 </div>
               </div>

@@ -44,6 +44,8 @@ const MIGRATIONS = [
   '020_rls_tightening_and_indexes.sql',
   '021_supremo_retry_cron.sql',
   '022_blog_posts.sql',
+  '023_rate_limit_buckets.sql',
+  '024_turnstile_keys.sql',
 ]
 
 const client = new Client({

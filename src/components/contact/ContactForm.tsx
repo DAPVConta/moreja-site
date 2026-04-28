@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Send, Check } from 'lucide-react'
 import { collectLeadTracking } from '@/lib/lead-tracking'
 import { trackLead } from '@/components/seo/PixelEvents'
+import { TurnstileWidget, Honeypot } from '@/components/seo/TurnstileWidget'
+import { verifyTurnstileToken, passedMinTimeToSubmit } from '@/lib/turnstile'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+interface ContactFormProps {
+  turnstileSiteKey?: string
+}
 
 const ASSUNTOS = [
   'Quero comprar um imóvel',
@@ -17,7 +23,7 @@ const ASSUNTOS = [
   'Outro assunto',
 ]
 
-export function ContactForm() {
+export function ContactForm({ turnstileSiteKey }: ContactFormProps = {}) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -26,15 +32,43 @@ export function ContactForm() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const formMountedAt = useRef<number>(Date.now())
 
-  async function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    formMountedAt.current = Date.now()
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!nome.trim() || !email.trim() || !mensagem.trim()) return
+
+    // Honeypot check — campo invisível "website" que humanos não preenchem
+    const fd = new FormData(e.currentTarget)
+    if (fd.get('website')) {
+      setSuccess(true) // simula sucesso pra bot
+      return
+    }
+    // Min-time-to-submit check (>= 2s desde mount)
+    if (!passedMinTimeToSubmit(formMountedAt.current)) {
+      setError('Aguarde alguns instantes antes de enviar.')
+      return
+    }
 
     setLoading(true)
     setError('')
 
     try {
+      // Verifica Turnstile (se configurado)
+      if (turnstileSiteKey) {
+        const verify = await verifyTurnstileToken(turnstileToken, 'contact-form')
+        if (!verify.ok) {
+          setError('Verificação de segurança falhou. Tente novamente.')
+          setLoading(false)
+          return
+        }
+      }
+
       // Pixel + CAPI client-side (gera event_id compartilhado)
       const event_id = trackLead('pagina_contato', { email, phone: telefone })
       const tracking = collectLeadTracking()
@@ -174,9 +208,22 @@ export function ContactForm() {
         <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg" role="alert">{error}</p>
       )}
 
+      {/* Honeypot anti-bot (invisível) */}
+      <Honeypot />
+
+      {/* Turnstile widget (só renderiza se admin configurou site_key) */}
+      {turnstileSiteKey && (
+        <TurnstileWidget
+          sitekey={turnstileSiteKey}
+          action="contact-form"
+          onVerify={setTurnstileToken}
+          onExpired={() => setTurnstileToken('')}
+        />
+      )}
+
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (!!turnstileSiteKey && !turnstileToken)}
         className="w-full flex items-center justify-center gap-2 bg-[#010744] hover:bg-[#0a1a6e] text-white py-3.5 rounded-lg font-semibold transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] focus-visible:ring-offset-2"
       >
         <Send className="w-4 h-4" />
