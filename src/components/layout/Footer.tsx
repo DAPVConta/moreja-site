@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { MapPin, Phone, Mail, ChevronDown, MessageCircle } from 'lucide-react'
 import { MoRejaLogo } from './Header'
+import { NewsletterForm } from './NewsletterForm'
+import { TrustBadges } from './TrustBadges'
 
 // Social media SVG icons (lucide-react doesn't have brand icons)
 function IconInstagram() {
@@ -167,7 +169,12 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
             ))}
           </nav>
 
-          {/* 5. Social */}
+          {/* 5. Newsletter mobile */}
+          <div className="mt-7 pt-6 border-t border-white/10">
+            <NewsletterForm variant="dark" />
+          </div>
+
+          {/* 6. Social */}
           <div className="mt-7">
             <p className="text-center text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-3">
               Siga-nos
@@ -202,12 +209,30 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
               </a>
             </div>
           </div>
+
+          {/* 7. Selos de confiança — mobile */}
+          <div className="mt-7 pt-6 border-t border-white/10">
+            <TrustBadges />
+          </div>
         </div>
       </div>
 
       {/* ═══════════════════════ DESKTOP LAYOUT ═══════════════════════ */}
       <div className="hidden lg:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="container-page py-16">
+          {/* Newsletter — banner em destaque acima das colunas */}
+          <div className="mb-12 pb-12 border-b border-white/10 grid grid-cols-2 gap-10 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-white leading-tight mb-2">
+                Lançamentos exclusivos no seu e-mail
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                Receba antes de todo mundo as melhores oportunidades de imóveis residenciais e comerciais da nossa região.
+              </p>
+            </div>
+            <NewsletterForm variant="dark" />
+          </div>
+
           <div className="grid grid-cols-4 gap-10">
             {/* Brand */}
             <div>
@@ -310,6 +335,11 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
                 </li>
               </ul>
             </div>
+          </div>
+
+          {/* Selos de confiança — desktop */}
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <TrustBadges />
           </div>
         </div>
       </div>
