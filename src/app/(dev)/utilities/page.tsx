@@ -1,14 +1,19 @@
 'use client'
 
 /**
- * Smoke-test page for Phase 0 UI primitives.
+ * Smoke-test page for Phase 0 and Phase 1 UI primitives.
  * Route: /utilities  (dev-only — retorna 404 em produção via guard abaixo)
  *
  * Visual checks:
+ * Phase 0:
  * 1. Carousel — loop, autoplay, prev/next, dots, progress ring
  * 2. AnimatedChip — three variants + icon, with/without pulse
  * 3. MagneticButton — three variants × three sizes, anchor usage
  * 4. Mesh gradients — three bg-mesh-* utility classes side by side
+ *
+ * Phase 1:
+ * 5. StatsSection — tabular numbers + sparkline + animation-timeline + dividers
+ * 6. NewsletterForm — dark variant (Footer) + light variant (inline)
  */
 
 import { notFound } from 'next/navigation'
@@ -30,6 +35,8 @@ import {
   AnimatedChip,
   MagneticButton,
 } from '@/components/ui'
+import { StatsSection } from '@/components/home/StatsSection'
+import { NewsletterForm } from '@/components/layout/NewsletterForm'
 
 // ─── Slide colours for demo ───────────────────────────────────────────────────
 const SLIDES = [
@@ -219,6 +226,59 @@ export default function UtilitiesPage() {
               label=".bg-mesh-white"
               textColor="text-[#010744]"
             />
+          </div>
+        </section>
+
+        {/* ─── 5. StatsSection (Phase 1) ───────────────────────────── */}
+        <section>
+          <SectionLabel>5. StatsSection (Phase 1)</SectionLabel>
+          <p className="text-xs text-gray-400 mb-4">
+            Tabular numbers · sparkline SVG animada · animation-timeline nativo · dividers desktop
+          </p>
+
+          {/* Default data (4 stats sem trend — gera curva automática) */}
+          <div className="-mx-6">
+            <StatsSection />
+          </div>
+
+          {/* Com trend explícito */}
+          <div className="-mx-6 mt-4">
+            <StatsSection
+              stats={[
+                { id: '1', key: 'anos', value: '10', label: 'Anos de Mercado', icon: 'calendar', sort_order: 1, trend: [1, 2, 3, 5, 6, 8, 9, 10] },
+                { id: '2', key: 'vendas', value: '500+', label: 'Imóveis Vendidos', icon: 'home', sort_order: 2, trend: [50, 150, 230, 310, 380, 430, 470, 500] },
+                { id: '3', key: 'satisf', value: '98%', label: 'Clientes Satisfeitos', icon: 'heart', sort_order: 3, trend: [60, 72, 80, 87, 91, 94, 96, 98] },
+                { id: '4', key: 'corr', value: '15', label: 'Corretores', icon: 'users', sort_order: 4, trend: [3, 5, 7, 9, 11, 12, 14, 15] },
+              ]}
+            />
+          </div>
+        </section>
+
+        {/* ─── 6. NewsletterForm (Phase 1) ─────────────────────────── */}
+        <section>
+          <SectionLabel>6. NewsletterForm (Phase 1)</SectionLabel>
+          <p className="text-xs text-gray-400 mb-6">
+            Button embedded · gradient border no focus · animated check SVG · social proof
+          </p>
+
+          {/* Dark variant — contexto Footer (fundo navy) */}
+          <div className="mb-6">
+            <p className="text-xs text-gray-400 mb-3">
+              variant="dark" — usado no Footer (fundo navy)
+            </p>
+            <div className="bg-[#010744] rounded-2xl p-8 max-w-sm">
+              <NewsletterForm variant="dark" subscribersCount={1247} />
+            </div>
+          </div>
+
+          {/* Light variant — contexto inline / banner claro */}
+          <div>
+            <p className="text-xs text-gray-400 mb-3">
+              variant="light" — usado em banners claros
+            </p>
+            <div className="bg-[#ededd1] rounded-2xl p-8 max-w-sm">
+              <NewsletterForm variant="light" subscribersCount={1247} />
+            </div>
           </div>
         </section>
 

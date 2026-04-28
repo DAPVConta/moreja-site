@@ -75,6 +75,11 @@ export {
   type MagneticButtonProps,
 } from './MagneticButton'
 
+export {
+  Sparkline,
+  type SparklineProps,
+} from './Sparkline'
+
 // Note: mesh gradient classes (.bg-mesh-cream, .bg-mesh-navy, .bg-mesh-white)
 // and the .animated-chip-pulse keyframe live in src/app/globals.css — use them
 // as plain Tailwind utility strings, no JS import needed.
