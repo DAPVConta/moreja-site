@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { PropertyCard, PropertyCardSkeleton } from '@/components/properties/PropertyCard'
 import {
   Carousel,
@@ -16,22 +16,69 @@ interface FeaturedPropertiesProps {
   loading?: boolean
 }
 
+/** Imóveis de destaque de fallback — exibidos enquanto o banco estiver vazio. */
+const FALLBACK_FEATURED: Property[] = [
+  {
+    id: 'feat-1', codigo: 'MRJ-F01', titulo: 'Apartamento de Alto Padrão — Boa Viagem',
+    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
+    preco: 890000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
+    area_total: 130, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
+    descricao: 'Apartamento de alto padrão a 200m da praia de Boa Viagem, varanda gourmet.',
+    fotos: ['https://placehold.co/800x600/010744/f2d22e?text=Apto+Alto+Padrão'],
+    destaque: true,
+  },
+  {
+    id: 'feat-2', codigo: 'MRJ-F02', titulo: 'Casa com Piscina — Casa Forte',
+    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
+    preco: 1350000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
+    area_total: 280, quartos: 4, suites: 3, banheiros: 4, vagas: 3,
+    descricao: 'Casa com piscina, jardim e ampla área de lazer em condomínio fechado.',
+    fotos: ['https://placehold.co/800x600/1a1f6e/f2d22e?text=Casa+Piscina'],
+    destaque: true,
+  },
+  {
+    id: 'feat-3', codigo: 'MRJ-F03', titulo: 'Penthouse nas Graças',
+    tipo: 'Cobertura', subtipo: 'Cobertura', finalidade: 'Venda',
+    preco: 2100000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
+    area_total: 250, quartos: 4, suites: 4, banheiros: 5, vagas: 3,
+    descricao: 'Penthouse exclusivo com terraço privativo e vista panorâmica de Recife.',
+    fotos: ['https://placehold.co/800x600/f2d22e/010744?text=Penthouse+Graças'],
+    destaque: true,
+  },
+  {
+    id: 'feat-4', codigo: 'MRJ-F04', titulo: 'Studio Moderno — Pina',
+    tipo: 'Apartamento', subtipo: 'Studio', finalidade: 'Venda',
+    preco: 380000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
+    area_total: 42, quartos: 1, suites: 1, banheiros: 1, vagas: 1,
+    descricao: 'Studio inteligente com acabamento premium próximo ao Cais do Pina.',
+    fotos: ['https://placehold.co/800x600/ededd1/010744?text=Studio+Pina'],
+    destaque: true,
+  },
+  {
+    id: 'feat-5', codigo: 'MRJ-F05', titulo: 'Apartamento na Zona Sul — Imbiribeira',
+    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
+    preco: 490000, bairro: 'Imbiribeira', cidade: 'Recife', estado: 'PE',
+    area_total: 90, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
+    descricao: 'Apartamento com três quartos, bem localizado na zona sul do Recife.',
+    fotos: ['https://placehold.co/800x600/010744/ededd1?text=Apto+Imbiribeira'],
+    destaque: true,
+  },
+  {
+    id: 'feat-6', codigo: 'MRJ-F06', titulo: 'Casa em Olinda — Ampliada',
+    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
+    preco: 650000, bairro: 'Carmo', cidade: 'Olinda', estado: 'PE',
+    area_total: 200, quartos: 4, suites: 1, banheiros: 3, vagas: 2,
+    descricao: 'Casa ampliada com quintal em rua tranquila de Olinda, próximo ao centro histórico.',
+    fotos: ['https://placehold.co/800x600/1a1f6e/ededd1?text=Casa+Olinda'],
+    destaque: true,
+  },
+]
+
 export function FeaturedProperties({ properties, loading = false }: FeaturedPropertiesProps) {
   const skeletonCount = 6
-  const items = loading ? skeletonCount : properties.length
 
-  if (items === 0 && !loading) {
-    return (
-      <section className="section bg-white">
-        <div className="container-page text-center py-16 text-gray-400">
-          <p className="text-lg">Nenhum imóvel em destaque no momento.</p>
-          <Link href="/comprar" className="btn-primary mt-4 inline-block">
-            Ver todos os imóveis
-          </Link>
-        </div>
-      </section>
-    )
-  }
+  // Usar fallback quando banco estiver vazio
+  const displayProperties = properties.length > 0 ? properties : FALLBACK_FEATURED
 
   return (
     <section className="section bg-white">
@@ -85,7 +132,7 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
                     <PropertyCardSkeleton />
                   </CarouselItem>
                 ))
-              : properties.map((property, index) => (
+              : displayProperties.map((property, index) => (
                   <CarouselItem
                     key={property.id}
                     basis="85%"

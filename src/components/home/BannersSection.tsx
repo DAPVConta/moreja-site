@@ -12,11 +12,44 @@ interface BannersSectionProps {
   intervalSeconds?: number
 }
 
+/** Banners de fallback usados enquanto o banco estiver vazio. */
+const FALLBACK_BANNERS: Banner[] = [
+  {
+    id: 'fallback-1',
+    page: 'home',
+    title: 'Realize o sonho da casa própria',
+    subtitle: 'Mais de 15 anos conectando famílias aos melhores imóveis de Recife e região metropolitana.',
+    cta_text: 'Conhecer imóveis',
+    cta_link: '/comprar',
+    image_url: 'https://placehold.co/1280x533/010744/f2d22e?text=Morejá+Imobiliária',
+    mobile_image_url: null,
+    position: 0,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'fallback-2',
+    page: 'home',
+    title: 'Quer vender mais rápido?',
+    subtitle: 'Anuncie com a Morejá e alcance milhares de compradores qualificados em Recife.',
+    cta_text: 'Anunciar imóvel',
+    cta_link: '/contato',
+    image_url: 'https://placehold.co/1280x533/f2d22e/010744?text=Anuncie+com+a+Morejá',
+    mobile_image_url: null,
+    position: 1,
+    active: true,
+    created_at: '',
+  },
+]
+
 export function BannersSection({
-  banners,
+  banners: bannersProp,
   autoplay = true,
   intervalSeconds = 5,
 }: BannersSectionProps) {
+  // Usar fallback quando banco estiver vazio
+  const banners = bannersProp.length > 0 ? bannersProp : FALLBACK_BANNERS
+
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -46,7 +79,7 @@ export function BannersSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, banners.length, paused])
 
-  if (banners.length === 0) return null
+  // banners nunca é vazio aqui — já substituído por FALLBACK_BANNERS acima
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-white">

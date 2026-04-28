@@ -5,6 +5,70 @@ interface TestimonialsSectionProps {
   testimonials: Testimonial[]
 }
 
+/** Depoimentos de fallback usados enquanto o banco estiver vazio. */
+const FALLBACK_TESTIMONIALS: Testimonial[] = [
+  {
+    id: 'ft-1',
+    name: 'Ana Beatriz Melo',
+    role: 'Compradora — Boa Viagem',
+    text: 'A equipe da Morejá tornou todo o processo de compra muito tranquilo. Encontramos o apartamento ideal em Boa Viagem em menos de três semanas.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'ft-2',
+    name: 'Carlos Eduardo Lima',
+    role: 'Locador — Graças',
+    text: 'Aluguel gerenciado com profissionalismo. Nunca precisei me preocupar com inadimplência ou burocracia. Recomendo a Morejá sem hesitar.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'ft-3',
+    name: 'Fernanda Souza',
+    role: 'Compradora — Aflitos',
+    text: 'Atendimento impecável do início ao fim. O corretor conhecia cada detalhe do bairro e nos ajudou a tomar a melhor decisão.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'ft-4',
+    name: 'Ricardo Alves',
+    role: 'Vendedor — Casa Forte',
+    text: 'Vendi meu imóvel em tempo recorde. A divulgação foi excelente e a equipe cuidou de toda a documentação com muita competência.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'ft-5',
+    name: 'Juliana Ferreira',
+    role: 'Locatária — Pina',
+    text: 'Processo rápido e transparente. A Morejá foi clara em cada etapa da locação e me ajudou a encontrar um apartamento dentro do meu orçamento.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+  {
+    id: 'ft-6',
+    name: 'Marcos Henrique Costa',
+    role: 'Comprador — Boa Viagem',
+    text: 'Qualidade no atendimento que diferencia a Morejá das demais imobiliárias. Sinto que tive um parceiro de verdade nessa jornada.',
+    rating: 5,
+    photo_url: null,
+    active: true,
+    created_at: '',
+  },
+]
+
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
@@ -20,8 +84,9 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
-export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
-  if (testimonials.length === 0) return null
+export function TestimonialsSection({ testimonials: testimonialsProp }: TestimonialsSectionProps) {
+  // Usar fallback quando banco estiver vazio
+  const testimonials = testimonialsProp.length > 0 ? testimonialsProp : FALLBACK_TESTIMONIALS
 
   return (
     <section className="section bg-[#010744]">

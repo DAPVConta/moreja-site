@@ -19,6 +19,46 @@ interface ResidentialFeaturedProps {
   hrefAll?: string
 }
 
+/** Imóveis residenciais de fallback — exibidos enquanto o banco estiver vazio. */
+const FALLBACK_RESIDENTIAL: Property[] = [
+  {
+    id: 'res-1', codigo: 'MRJ-001', titulo: 'Apartamento em Boa Viagem',
+    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
+    preco: 580000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
+    area_total: 85, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
+    descricao: 'Apartamento bem localizado em Boa Viagem, a poucos metros da praia.',
+    fotos: ['https://placehold.co/800x600/010744/f2d22e?text=Apto+Boa+Viagem'],
+    destaque: true,
+  },
+  {
+    id: 'res-2', codigo: 'MRJ-002', titulo: 'Casa em Casa Forte',
+    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
+    preco: 920000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
+    area_total: 220, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
+    descricao: 'Casa espaçosa em condomínio fechado, bairro nobre de Casa Forte.',
+    fotos: ['https://placehold.co/800x600/1a1f6e/f2d22e?text=Casa+Casa+Forte'],
+    destaque: true,
+  },
+  {
+    id: 'res-3', codigo: 'MRJ-003', titulo: 'Apartamento nas Graças',
+    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
+    preco: 750000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
+    area_total: 110, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
+    descricao: 'Apartamento reformado no bairro das Graças, próximo ao Parque Amorim.',
+    fotos: ['https://placehold.co/800x600/ededd1/010744?text=Apto+Graças'],
+    destaque: true,
+  },
+  {
+    id: 'res-4', codigo: 'MRJ-004', titulo: 'Cobertura no Pina',
+    tipo: 'Cobertura', subtipo: 'Cobertura', finalidade: 'Venda',
+    preco: 1200000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
+    area_total: 180, quartos: 4, suites: 3, banheiros: 4, vagas: 2,
+    descricao: 'Cobertura duplex com vista para o mar no Pina.',
+    fotos: ['https://placehold.co/800x600/010744/ededd1?text=Cobertura+Pina'],
+    destaque: true,
+  },
+]
+
 export function ResidentialFeatured({
   properties,
   loading = false,
@@ -26,27 +66,15 @@ export function ResidentialFeatured({
   subtitle = 'Apartamentos, casas e coberturas para sua família',
   hrefAll = '/comprar?tipo=Residencial',
 }: ResidentialFeaturedProps) {
-  const residentials = properties
-    .filter((p) => {
-      const t = (p.tipo ?? '').toLowerCase()
-      return ['apartamento', 'casa', 'cobertura', 'studio', 'kitnet', 'residencial'].some((k) =>
-        t.includes(k),
-      )
-    })
-    .slice(0, 6)
-
-  if (residentials.length === 0 && !loading) {
-    return (
-      <section className="section bg-[#fafbff]">
-        <div className="container-page text-center py-16 text-gray-400">
-          <p className="text-lg">Nenhum imóvel residencial em destaque.</p>
-          <Link href={hrefAll} className="btn-primary mt-4 inline-block">
-            Ver catálogo residencial
-          </Link>
-        </div>
-      </section>
+  const filtered = properties.filter((p) => {
+    const t = (p.tipo ?? '').toLowerCase()
+    return ['apartamento', 'casa', 'cobertura', 'studio', 'kitnet', 'residencial'].some((k) =>
+      t.includes(k),
     )
-  }
+  })
+
+  // Usar fallback quando banco estiver vazio
+  const residentials = (filtered.length > 0 ? filtered : FALLBACK_RESIDENTIAL).slice(0, 6)
 
   const skeletonCount = 6
 

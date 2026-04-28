@@ -20,19 +20,19 @@ const defaultCards: CategoryCard[] = [
     title: 'Residencial',
     description: 'Apartamentos, casas e condomínios para sua família',
     href: '/comprar?tipo=Apartamento',
-    bg: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+    bg: 'https://placehold.co/800x1000/010744/f2d22e?text=Residencial',
   },
   {
     title: 'Comercial',
     description: 'Salas, galpões e espaços para o seu negócio crescer',
     href: '/comprar?tipo=Comercial',
-    bg: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    bg: 'https://placehold.co/800x1000/1a1f6e/f2d22e?text=Comercial',
   },
   {
     title: 'Empreendimentos',
     description: 'Lançamentos exclusivos e novos empreendimentos',
     href: '/empreendimentos',
-    bg: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80',
+    bg: 'https://placehold.co/800x1000/f2d22e/010744?text=Empreendimentos',
   },
 ]
 
