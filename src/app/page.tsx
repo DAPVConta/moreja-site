@@ -1,7 +1,14 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { fetchFeaturedProperties } from '@/lib/properties'
-import { getSiteStats, getTestimonials, getHomeSections, getBanners } from '@/lib/site-config'
+import {
+  getSiteStats,
+  getTestimonials,
+  getHomeSections,
+  getBanners,
+  getBrokers,
+  getRecentPosts,
+} from '@/lib/site-config'
 import { HeroSection } from '@/components/home/HeroSection'
 import { FeaturedProperties } from '@/components/home/FeaturedProperties'
 import { CategoryCards } from '@/components/home/CategoryCards'
@@ -15,6 +22,10 @@ import { FeaturedCities } from '@/components/home/FeaturedCities'
 import { LaunchesPreview } from '@/components/home/LaunchesPreview'
 import { LaunchesWaitlist } from '@/components/home/LaunchesWaitlist'
 import { BannersSection } from '@/components/home/BannersSection'
+import { TeamSection } from '@/components/home/TeamSection'
+import { PropertyValuationCTA } from '@/components/home/PropertyValuationCTA'
+import { BlogPreview } from '@/components/home/BlogPreview'
+import { CoverageMap } from '@/components/home/CoverageMap'
 
 function CtaAnunciarSection() {
   return (
@@ -40,12 +51,22 @@ function CtaAnunciarSection() {
 }
 
 export default async function HomePage() {
-  const [featuredProperties, stats, testimonials, sections, homeBanners] = await Promise.all([
+  const [
+    featuredProperties,
+    stats,
+    testimonials,
+    sections,
+    homeBanners,
+    brokers,
+    recentPosts,
+  ] = await Promise.all([
     fetchFeaturedProperties(),
     getSiteStats(),
     getTestimonials(),
     getHomeSections(),
     getBanners('home'),
+    getBrokers(),
+    getRecentPosts(3),
   ])
 
   // Helper: extrai config jsonb de cada seção (caso cadastrada no admin)
@@ -170,6 +191,66 @@ export default async function HomePage() {
           subtitle={c.subtitle}
           lancamentoId={c.lancamento_id ?? null}
           benefits={c.benefits}
+        />
+      )
+    },
+    team: () => {
+      const c = cfg('team') as {
+        title?: string; subtitle?: string; cta_label?: string; cta_href?: string; limit?: number
+      }
+      return (
+        <TeamSection
+          brokers={brokers}
+          title={c.title}
+          subtitle={c.subtitle}
+          ctaLabel={c.cta_label}
+          ctaHref={c.cta_href}
+          limit={c.limit}
+        />
+      )
+    },
+    valuation_cta: () => {
+      const c = cfg('valuation_cta') as {
+        title?: string; subtitle?: string; benefits?: string[]
+        cta_label?: string; cta_href?: string; image_url?: string
+      }
+      return (
+        <PropertyValuationCTA
+          title={c.title}
+          subtitle={c.subtitle}
+          benefits={c.benefits}
+          ctaLabel={c.cta_label}
+          ctaHref={c.cta_href}
+          imageUrl={c.image_url}
+        />
+      )
+    },
+    blog_preview: () => {
+      const c = cfg('blog_preview') as {
+        title?: string; subtitle?: string; cta_label?: string; cta_href?: string
+      }
+      return (
+        <BlogPreview
+          posts={recentPosts}
+          title={c.title}
+          subtitle={c.subtitle}
+          ctaLabel={c.cta_label}
+          ctaHref={c.cta_href}
+        />
+      )
+    },
+    coverage_map: () => {
+      const c = cfg('coverage_map') as {
+        title?: string; subtitle?: string; city_label?: string; cta_href?: string
+        regions?: { name: string; slug: string; count?: number; highlight?: boolean }[]
+      }
+      return (
+        <CoverageMap
+          title={c.title}
+          subtitle={c.subtitle}
+          cityLabel={c.city_label}
+          ctaHref={c.cta_href}
+          regions={c.regions ?? []}
         />
       )
     },

@@ -14,7 +14,8 @@
 | 5 | SEO avançado | ✅ |
 | 6 | Tracking & LGPD Consent Mode v2 | ✅ |
 | 7 | Supremo CRM hardening | ✅ código / ⏳ deploy edge fns |
-| 8 | Admin refactor + seções RE/MAX | 🔜 próximo |
+| 8a | Seções RE/MAX no público | ✅ |
+| 8b | Admin SPA refactor | 🔜 próximo |
 | 9 | Security hardening pleno | 🔜 |
 | 10 | Performance & QA final | 🔜 |
 | 11 | Diferenciadores opcionais (AI search, mapa interativo) | 🔜 opcional |
@@ -95,6 +96,17 @@
 - PropertyViewTracker plugado em /imovel e /empreendimentos
 - ManageConsentLink no Footer
 
+### Seções RE/MAX no público (Bloco 8a)
+- TopBar institucional com "Anuncie seu imóvel" + "Equipe" no Header (desktop)
+- `TeamSection.tsx` — "Encontre um Corretor" lendo `brokers` table (foto, CRECI, especialidades, WhatsApp/Phone/Email CTAs)
+- `PropertyValuationCTA.tsx` — seção home pitch + benefits para vendedor
+- `/avaliar` — wizard 4-step (Tipo+Finalidade · Localização+Área · Detalhes · Contato) com progress bar, grava em `valuation_requests` E dispara send-lead → Supremo
+- `BlogPreview.tsx` — 3 artigos da home lendo `posts` table (migration 022)
+- `CoverageMap.tsx` — mapa de cobertura por bairros sem JS de mapa (zero deps), dotted overlay + grid de regiões com contagem
+- Badge "Morejá Premium" auto-aplicada em PropertyCard quando preço > threshold (default R$ 1MM, configurável)
+- Migration 022 — `posts` table com status enum + RLS + audit trigger
+- 4 entradas novas no sectionMap da home: `team`, `valuation_cta`, `blog_preview`, `coverage_map` (admin pode reordenar/ativar)
+
 ### Supremo hardening (Bloco 7)
 - send-lead **agora empurra leads pro Supremo** via POST `/oportunidades` (era só Supabase)
 - fetch retry/backoff (250ms · 500ms · 1.5s) + timeout 8s + circuit breaker via stale-on-error
@@ -126,7 +138,7 @@
 7. **Rotacionar segredos** (decisão sua para o final): SUPABASE_SERVICE_ROLE_KEY, SUPREMO_JWT, DB password
 8. **Popular conteúdo** opcional: `neighborhood_guides`, `lancamentos_waitlist` ativar a seção, banners, testimonials, etc
 
-### Bloco 8 — Admin refactor + seções RE/MAX (🔜 próximo)
+### Bloco 8b — Admin SPA refactor (🔜 próximo)
 - shadcn pass nas páginas admin (Dashboard, banners, brokers, leads, etc.)
 - Image-crop moderno (react-easy-crop + FocalPointPicker existente)
 - Branding panel light/dark (lê migration 011)
@@ -136,15 +148,18 @@
 - Audit log viewer (migration 010)
 - Admin users + roles UI (migration 009)
 - Pages CMS com draft/publish/archive + revisões (migration 016)
+- Posts editor (migration 022) — novo CRUD pra blog
+- Brokers editor enriquecido (especialidades, foto crop, ordenação drag)
+- Valuation requests inbox (migration 019)
+- Lancamentos waitlist inbox (migration 019)
+- Tracking scripts editor (migration 012 — slot system head/body)
 - MFA + idle timeout
-- 🆕 RE/MAX-inspired sections (do brief do agente):
-  - **TeamSection.tsx** "Encontre um Corretor" (lê `brokers`)
-  - **PropertyValuationCTA + /avaliar** wizard 4-step (`valuation_requests`)
-  - **BlogPreview + /blog** — exige nova migration `posts`
-  - **TopBar.tsx** institucional acima do header
-  - **Badge "Morejá Premium"** auto-aplicada acima de threshold
-  - **CoverageMap.tsx** SVG das regiões atendidas
-  - Contagem ao vivo de imóveis nas FeaturedCities
+
+### Pendente Bloco 8a (você popular conteúdo)
+- Inserir corretores em `brokers` (admin SPA já edita, mas verifique RLS funciona após migrations 009)
+- Criar artigos em `posts` (migration 022 ativa quando rodar; admin SPA do 8b vai ter editor)
+- Configurar `coverage_map` config jsonb no home_sections com regions array
+- Considerar custom `premium_price_threshold` em site_config se R$ 1MM não fizer sentido pro mercado de Recife
 
 ### Bloco 9 — Security hardening pleno
 - CSP com nonce per-request

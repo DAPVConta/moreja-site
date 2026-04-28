@@ -14,6 +14,9 @@ interface PropertyCardProps {
   priority?: boolean
   /** Aspect ratio do thumb. mobile: 16:9 (mais cards no fold); desktop: mantém 4:3. */
   aspect?: 'card' | 'square'
+  /** Threshold de preço (em R$) p/ aplicar badge "Morejá Premium".
+   *  Configurável em site_config.premium_price_threshold. Default: 1.000.000 */
+  premiumThreshold?: number
 }
 
 const PLACEHOLDER = 'https://placehold.co/600x400/ededd1/010744?text=Sem+Foto'
@@ -22,6 +25,7 @@ export function PropertyCard({
   property,
   priority = false,
   aspect = 'card',
+  premiumThreshold = 1_000_000,
 }: PropertyCardProps) {
   // Mostra até 5 fotos no slider (limita pra evitar requests desnecessários)
   const photos = (property.fotos.length > 0 ? property.fotos : [PLACEHOLDER]).slice(0, 5)
@@ -44,6 +48,12 @@ export function PropertyCard({
   const priceDropped =
     (property as Property & { preco_anterior?: number }).preco_anterior &&
     (property as Property & { preco_anterior?: number }).preco_anterior! > property.preco
+  // Auto-aplica badge "Morejá Premium" acima do threshold (só Venda — aluguel
+  // tem preços de outra ordem)
+  const isPremium =
+    property.finalidade === 'Venda' &&
+    property.preco >= premiumThreshold &&
+    !isLaunch
 
   const aspectClass = aspect === 'square' ? 'aspect-square' : 'aspect-[16/9] sm:aspect-[4/3]'
 
@@ -122,6 +132,7 @@ export function PropertyCard({
               {property.finalidade}
             </Badge>
             {isLaunch && <Badge variant="launch">Lançamento</Badge>}
+            {isPremium && <Badge variant="exclusive">Morejá Premium</Badge>}
           </div>
 
           {/* Badges promocionais canto inferior esquerdo */}

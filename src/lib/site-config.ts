@@ -93,6 +93,60 @@ export const getHomeSections = cache(async (): Promise<HomeSection[]> => {
 })
 
 /**
+ * Blog post (migration 022).
+ */
+export interface BlogPost {
+  id: string
+  slug: string
+  title: string
+  excerpt: string | null
+  content: string | null
+  cover_image: string | null
+  category: string | null
+  author_name: string | null
+  status: 'draft' | 'published' | 'archived'
+  published_at: string | null
+  meta_title: string | null
+  meta_description: string | null
+  og_image: string | null
+  read_minutes: number | null
+  views: number
+  position: number
+}
+
+export const getRecentPosts = cache(
+  async (limit = 3): Promise<BlogPost[]> => {
+    try {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(limit)
+      return (data ?? []) as BlogPost[]
+    } catch {
+      return []
+    }
+  }
+)
+
+export const getPostBySlug = cache(async (slug: string): Promise<BlogPost | null> => {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .maybeSingle()
+    return data as BlogPost | null
+  } catch {
+    return null
+  }
+})
+
+/**
  * SEO route record — para rotas não-CMS (/comprar, /alugar, etc).
  * Lê de seo_routes (migration 013).
  */

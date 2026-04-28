@@ -43,6 +43,7 @@ const MIGRATIONS = [
   '019_engagement_features.sql',
   '020_rls_tightening_and_indexes.sql',
   '021_supremo_retry_cron.sql',
+  '022_blog_posts.sql',
 ]
 
 const client = new Client({

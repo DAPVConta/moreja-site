@@ -223,6 +223,23 @@ export function Header({
               <span>{businessHours}</span>
             </div>
           </div>
+
+          {/* B2B / institutional shortcuts (RE/MAX-inspired) */}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/avaliar"
+              className="font-semibold hover:text-[#f2d22e] transition-colors"
+            >
+              Anuncie seu imóvel
+            </Link>
+            <span aria-hidden="true" className="text-white/30">·</span>
+            <Link
+              href="/sobre#equipe"
+              className="hover:text-[#f2d22e] transition-colors"
+            >
+              Equipe
+            </Link>
+          </div>
         </div>
       )}
 
