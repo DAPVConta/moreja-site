@@ -11,6 +11,7 @@ import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { SaveButton } from '@/components/properties/SaveButton'
 import { IdleCallbackPrompt } from '@/components/properties/IdleCallbackPrompt'
+import { MortgageSimulatorCTA } from '@/components/properties/MortgageSimulatorCTA'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -304,6 +305,15 @@ export default async function ImovelPage({ params }: PageProps) {
                       Ligar
                     </a>
                   </div>
+                )}
+
+                {/* Mortgage simulator — só p/ Venda */}
+                {property.finalidade === 'Venda' && property.preco > 0 && (
+                  <MortgageSimulatorCTA
+                    preco={property.preco}
+                    cidade={property.cidade}
+                    estado={property.estado}
+                  />
                 )}
 
                 {/* Lead Form */}
