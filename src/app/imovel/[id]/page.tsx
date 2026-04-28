@@ -6,6 +6,7 @@ import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, Chevro
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
 import { BreadcrumbJsonLd, PropertyJsonLd } from '@/components/seo/JsonLd'
+import { PropertyViewTracker } from '@/components/seo/PropertyViewTracker'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
@@ -79,6 +80,14 @@ export default async function ImovelPage({ params }: PageProps) {
         ]}
       />
       <PropertyJsonLd property={property} url={`${SITE_URL}/imovel/${id}`} />
+      <PropertyViewTracker
+        property={{
+          id: property.id,
+          titulo: property.titulo,
+          preco: property.preco,
+          tipo: property.tipo,
+        }}
+      />
 
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}

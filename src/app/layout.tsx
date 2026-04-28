@@ -6,7 +6,13 @@ import { Footer } from '@/components/layout/Footer'
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab'
 import { PwaInstallPrompt } from '@/components/layout/PwaInstallPrompt'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { ThirdPartyScripts, GtmNoScript } from '@/components/seo/ThirdPartyScripts'
+import {
+  ThirdPartyScripts,
+  GtmNoScript,
+  ConsentModeInit,
+  BodyStartScripts,
+} from '@/components/seo/ThirdPartyScripts'
+import { CookieConsent } from '@/components/seo/CookieConsent'
 import { getSiteConfig } from '@/lib/site-config'
 
 const raleway = Raleway({
@@ -216,8 +222,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://snap.licdn.com" />
         <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
+        <link rel="dns-prefetch" href="https://www.clarity.ms" />
+        <link rel="dns-prefetch" href="https://static.hotjar.com" />
         <style dangerouslySetInnerHTML={{ __html: brandCss }} />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+        {/* Consent Mode v2 init — DEFAULT 'denied' antes de qualquer pixel */}
+        <ConsentModeInit />
       </head>
       <body className="min-h-full flex flex-col font-sans">
         {/* Skip link — focável só via teclado (Tab no início da página).
@@ -234,6 +244,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* GTM noscript — first element inside body */}
         <GtmNoScript />
+
+        {/* Custom scripts (body_start) — admin-controlled */}
+        <BodyStartScripts />
 
         {/* Schema.org structured data */}
         <JsonLd data={organizationSchema} />
@@ -257,7 +270,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* PWA install banner — só aparece após 3+ pageviews, dismissable 30 dias */}
         <PwaInstallPrompt />
 
-        {/* Third-party scripts — loaded afterInteractive, IDs from DB */}
+        {/* Cookie consent LGPD — banner granular (Aceitar / Recusar / Personalizar) */}
+        <CookieConsent />
+
+        {/* Third-party scripts — loaded afterInteractive, IDs from DB,
+            todos respeitam Consent Mode v2 */}
         <ThirdPartyScripts />
       </body>
     </html>
