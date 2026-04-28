@@ -31,6 +31,17 @@ const MIGRATIONS = [
   '007_branding_extensions.sql',
   '008_home_sections_remax.sql',
   '009_admin_users_and_security_hotfix.sql',
+  '010_audit_log.sql',
+  '011_branding_dark_mode.sql',
+  '012_tracking_extras.sql',
+  '013_seo_routes.sql',
+  '014_navigation.sql',
+  '015_footer_links.sql',
+  '016_pages_revisions.sql',
+  '017_ui_strings.sql',
+  '018_leads_supremo_utm.sql',
+  '019_engagement_features.sql',
+  '020_rls_tightening_and_indexes.sql',
 ]
 
 const client = new Client({
