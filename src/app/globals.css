@@ -512,6 +512,17 @@
   animation: shimmer 1.5s linear infinite;
 }
 
+/* ── Hero parallax — CSS scroll-driven (Ação 1, Fase 3) ─────────────────────
+   Moves the hero backdrop image upward by 12vh as the root scrolls 0→50vh.
+   Requires @supports guard in the consuming stylesheet or component.
+   The global prefers-reduced-motion rule collapses animation-duration to
+   0.01ms, which effectively freezes the animation — no extra query needed.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes hero-parallax {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -12vh, 0); }
+}
+
 /* ── View Transition — reduced motion: collapse all durations ────────────────
    Complements the existing *{} rule in @layer base by also covering
    ::view-transition-* pseudo-elements that live outside the normal DOM cascade.
