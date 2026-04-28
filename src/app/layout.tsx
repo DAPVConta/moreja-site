@@ -4,6 +4,7 @@ import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab'
+import { PwaInstallPrompt } from '@/components/layout/PwaInstallPrompt'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ThirdPartyScripts, GtmNoScript } from '@/components/seo/ThirdPartyScripts'
 import { getSiteConfig } from '@/lib/site-config'
@@ -252,6 +253,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
 
         <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
+
+        {/* PWA install banner — só aparece após 3+ pageviews, dismissable 30 dias */}
+        <PwaInstallPrompt />
 
         {/* Third-party scripts — loaded afterInteractive, IDs from DB */}
         <ThirdPartyScripts />

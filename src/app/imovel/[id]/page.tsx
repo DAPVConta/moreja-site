@@ -10,6 +10,7 @@ import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { SaveButton } from '@/components/properties/SaveButton'
+import { IdleCallbackPrompt } from '@/components/properties/IdleCallbackPrompt'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -318,6 +319,13 @@ export default async function ImovelPage({ params }: PageProps) {
             </aside>
           </div>
         </div>
+
+        {/* Idle callback prompt — abre após 45s de dwell time, sem nag agressivo */}
+        <IdleCallbackPrompt
+          imovelId={property.id}
+          imovelCodigo={property.codigo}
+          imovelTitulo={property.titulo}
+        />
 
         {/* Mobile sticky action bar — pedaço 6.4
             3 botões: Salvar (toggle), WhatsApp, Ligar.
