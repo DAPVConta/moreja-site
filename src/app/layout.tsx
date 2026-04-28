@@ -18,6 +18,7 @@ import {
 import { CookieConsent } from '@/components/seo/CookieConsent'
 import { LeadTrackingInit } from '@/components/seo/LeadTrackingInit'
 import { getSiteConfig } from '@/lib/site-config'
+import { CommandPalette } from '@/components/layout/CommandPalette'
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -298,6 +299,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* First-touch UTM tracking init (sticky em localStorage) */}
         <LeadTrackingInit />
+
+        {/* Global command palette — Cmd+K / Ctrl+K — Fase 9 */}
+        <CommandPalette />
 
         {/* Third-party scripts — loaded afterInteractive, IDs from DB,
             todos respeitam Consent Mode v2 */}

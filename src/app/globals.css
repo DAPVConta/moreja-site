@@ -486,6 +486,38 @@
   }
 }
 
+/* ── Header top-bar marquee — Phase 9 ───────────────────────────────────────
+   Infinite horizontal scroll for institutional info strip (desktop only).
+   One cycle = 60s (slow, readable). pause-on-hover via animation-play-state.
+   The global prefers-reduced-motion rule in @layer base collapses
+   animation-duration to 0.01ms, effectively freezing the marquee.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes header-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.header-marquee-track {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 4%,
+    black 96%,
+    transparent 100%
+  );
+}
+
+.header-marquee-inner {
+  display: flex;
+  width: max-content;
+  animation: header-marquee 60s linear infinite;
+}
+
+.header-marquee-inner:hover {
+  animation-play-state: paused;
+}
+
 /* ── AnimatedChip pulse keyframe ─────────────────────────────────────────────
    Used by AnimatedChip's `animated-chip-pulse` class.
    The global `prefers-reduced-motion` rule in @layer base already sets

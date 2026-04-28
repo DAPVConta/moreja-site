@@ -3,9 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
+import { Menu, X, MapPin, Phone, Mail, Clock, MessageCircle, Search } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MobileSearchButton } from './MobileSearchButton'
 import { HeaderMegaMenu } from './HeaderMegaMenu'
+
+// ── Nav data ──────────────────────────────────────────────────────────────────
 
 const COMPRAR_COLUMNS = [
   {
@@ -74,6 +77,8 @@ const navLinks = [
   { href: '/contato', label: 'Contato' },
 ]
 
+// ── Logo ──────────────────────────────────────────────────────────────────────
+
 export function MoRejaLogo({
   variant = 'navy',
   logoUrl,
@@ -119,6 +124,128 @@ export function MoRejaLogo({
   )
 }
 
+// ── Marquee top-bar (desktop only) ───────────────────────────────────────────
+// Items are duplicated once so the seam is invisible (same technique as
+// testimonials-marquee). CSS classes `.header-marquee-track / -inner` are
+// defined in globals.css.
+
+interface MarqueeItem {
+  id: string
+  content: React.ReactNode
+}
+
+function TopBarMarquee({ items }: { items: MarqueeItem[] }) {
+  return (
+    <div className="header-marquee-track flex-1 overflow-hidden">
+      {/* Double the items so the loop seam is invisible */}
+      <div className="header-marquee-inner">
+        {[...items, ...items].map((item, i) => (
+          <span
+            key={`${item.id}-${i}`}
+            className="flex items-center shrink-0 pr-10"
+          >
+            {item.content}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Nav underline (layoutId) ──────────────────────────────────────────────────
+// A single <motion.div> with layoutId="header-nav-underline" slides between
+// nav items when the active route changes. Each link renders it conditionally.
+
+interface NavLinkProps {
+  href: string
+  label: string
+  isActive: boolean
+  isScrolled: boolean
+}
+
+function DesktopNavLink({ href, label, isActive, isScrolled }: NavLinkProps) {
+  const [hovered, setHovered] = useState(false)
+  const showUnderline = isActive || hovered
+
+  return (
+    <Link
+      href={href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={[
+        'relative inline-flex flex-col items-center gap-0 pb-0.5',
+        'text-sm font-semibold transition-colors duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2 rounded-sm',
+        isScrolled
+          ? isActive
+            ? 'text-[#010744]'
+            : 'text-gray-600 hover:text-[#010744]'
+          : isActive
+          ? 'text-white'
+          : 'text-white/80 hover:text-white',
+      ].join(' ')}
+    >
+      {label}
+      <AnimatePresence>
+        {showUnderline && (
+          <motion.span
+            layoutId="header-nav-underline"
+            className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#f2d22e]"
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            exit={{ scaleX: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            style={{ originX: 0.5 }}
+          />
+        )}
+      </AnimatePresence>
+    </Link>
+  )
+}
+
+// ── Search trigger (desktop) ──────────────────────────────────────────────────
+// Opens CommandPalette; clicking dispatches a synthetic Ctrl+K so the palette's
+// own global listener picks it up — keeps a single source of truth for
+// open/close logic without prop drilling.
+
+function SearchTrigger({ isScrolled }: { isScrolled: boolean }) {
+  function openPalette() {
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'k',
+        ctrlKey: true,
+        metaKey: false,
+        bubbles: true,
+        cancelable: true,
+      }),
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={openPalette}
+      aria-label="Abrir busca global (Cmd K)"
+      className={[
+        'hidden lg:inline-flex items-center gap-2 h-9 px-3 rounded-lg border text-xs font-medium',
+        'transition-all duration-200 cursor-pointer',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2',
+        isScrolled
+          ? 'border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 bg-gray-50/60'
+          : 'border-white/20 text-white/60 hover:border-white/40 hover:text-white/80 bg-white/5',
+      ].join(' ')}
+    >
+      <Search size={13} aria-hidden="true" />
+      <span>Buscar...</span>
+      <kbd className="inline-flex items-center justify-center h-4 px-1 rounded border border-current/40 text-[10px] font-mono opacity-70">
+        ⌘K
+      </kbd>
+    </button>
+  )
+}
+
+// ── Header props ──────────────────────────────────────────────────────────────
+
 interface HeaderProps {
   logoUrl?: string | null
   companyName?: string
@@ -127,6 +254,8 @@ interface HeaderProps {
   whatsapp?: string
   businessHours?: string
 }
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export function Header({
   logoUrl,
@@ -139,49 +268,56 @@ export function Header({
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [dragX, setDragX] = useState(0) // px deslocamento durante swipe
+  const [dragX, setDragX] = useState(0)
   const dragStart = useRef<number | null>(null)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
+  // ── Liquid-glass: IntersectionObserver on a sentinel at 80px ──
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When sentinel is NOT intersecting (scrolled past 80px), apply glass
+        setScrolled(!entry.isIntersecting)
+      },
+      { threshold: 0, rootMargin: '0px' },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
   }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [pathname])
 
-  // Lock body scroll while mobile menu is open + ESC fecha
+  // Lock body scroll while mobile menu is open + ESC closes
   useEffect(() => {
     if (!mobileOpen) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setMobileOpen(false)
     }
     window.addEventListener('keydown', onKey)
-
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
     }
   }, [mobileOpen])
 
-  // Handlers de swipe-right para fechar
+  // Swipe-right to close mobile drawer
   function onTouchStart(e: React.TouchEvent) {
     dragStart.current = e.touches[0].clientX
   }
   function onTouchMove(e: React.TouchEvent) {
     if (dragStart.current == null) return
     const dx = e.touches[0].clientX - dragStart.current
-    if (dx > 0) setDragX(dx) // só permite arrastar para a direita
+    if (dx > 0) setDragX(dx)
   }
   function onTouchEnd() {
-    // Fechar se arrastou > 80px; senão volta ao lugar
     if (dragX > 80) setMobileOpen(false)
     setDragX(0)
     dragStart.current = null
@@ -189,85 +325,148 @@ export function Header({
 
   const whatsappDigits = whatsapp?.replace(/\D/g, '')
 
+  // ── Marquee items ──
+  const marqueeItems: MarqueeItem[] = [
+    ...(phone
+      ? [
+          {
+            id: 'phone',
+            content: (
+              <a
+                href={`tel:${phone.replace(/\D/g, '')}`}
+                className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
+              >
+                <Phone size={12} aria-hidden="true" />
+                <span>{phone}</span>
+              </a>
+            ),
+          },
+        ]
+      : []),
+    ...(email
+      ? [
+          {
+            id: 'email',
+            content: (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
+              >
+                <Mail size={12} aria-hidden="true" />
+                <span>{email}</span>
+              </a>
+            ),
+          },
+        ]
+      : []),
+    ...(businessHours
+      ? [
+          {
+            id: 'hours',
+            content: (
+              <span className="flex items-center gap-1.5 text-white/70">
+                <Clock size={12} aria-hidden="true" />
+                <span>{businessHours}</span>
+              </span>
+            ),
+          },
+        ]
+      : []),
+    {
+      id: 'creci',
+      content: (
+        <span className="text-white/60">CRECI · PE</span>
+      ),
+    },
+    {
+      id: 'region',
+      content: (
+        <span className="text-white/60">Atendemos toda Recife/PE</span>
+      ),
+    },
+    {
+      id: 'anuncie',
+      content: (
+        <Link
+          href="/avaliar"
+          className="font-semibold hover:text-[#f2d22e] transition-colors"
+        >
+          Anuncie seu imóvel
+        </Link>
+      ),
+    },
+  ]
+
+  // Decide if top-bar should render (needs at least one item)
+  const hasTopBar = phone || email || businessHours
+
   return (
     <>
-      {/* ── Top bar (desktop) ───────────────────────────────────────── */}
-      {(phone || email) && (
+      {/* ── Sentinel for IntersectionObserver — 80px below viewport top ── */}
+      <div
+        ref={sentinelRef}
+        aria-hidden="true"
+        className="fixed top-[80px] left-0 right-0 h-px pointer-events-none z-[-1]"
+      />
+
+      {/* ── Top bar — marquee (desktop only) ── */}
+      {hasTopBar && (
         <div
-          className="hidden lg:block bg-[#010744] text-white/85 text-xs"
+          className="hidden lg:flex items-center bg-[#010744] text-white/85 text-xs h-9 overflow-hidden"
           aria-label="Informações de contato"
         >
-          <div className="container-page flex items-center justify-between h-9">
-            <div className="flex items-center gap-5">
-              {phone && (
-                <a
-                  href={`tel:${phone.replace(/\D/g, '')}`}
-                  className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
-                >
-                  <Phone size={13} aria-hidden="true" />
-                  <span>{phone}</span>
-                </a>
-              )}
-              {email && (
-                <a
-                  href={`mailto:${email}`}
-                  className="flex items-center gap-1.5 hover:text-[#f2d22e] transition-colors"
-                >
-                  <Mail size={13} aria-hidden="true" />
-                  <span>{email}</span>
-                </a>
-              )}
+          <div className="container-page flex items-center gap-0 w-full overflow-hidden">
+            {/* Reduced-motion fallback: show first 2 static items */}
+            <div
+              className="hidden motion-reduce:flex items-center gap-5 text-white/85"
+              aria-hidden="false"
+            >
+              {marqueeItems.slice(0, 2).map((item) => (
+                <span key={item.id}>{item.content}</span>
+              ))}
             </div>
-            {businessHours && (
-              <div className="flex items-center gap-1.5 text-white/70">
-                <Clock size={13} aria-hidden="true" />
-                <span>{businessHours}</span>
-              </div>
-            )}
-          </div>
-
-          {/* B2B / institutional shortcuts (RE/MAX-inspired) */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/avaliar"
-              className="font-semibold hover:text-[#f2d22e] transition-colors"
-            >
-              Anuncie seu imóvel
-            </Link>
-            <span aria-hidden="true" className="text-white/30">·</span>
-            <Link
-              href="/sobre#equipe"
-              className="hover:text-[#f2d22e] transition-colors"
-            >
-              Equipe
-            </Link>
+            {/* Animated marquee (hidden when reduce-motion) */}
+            <div className="flex-1 overflow-hidden motion-reduce:hidden" aria-hidden="true">
+              <TopBarMarquee items={marqueeItems} />
+            </div>
           </div>
         </div>
       )}
 
+      {/* ── Main header — liquid-glass ── */}
       <header
-        className={`sticky top-0 z-50 w-full bg-white transition-shadow duration-300 ${
-          scrolled ? 'shadow-md' : 'shadow-sm'
-        }`}
+        className={[
+          'sticky top-0 z-50 w-full',
+          'transition-all duration-300',
+          scrolled
+            ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
+            : 'bg-transparent shadow-none border-b border-transparent',
+        ].join(' ')}
       >
         <div className="container-page">
           <div
-            className={`flex items-center justify-between transition-all duration-300 ${
-              scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20'
-            }`}
+            className={[
+              'flex items-center justify-between transition-all duration-300',
+              scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20',
+            ].join(' ')}
           >
             {/* Logo */}
             <Link href="/" aria-label={`${companyName ?? 'Morejá'} — Início`}>
-              <MoRejaLogo variant="navy" logoUrl={logoUrl} companyName={companyName} />
+              <MoRejaLogo
+                variant={scrolled ? 'navy' : 'white'}
+                logoUrl={logoUrl}
+                companyName={companyName}
+              />
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-8" aria-label="Navegação principal">
+            <nav className="hidden lg:flex items-center gap-7" aria-label="Navegação principal">
               <HeaderMegaMenu
                 label="Comprar"
                 href="/comprar"
                 columns={COMPRAR_COLUMNS}
                 active={pathname.startsWith('/comprar')}
+                isScrolled={scrolled}
                 highlight={{
                   title: 'Imóveis em Recife',
                   description: 'Apartamentos e casas no coração da capital pernambucana.',
@@ -280,6 +479,7 @@ export function Header({
                 href="/alugar"
                 columns={ALUGAR_COLUMNS}
                 active={pathname.startsWith('/alugar')}
+                isScrolled={scrolled}
                 highlight={{
                   title: 'Locação rápida',
                   description: 'Imóveis com aprovação ágil e sem fiador.',
@@ -290,32 +490,20 @@ export function Header({
               {navLinks
                 .filter((l) => l.href !== '/comprar' && l.href !== '/alugar')
                 .map((link) => (
-                  <Link
+                  <DesktopNavLink
                     key={link.href}
                     href={link.href}
-                    className={`text-sm font-semibold transition-colors duration-200 hover:text-[#f2d22e] ${
-                      pathname.startsWith(link.href)
-                        ? 'text-[#010744] border-b-2 border-[#f2d22e] pb-0.5'
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
+                    label={link.label}
+                    isActive={pathname.startsWith(link.href)}
+                    isScrolled={scrolled}
+                  />
                 ))}
             </nav>
 
-            {/* CTA + hamburger */}
+            {/* Right-side CTAs */}
             <div className="flex items-center gap-3">
-              {phone && (
-                <a
-                  href={`tel:${phone.replace(/\D/g, '')}`}
-                  className="hidden md:flex items-center gap-2 text-sm text-gray-600 hover:text-[#010744] transition-colors"
-                  aria-label={`Ligar para a ${companyName ?? 'Morejá'}`}
-                >
-                  <Phone size={15} />
-                  <span className="font-medium">{phone}</span>
-                </a>
-              )}
+              {/* Search trigger — desktop only, hidden on mobile (has MobileSearchButton) */}
+              <SearchTrigger isScrolled={scrolled} />
 
               <Link
                 href="/contato"
@@ -328,7 +516,13 @@ export function Header({
 
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md text-gray-600 hover:text-[#010744] hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] transition-colors"
+                className={[
+                  'lg:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] transition-colors',
+                  scrolled
+                    ? 'text-gray-600 hover:text-[#010744] hover:bg-gray-100'
+                    : 'text-white hover:text-white/80 hover:bg-white/10',
+                ].join(' ')}
                 aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav"
@@ -340,21 +534,17 @@ export function Header({
         </div>
       </header>
 
-      {/* ── Backdrop ─────────────────────────────────────────────────
-          Sempre montado (com pointer-events-none) para suportar fade
-          sem depender de mount/unmount. */}
+      {/* ── Backdrop ── */}
       <div
         onClick={() => setMobileOpen(false)}
         aria-hidden="true"
-        className={`lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={[
+          'lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300',
+          mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        ].join(' ')}
       />
 
-      {/* ── Drawer mobile ─ slide-in da direita ─────────────────────
-          translateX(100%) quando fechado; quando abre, translateX(0).
-          Durante touchmove, dragX adiciona offset positivo (segue o
-          dedo). */}
+      {/* ── Mobile drawer ── */}
       <aside
         id="mobile-nav"
         role="dialog"
@@ -364,36 +554,38 @@ export function Header({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         style={{
-          transform: mobileOpen
-            ? `translateX(${dragX}px)`
-            : 'translateX(100%)',
-          transition: dragStart.current == null
-            ? 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)'
-            : 'none',
+          transform: mobileOpen ? `translateX(${dragX}px)` : 'translateX(100%)',
+          transition:
+            dragStart.current == null
+              ? 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)'
+              : 'none',
         }}
-        className={`lg:hidden fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl flex flex-col ${
-          mobileOpen ? '' : 'pointer-events-none'
-        }`}
+        className={[
+          'lg:hidden fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl flex flex-col',
+          mobileOpen ? '' : 'pointer-events-none',
+        ].join(' ')}
       >
-        {/* Header do drawer */}
+        {/* Drawer header */}
         <div className="flex items-center justify-between h-16 sm:h-20 px-5 border-b border-gray-100 shrink-0">
           <MoRejaLogo variant="navy" logoUrl={logoUrl} companyName={companyName} />
           <button
             onClick={() => setMobileOpen(false)}
             aria-label="Fechar menu"
-            className="inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md text-gray-600 hover:text-[#010744] hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] transition-colors"
+            className="inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md
+                       text-gray-600 hover:text-[#010744] hover:bg-gray-100
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#010744] transition-colors"
           >
             <X size={24} />
           </button>
         </div>
 
-        {/* Pull indicator (visual hint pra swipe) */}
+        {/* Pull indicator */}
         <span
           aria-hidden="true"
           className="absolute top-1/2 left-2 -translate-y-1/2 w-1 h-12 rounded-full bg-gray-200"
         />
 
-        {/* Lista de navegação */}
+        {/* Nav list */}
         <nav
           className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1"
           aria-label="Menu mobile"
@@ -404,9 +596,10 @@ export function Header({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center text-lg font-semibold py-4 border-b border-gray-100 transition-colors ${
-                  isActive ? 'text-[#010744]' : 'text-gray-700 hover:text-[#010744]'
-                }`}
+                className={[
+                  'flex items-center text-lg font-semibold py-4 border-b border-gray-100 transition-colors',
+                  isActive ? 'text-[#010744]' : 'text-gray-700 hover:text-[#010744]',
+                ].join(' ')}
               >
                 {isActive && (
                   <span
@@ -420,7 +613,7 @@ export function Header({
           })}
         </nav>
 
-        {/* Rodapé com ações primárias */}
+        {/* Footer CTAs */}
         <div
           className="px-5 pt-4 pb-6 border-t border-gray-100 flex flex-col gap-3 shrink-0"
           style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
@@ -430,7 +623,8 @@ export function Header({
               href={`https://wa.me/${whatsappDigits}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 h-12 rounded-lg bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold transition-colors"
+              className="flex items-center justify-center gap-2 h-12 rounded-lg
+                         bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold transition-colors"
             >
               <MessageCircle size={18} aria-hidden="true" />
               WhatsApp
@@ -439,7 +633,8 @@ export function Header({
           {phone && (
             <a
               href={`tel:${phone.replace(/\D/g, '')}`}
-              className="flex items-center justify-center gap-2 h-12 rounded-lg border border-gray-300 text-gray-700 hover:border-[#010744] hover:text-[#010744] font-medium transition-colors"
+              className="flex items-center justify-center gap-2 h-12 rounded-lg border border-gray-300
+                         text-gray-700 hover:border-[#010744] hover:text-[#010744] font-medium transition-colors"
             >
               <Phone size={18} />
               {phone}
