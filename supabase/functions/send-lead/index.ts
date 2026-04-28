@@ -76,11 +76,11 @@ async function hashString(input: string): Promise<string> {
 }
 
 /**
- * Tenta criar oportunidade no Supremo. Retorna { ok, supremo_id, error }.
+ * Tenta criar lead no Supremo. Retorna { ok, supremo_id, error }.
  * Não bloqueia o lead — chamado fire-and-forget após o save em Supabase.
  *
- * Endpoint Supremo (verificar com docs):
- *   POST /oportunidades
+ * Endpoint Supremo:
+ *   POST /v1/leads
  *   Body: { nome, email, ddd, telefone, mensagem, id_imovel?, id_empreendimento?, origem, sit_id }
  */
 async function pushToSupremo(lead: {
@@ -131,7 +131,7 @@ async function pushToSupremo(lead: {
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 6000)
-    const res = await fetch(`${SUPREMO_API_URL}/oportunidades`, {
+    const res = await fetch(`${SUPREMO_API_URL}/leads`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SUPREMO_JWT}`,

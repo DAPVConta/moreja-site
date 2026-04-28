@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
  * supremo-retry — worker invocado pelo pg_cron a cada 5 minutos.
  *
  *   • Lê leads onde supremo_status IN ('pending', 'retry') AND attempts < 5
- *   • Reenvia POST /oportunidades pro Supremo
+ *   • Reenvia POST /leads pro Supremo
  *   • Backoff implícito: rodar a cada 5min naturalmente espaça as tentativas
  *   • Após 5 attempts, marca supremo_status='failed' e desiste
  *
@@ -69,7 +69,7 @@ async function pushOne(lead: LeadRow): Promise<{ ok: boolean; supremo_id?: strin
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 8000)
-    const res = await fetch(`${SUPREMO_API_URL}/oportunidades`, {
+    const res = await fetch(`${SUPREMO_API_URL}/leads`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SUPREMO_JWT}`,
