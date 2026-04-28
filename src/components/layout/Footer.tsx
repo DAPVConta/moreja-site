@@ -4,6 +4,7 @@ import { MoRejaLogo } from './Header'
 import { NewsletterForm } from './NewsletterForm'
 import { TrustBadges } from './TrustBadges'
 import { ManageConsentLink } from '@/components/seo/CookieConsent'
+import { LivePresenceIndicator } from './LivePresenceIndicator'
 import type { SiteConfig } from '@/types/site'
 
 // Social media SVG icons (lucide-react doesn't have brand icons)
@@ -83,12 +84,15 @@ export interface FooterProps {
   // identity
   logoUrl?: string | null
   companyName?: string
+  slogan?: string
   // contact — all optional; fallback to empty = not rendered
   phone?: string
   whatsappFull?: string
   email?: string
   address?: string
   creci?: string
+  // business hours for live indicator
+  businessHours?: string
   // social — empty string = not rendered
   instagram?: string
   facebook?: string
@@ -111,30 +115,36 @@ function buildMaps(addr: string): string {
 export function Footer({
   logoUrl,
   companyName = 'Morejá Imobiliária', /* TODO(content) */
+  slogan,
   phone = '',
   whatsappFull = '',
   email = '',
   address = '',
   creci = '',
+  businessHours = '',
   instagram = '',
   facebook = '',
   youtube = '',
 }: FooterProps = {}) {
   const resolvedName = companyName || 'Morejá Imobiliária'
+  const resolvedSlogan =
+    slogan ||
+    'Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.'
   const displayCreci = creci || '' /* TODO(content): cadastrar CRECI no admin */
   const displayAddress = address || '' /* TODO(content): cadastrar endereço no admin */
   const displayPhone = phone || '' /* TODO(content): cadastrar telefone no admin */
   const displayEmail = email || '' /* TODO(content): cadastrar e-mail no admin */
 
   const socialIconClass =
-    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors'
+    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#010744]'
   const socialIconClassActive =
-    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors'
+    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors duration-200'
 
   return (
-    <footer className="text-white" style={{ background: 'var(--brand-primary, #010744)' }}>
+    <footer className="text-white relative overflow-hidden" style={{ background: 'var(--brand-primary, #010744)' }}>
+
       {/* ═══════════════════════ MOBILE LAYOUT ═══════════════════════ */}
-      <div className="lg:hidden">
+      <div className="lg:hidden relative">
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-6">
           {/* 1. Quick CTAs */}
           <div className="grid grid-cols-2 gap-3">
@@ -162,14 +172,17 @@ export function Footer({
             )}
           </div>
 
-          {/* 2. Brand */}
+          {/* 2. Brand + Live indicator */}
           <div className="mt-8 text-center">
             <div className="inline-block">
               <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={resolvedName} />
             </div>
             <p className="mt-3 text-sm text-gray-300 leading-relaxed max-w-[18rem] mx-auto">
-              Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
+              {resolvedSlogan}
             </p>
+            <div className="mt-4 flex justify-center">
+              <LivePresenceIndicator businessHours={businessHours} />
+            </div>
           </div>
 
           {/* 3. Contato - actionable info cards */}
@@ -277,19 +290,58 @@ export function Footer({
       </div>
 
       {/* ═══════════════════════ DESKTOP LAYOUT ═══════════════════════ */}
-      <div className="hidden lg:block">
-        <div className="container-page py-16">
-          {/* Newsletter — banner em destaque acima das colunas */}
-          <div className="mb-12 pb-12 border-b border-white/10 grid grid-cols-2 gap-10 items-center">
+      <div className="hidden lg:block relative">
+
+        {/* ── Watermark logo gigante ───────────────────────────────────
+            z-0: atrás das colunas. pointer-events-none: não interfere com cliques.
+            Corta propositalmente na borda inferior para sensação de profundidade. */}
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 right-0 pointer-events-none select-none leading-none z-0"
+          style={{
+            fontSize: 'clamp(120px, 25vw, 320px)',
+            fontWeight: 900,
+            letterSpacing: '-0.04em',
+            opacity: 0.04,
+            lineHeight: 0.85,
+            // Corta ~30% da altura para fora da borda inferior
+            transform: 'translateY(30%)',
+          }}
+        >
+          MORE<span className="text-[#f2d22e]">JÁ</span>
+        </div>
+
+        <div className="container-page py-16 relative z-10">
+
+          {/* ── Newsletter banner com mesh gradient rico ──────────────────────
+              3 radial blobs sobrepostos: navy profundo + blob amarelo topo-direito
+              + blob azul-médio inferior-esquerdo. Contraste mantido para o form dark. */}
+          <div
+            className="mb-12 pb-12 border-b border-white/10 grid grid-cols-2 gap-10 items-center rounded-2xl p-8 -mx-4"
+            style={{
+              background:
+                'radial-gradient(ellipse 55% 80% at 92% 10%, rgb(242 210 46 / 0.12) 0%, transparent 60%), ' +
+                'radial-gradient(ellipse 50% 60% at 8% 85%, rgb(56 84 200 / 0.20) 0%, transparent 55%), ' +
+                'radial-gradient(ellipse 70% 50% at 50% 50%, rgb(1 7 68 / 1) 0%, rgb(10 20 90 / 0.95) 100%)',
+            }}
+          >
             <div>
+              <p className="text-[#f2d22e] text-xs font-bold uppercase tracking-widest mb-2">
+                Newsletter exclusiva
+              </p>
               <h3 className="text-2xl font-bold text-white leading-tight mb-2">
                 Lançamentos exclusivos no seu e-mail
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-gray-300 leading-relaxed text-sm">
                 Receba antes de todo mundo as melhores oportunidades de imóveis residenciais e comerciais da nossa região.
               </p>
             </div>
             <NewsletterForm variant="dark" />
+          </div>
+
+          {/* ── Live presence indicator ───────────────────────────────────── */}
+          <div className="mb-8 flex items-center gap-3">
+            <LivePresenceIndicator businessHours={businessHours} />
           </div>
 
           <div className="grid grid-cols-4 gap-10">
@@ -297,7 +349,7 @@ export function Footer({
             <div>
               <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={resolvedName} />
               <p className="mt-4 text-sm text-gray-300 leading-relaxed">
-                Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
+                {resolvedSlogan}
               </p>
               {(instagram || facebook || youtube) && (
                 <div className="flex gap-3 mt-6">
@@ -314,7 +366,7 @@ export function Footer({
               <ul className="space-y-3">
                 {companyLinks.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                    <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-1 focus-visible:ring-offset-[#010744] rounded-sm">
                       {link.label}
                     </Link>
                   </li>
@@ -329,7 +381,7 @@ export function Footer({
                 <ul className="space-y-3">
                   {buyLinks.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-1 focus-visible:ring-offset-[#010744] rounded-sm">
                         {link.label}
                       </Link>
                     </li>
@@ -341,7 +393,7 @@ export function Footer({
                 <ul className="space-y-3">
                   {rentLinks.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                      <Link href={link.href} className="inline-block py-1 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-1 focus-visible:ring-offset-[#010744] rounded-sm">
                         {link.label}
                       </Link>
                     </li>
@@ -362,7 +414,7 @@ export function Footer({
                 )}
                 {displayPhone && (
                   <li>
-                    <a href={buildTel(displayPhone)} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                    <a href={buildTel(displayPhone)} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-1 focus-visible:ring-offset-[#010744] rounded-sm">
                       <Phone size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
                       {displayPhone}
                     </a>
@@ -370,7 +422,7 @@ export function Footer({
                 )}
                 {displayEmail && (
                   <li>
-                    <a href={`mailto:${displayEmail}`} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                    <a href={`mailto:${displayEmail}`} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-1 focus-visible:ring-offset-[#010744] rounded-sm">
                       <Mail size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
                       {displayEmail}
                     </a>
@@ -388,7 +440,7 @@ export function Footer({
       </div>
 
       {/* ═══════════════════════ BOTTOM BAR (shared) ═══════════════════════ */}
-      <div className="border-t border-white/10">
+      <div className="border-t border-white/10 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 text-xs text-gray-400 text-center sm:text-left">
           <p>© {new Date().getFullYear()} {resolvedName}. Todos os direitos reservados.</p>
           <div className="flex items-center gap-3">

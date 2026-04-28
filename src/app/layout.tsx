@@ -5,6 +5,7 @@ import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab'
+import { BackToTopFab } from '@/components/layout/BackToTopFab'
 import { PwaInstallPrompt } from '@/components/layout/PwaInstallPrompt'
 import { CompareFloatingBar } from '@/components/properties/CompareFloatingBar'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -271,17 +272,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Footer
           logoUrl={config.logo_footer_url || config.logo_url}
           companyName={config.company_name}
+          slogan={config.company_slogan}
           phone={config.phone}
           whatsappFull={config.whatsapp_full}
           email={config.email}
           address={config.address}
           creci={config.creci}
+          businessHours={config.business_hours}
           instagram={config.instagram}
           facebook={config.facebook}
           youtube={config.youtube}
         />
 
         <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
+        <BackToTopFab />
 
         {/* Pílula flutuante p/ comparador (só aparece com 1+ items) */}
         <CompareFloatingBar />
