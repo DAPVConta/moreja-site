@@ -18,6 +18,10 @@
  * Phase 2:
  * 7. PropertyCard v2 — multi-photo slider, favorite button (heart), ViewTransition
  * 8. PropertyCardSkeleton — shimmer sweep (cream→white→cream)
+ *
+ * Phase 3:
+ * 9. HeroSection — AnimatedChip eyebrow, grain overlay, CSS scroll-driven parallax,
+ *    cmdk autocomplete (recent searches + suggestion groups), Framer layoutId tab pill
  */
 
 import { notFound } from 'next/navigation'
@@ -27,6 +31,7 @@ if (process.env.NODE_ENV === 'production') {
   notFound()
 }
 import { Home, Sparkles, MapPin, ArrowRight } from 'lucide-react'
+import { HeroSection } from '@/components/home/HeroSection'
 import {
   Carousel,
   CarouselItem,
@@ -180,14 +185,15 @@ export default function UtilitiesPage() {
         {/* Header */}
         <header>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">
-            Phase 0 · 1 · 2 — Smoke Test
+            Phase 0 · 1 · 2 · 3 — Smoke Test
           </p>
           <h1 className="text-3xl font-extrabold text-[#010744] tracking-tight">
             UI Primitive Gallery
           </h1>
           <p className="mt-2 text-gray-500 text-sm">
             Visual check for Carousel, AnimatedChip, MagneticButton, mesh gradients,
-            StatsSection, NewsletterForm, PropertyCard v2, and PropertyCardSkeleton shimmer.
+            StatsSection, NewsletterForm, PropertyCard v2, PropertyCardSkeleton shimmer,
+            and HeroSection (Phase 3 — cmdk autocomplete, layoutId tabs, CSS parallax, grain).
           </p>
         </header>
 
@@ -455,6 +461,38 @@ export default function UtilitiesPage() {
           </div>
         </section>
 
+        {/* ─── 9. HeroSection (Phase 3) ────────────────────────────── */}
+        <section>
+          <SectionLabel>9. HeroSection (Phase 3)</SectionLabel>
+          <p className="text-xs text-gray-400 mb-2">
+            AnimatedChip ghost eyebrow · grain SVG overlay · CSS scroll-driven parallax
+            (BG image requires a real URL — shows gradient fallback here) ·
+            cmdk autocomplete with recent-searches (localStorage) ·
+            Framer layoutId tab pill.
+          </p>
+          <p className="text-xs text-gray-400 mb-4">
+            Check: click tabs → pill morphs smoothly; focus location input → dropdown opens;
+            type &quot;boa&quot; → filters to Boa Viagem; select item → populates input;
+            revisit after selecting → item appears under &quot;Buscas recentes&quot;.
+          </p>
+        </section>
+
+        {/* Hero rendered full-bleed outside the constrained max-w-5xl wrapper */}
+      </div>
+
+      {/* Full-bleed hero smoke test */}
+      <div className="mt-8">
+        <p className="max-w-5xl mx-auto px-6 text-xs text-gray-400 mb-2">
+          Full-bleed render (gradient fallback — no bgImage passed):
+        </p>
+        <HeroSection
+          title="Encontre o imóvel"
+          highlight="dos seus sonhos"
+          subtitle="Smoke test — Phase 3. Eyebrow chip, grain overlay, cmdk autocomplete, layoutId tabs."
+        />
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 space-y-16 mt-8">
         {/* Footer note */}
         <footer className="pb-8 text-xs text-gray-400">
           This page lives at <code>/utilities</code> via the <code>(dev)</code> route group.
