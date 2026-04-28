@@ -19,6 +19,37 @@ interface CommercialFeaturedProps {
   hrefAll?: string
 }
 
+/** Imóveis comerciais de fallback — exibidos enquanto o banco estiver vazio. */
+const FALLBACK_COMMERCIAL: Property[] = [
+  {
+    id: 'com-1', codigo: 'MRJ-C01', titulo: 'Sala Comercial no Recife Antigo',
+    tipo: 'Comercial', subtipo: 'Sala Comercial', finalidade: 'Venda',
+    preco: 320000, bairro: 'Recife Antigo', cidade: 'Recife', estado: 'PE',
+    area_total: 45, quartos: 0, banheiros: 1, vagas: 1,
+    descricao: 'Sala comercial em edifício corporativo no coração do Recife Antigo.',
+    fotos: ['https://placehold.co/800x600/010744/f2d22e?text=Sala+Recife+Antigo'],
+    destaque: true,
+  },
+  {
+    id: 'com-2', codigo: 'MRJ-C02', titulo: 'Loja no Boa Viagem',
+    tipo: 'Comercial', subtipo: 'Loja', finalidade: 'Locação',
+    preco: 8500, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
+    area_total: 80, quartos: 0, banheiros: 2, vagas: 2,
+    descricao: 'Ponto comercial de alto fluxo em Boa Viagem, ideal para varejo.',
+    fotos: ['https://placehold.co/800x600/1a1f6e/f2d22e?text=Loja+Boa+Viagem'],
+    destaque: true,
+  },
+  {
+    id: 'com-3', codigo: 'MRJ-C03', titulo: 'Galpão Industrial — Caruaru',
+    tipo: 'Comercial', subtipo: 'Galpão', finalidade: 'Venda',
+    preco: 1500000, bairro: 'Distrito Industrial', cidade: 'Caruaru', estado: 'PE',
+    area_total: 1200, quartos: 0, banheiros: 4, vagas: 10,
+    descricao: 'Galpão com piso industrial, docas e área administrativa.',
+    fotos: ['https://placehold.co/800x600/ededd1/010744?text=Galpão+Caruaru'],
+    destaque: true,
+  },
+]
+
 export function CommercialFeatured({
   properties,
   loading = false,
@@ -26,31 +57,19 @@ export function CommercialFeatured({
   subtitle = 'Salas, lojas e galpões para o seu negócio',
   hrefAll = '/comprar?tipo=Comercial',
 }: CommercialFeaturedProps) {
-  const commercials = properties
-    .filter((p) => {
-      const t = (p.tipo ?? '').toLowerCase()
-      const sub = (p.subtipo ?? '').toLowerCase()
-      return (
-        t.includes('comercial') ||
-        sub.includes('sala') ||
-        sub.includes('galpão') ||
-        sub.includes('loja')
-      )
-    })
-    .slice(0, 6)
-
-  if (commercials.length === 0 && !loading) {
+  const filtered = properties.filter((p) => {
+    const t = (p.tipo ?? '').toLowerCase()
+    const sub = (p.subtipo ?? '').toLowerCase()
     return (
-      <section className="section bg-white border-t border-gray-100">
-        <div className="container-page text-center py-16 text-gray-400">
-          <p className="text-lg">Nenhum imóvel comercial em destaque.</p>
-          <Link href={hrefAll} className="btn-primary mt-4 inline-block">
-            Ver catálogo comercial
-          </Link>
-        </div>
-      </section>
+      t.includes('comercial') ||
+      sub.includes('sala') ||
+      sub.includes('galpão') ||
+      sub.includes('loja')
     )
-  }
+  })
+
+  // Usar fallback quando banco estiver vazio
+  const commercials = (filtered.length > 0 ? filtered : FALLBACK_COMMERCIAL).slice(0, 6)
 
   const skeletonCount = 6
 

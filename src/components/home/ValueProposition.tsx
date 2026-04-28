@@ -32,7 +32,7 @@ export function ValueProposition({
           {/* Left: image */}
           <Reveal className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
             <Image
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=80"
+              src="https://placehold.co/800x600/010744/f2d22e?text=Morejá+Imobiliária"
               alt=""
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"

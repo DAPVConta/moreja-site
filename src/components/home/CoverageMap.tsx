@@ -18,6 +18,16 @@ interface CoverageMapProps {
   ctaHref?: string
 }
 
+/** Bairros de fallback para quando o banco ainda não foi populado. */
+const FALLBACK_REGIONS: CoverageRegion[] = [
+  { name: 'Boa Viagem',  slug: 'boa-viagem',  count: 0, highlight: true  },
+  { name: 'Pina',        slug: 'pina',         count: 0, highlight: false },
+  { name: 'Aflitos',     slug: 'aflitos',      count: 0, highlight: false },
+  { name: 'Casa Forte',  slug: 'casa-forte',   count: 0, highlight: false },
+  { name: 'Graças',      slug: 'gracas',       count: 0, highlight: false },
+  { name: 'Espinheiro',  slug: 'espinheiro',   count: 0, highlight: false },
+]
+
 /**
  * Mapa de cobertura simplificado — pattern RE/MAX. Responde à pergunta
  * tácita do cliente: "vocês conhecem meu bairro?".
@@ -27,13 +37,14 @@ interface CoverageMapProps {
  * pitch + CTA de avaliação.
  */
 export function CoverageMap({
-  title = 'Onde a Morejá atua',
+  title = 'Onde atuamos',
   subtitle = 'Conhecemos cada esquina, cada empreendimento, cada movimento de mercado nas regiões abaixo.',
-  regions,
+  regions: regionsProp,
   cityLabel = 'Recife e região metropolitana',
   ctaHref = '/bairros',
 }: CoverageMapProps) {
-  if (regions.length === 0) return null
+  // Usar fallback quando banco estiver vazio
+  const regions = regionsProp.length > 0 ? regionsProp : FALLBACK_REGIONS
 
   return (
     <section className="section bg-[#010744] text-white relative overflow-hidden">

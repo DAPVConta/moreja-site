@@ -273,16 +273,23 @@ export default async function HomePage() {
     },
   }
 
-  // Fallback: se a tabela estiver vazia, renderiza ordem padrão
+  // Fallback: se a tabela estiver vazia, renderiza a ordem canônica da home
   const ordered = sections.length > 0
     ? sections
     : [
-        { id: '1', section_type: 'hero_search', label: '', position: 0, active: true, config: {} },
-        { id: '2', section_type: 'featured_properties', label: '', position: 1, active: true, config: {} },
-        { id: '3', section_type: 'category_cards', label: '', position: 2, active: true, config: {} },
-        { id: '4', section_type: 'stats', label: '', position: 3, active: true, config: {} },
-        { id: '5', section_type: 'testimonials', label: '', position: 4, active: true, config: {} },
-        { id: '6', section_type: 'cta_anunciar', label: '', position: 5, active: true, config: {} },
+        { id: '1',  section_type: 'hero_search',          label: '', position:  0, active: true, config: {} },
+        { id: '2',  section_type: 'banners',               label: '', position:  1, active: true, config: {} },
+        { id: '3',  section_type: 'featured_properties',  label: '', position:  2, active: true, config: {} },
+        { id: '4',  section_type: 'category_cards',        label: '', position:  3, active: true, config: {} },
+        { id: '5',  section_type: 'stats',                 label: '', position:  4, active: true, config: {} },
+        { id: '6',  section_type: 'testimonials',          label: '', position:  5, active: true, config: {} },
+        { id: '7',  section_type: 'cta_anunciar',          label: '', position:  6, active: true, config: {} },
+        { id: '8',  section_type: 'trust_stats',           label: '', position:  7, active: true, config: {} },
+        { id: '9',  section_type: 'value_proposition',     label: '', position:  8, active: true, config: {} },
+        { id: '10', section_type: 'residential_featured',  label: '', position:  9, active: true, config: {} },
+        { id: '11', section_type: 'commercial_featured',   label: '', position: 10, active: true, config: {} },
+        { id: '12', section_type: 'coverage_map',          label: '', position: 11, active: true, config: {} },
+        { id: '13', section_type: 'launches_preview',      label: '', position: 12, active: true, config: {} },
       ]
 
   return (
