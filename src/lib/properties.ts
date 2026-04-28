@@ -217,15 +217,6 @@ export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promi
   }
 }
 
-export function formatPrice(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-export function formatArea(value: number): string {
-  return `${value.toLocaleString('pt-BR')} m²`
-}
+// Re-export para manter compatibilidade com chamadas existentes
+// (server components que chamam formatPrice/formatArea daqui).
+export { formatPrice, formatArea } from './format'

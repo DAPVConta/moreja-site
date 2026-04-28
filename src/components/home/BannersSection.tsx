@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import type { Banner } from '@/types/site'
 
 interface BannersSectionProps {
@@ -11,8 +12,13 @@ interface BannersSectionProps {
   intervalSeconds?: number
 }
 
-export function BannersSection({ banners, autoplay = true, intervalSeconds = 5 }: BannersSectionProps) {
+export function BannersSection({
+  banners,
+  autoplay = true,
+  intervalSeconds = 5,
+}: BannersSectionProps) {
   const [current, setCurrent] = useState(0)
+  const [paused, setPaused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const multi = banners.length > 1
   const intervalMs = Math.max(1, intervalSeconds) * 1000
@@ -24,83 +30,108 @@ export function BannersSection({ banners, autoplay = true, intervalSeconds = 5 }
 
   const resetTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    if (multi && autoplay) {
-      timerRef.current = setTimeout(() => setCurrent((p) => (p + 1) % banners.length), intervalMs)
+    if (multi && autoplay && !paused) {
+      timerRef.current = setTimeout(
+        () => setCurrent((p) => (p + 1) % banners.length),
+        intervalMs
+      )
     }
   }
 
   useEffect(() => {
     resetTimer()
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, banners.length])
+  }, [current, banners.length, paused])
 
   if (banners.length === 0) return null
 
-  const banner = banners[current]
-  void banner
-
   return (
-    // Wrapper com respiro vertical para destacar o banner do que vem
-    // antes/depois (antes ele ficava grudado no container superior).
     <section className="py-8 sm:py-12 lg:py-16 bg-white">
       <div className="container-page">
         <div
-          className="
-            relative w-full overflow-hidden
-            rounded-2xl shadow-xl shadow-[#010744]/10
-            aspect-[3/2] md:aspect-[12/5]
-          "
-          onMouseEnter={() => { if (timerRef.current) clearTimeout(timerRef.current) }}
+          className="relative w-full overflow-hidden rounded-2xl shadow-xl shadow-[#010744]/10
+                     aspect-[3/2] md:aspect-[12/5]"
+          onMouseEnter={() => {
+            if (timerRef.current) clearTimeout(timerRef.current)
+          }}
           onMouseLeave={resetTimer}
+          aria-roledescription="carousel"
+          aria-label="Banners promocionais"
         >
           {banners.map((b, i) => {
+            const isCurrent = i === current
             const hasMobile = !!b.mobile_image_url
+
             return (
               <div
                 key={b.id}
                 className="absolute inset-0 transition-opacity duration-700"
-                style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? 'auto' : 'none' }}
-                aria-hidden={i !== current}
+                style={{
+                  opacity: isCurrent ? 1 : 0,
+                  pointerEvents: isCurrent ? 'auto' : 'none',
+                }}
+                aria-hidden={!isCurrent}
+                role="group"
+                aria-label={`Banner ${i + 1} de ${banners.length}`}
               >
+                {/* Imagem mobile (se informada) */}
+                {hasMobile && b.mobile_image_url && (
+                  <Image
+                    src={b.mobile_image_url}
+                    alt={b.title ?? ''}
+                    fill
+                    sizes="100vw"
+                    className="object-cover md:hidden"
+                    priority={i === 0}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                  />
+                )}
+                {/* Imagem desktop (ou default) */}
                 {b.image_url && (
-                  <>
-                    {hasMobile && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={b.mobile_image_url!}
-                        alt={b.title ?? ''}
-                        className="w-full h-full object-cover md:hidden"
-                        draggable={false}
-                      />
-                    )}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={b.image_url}
-                      alt={b.title ?? ''}
-                      className={`w-full h-full object-cover ${hasMobile ? 'hidden md:block' : ''}`}
-                      draggable={false}
-                    />
-                  </>
+                  <Image
+                    src={b.image_url}
+                    alt={b.title ?? ''}
+                    fill
+                    sizes="(max-width: 1280px) 100vw, 1280px"
+                    className={`object-cover ${hasMobile ? 'hidden md:block' : ''}`}
+                    priority={i === 0}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                  />
                 )}
 
+                {/* Gradient overlay — content alinhado à esquerda quando há texto */}
                 {(b.title || b.subtitle || b.cta_text) && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-black/30 to-black/10">
-                    <div className="text-center text-white px-4 max-w-2xl">
+                  <div
+                    className="absolute inset-0 flex items-center
+                               bg-gradient-to-r from-black/70 via-black/40 to-transparent
+                               px-6 sm:px-10 lg:px-14"
+                  >
+                    <div className="text-white max-w-2xl lg:max-w-3xl">
                       {b.title && (
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold drop-shadow-lg mb-2">
+                        <h2
+                          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold
+                                     drop-shadow-lg mb-3 leading-tight tracking-tight"
+                        >
                           {b.title}
                         </h2>
                       )}
                       {b.subtitle && (
-                        <p className="text-sm sm:text-base md:text-lg text-gray-100 drop-shadow mb-5">
+                        <p className="text-sm sm:text-base md:text-lg text-gray-100 drop-shadow mb-6 max-w-xl">
                           {b.subtitle}
                         </p>
                       )}
                       {b.cta_text && b.cta_link && (
                         <Link
                           href={b.cta_link}
-                          className="inline-block bg-[#f2d22e] text-[#010744] font-bold px-6 py-3 rounded-xl text-sm sm:text-base hover:bg-[#e0c22a] transition-colors"
+                          className="inline-flex items-center gap-2 min-h-[48px] rounded-xl bg-[#f2d22e] px-6
+                                     font-bold text-[#010744] text-sm sm:text-base shadow-lg
+                                     transition-all hover:brightness-105 hover:shadow-xl active:scale-[0.98]
+                                     focus-visible:outline-none focus-visible:ring-2
+                                     focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2
+                                     focus-visible:ring-offset-black"
                         >
                           {b.cta_text}
                         </Link>
@@ -114,30 +145,70 @@ export function BannersSection({ banners, autoplay = true, intervalSeconds = 5 }
 
           {multi && (
             <>
+              {/* Arrow buttons — 48x48, glassmorphism, sempre visíveis */}
               <button
-                onClick={() => { go(current - 1); resetTimer() }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors z-10 backdrop-blur-sm"
+                onClick={() => {
+                  go(current - 1)
+                  resetTimer()
+                }}
+                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-10
+                           flex items-center justify-center h-12 w-12 rounded-full
+                           bg-white/20 border border-white/30 backdrop-blur-md
+                           text-white transition-all hover:bg-white/40 hover:scale-105
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white
+                           focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 aria-label="Banner anterior"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={22} />
               </button>
               <button
-                onClick={() => { go(current + 1); resetTimer() }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors z-10 backdrop-blur-sm"
+                onClick={() => {
+                  go(current + 1)
+                  resetTimer()
+                }}
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10
+                           flex items-center justify-center h-12 w-12 rounded-full
+                           bg-white/20 border border-white/30 backdrop-blur-md
+                           text-white transition-all hover:bg-white/40 hover:scale-105
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white
+                           focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 aria-label="Próximo banner"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={22} />
               </button>
 
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                {banners.map((_, i) => (
+              {/* Dots + pause button (WCAG 2.2.2) */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+                <div className="flex gap-2">
+                  {banners.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        go(i)
+                        resetTimer()
+                      }}
+                      className={`h-2 rounded-full transition-all ${
+                        i === current ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
+                      }`}
+                      aria-label={`Ir para banner ${i + 1}`}
+                      aria-current={i === current ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+
+                {autoplay && (
                   <button
-                    key={i}
-                    onClick={() => { go(i); resetTimer() }}
-                    className={`h-2 rounded-full transition-all ${i === current ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/70'}`}
-                    aria-label={`Ir para banner ${i + 1}`}
-                  />
-                ))}
+                    type="button"
+                    onClick={() => setPaused((p) => !p)}
+                    aria-label={paused ? 'Retomar autoplay' : 'Pausar autoplay'}
+                    className="ml-1 flex h-7 w-7 items-center justify-center rounded-full
+                               bg-white/20 border border-white/30 backdrop-blur-md text-white
+                               transition-colors hover:bg-white/40
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  >
+                    {paused ? <Play size={12} /> : <Pause size={12} />}
+                  </button>
+                )}
               </div>
             </>
           )}
