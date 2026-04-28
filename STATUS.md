@@ -15,7 +15,7 @@
 | 6 | Tracking & LGPD Consent Mode v2 | ✅ |
 | 7 | Supremo CRM hardening | ✅ código / ⏳ deploy edge fns |
 | 8a | Seções RE/MAX no público | ✅ |
-| 8b | Admin SPA refactor | 🔜 próximo |
+| 8b | Admin SPA refactor (parcial) | ✅ páginas-chave / 🔜 polish |
 | 9 | Security hardening pleno | 🔜 |
 | 10 | Performance & QA final | 🔜 |
 | 11 | Diferenciadores opcionais (AI search, mapa interativo) | 🔜 opcional |
@@ -96,6 +96,16 @@
 - PropertyViewTracker plugado em /imovel e /empreendimentos
 - ManageConsentLink no Footer
 
+### Admin SPA — páginas-chave (Bloco 8b)
+- **Sidebar** reorganizada em 4 grupos: Conteúdo / Leads / Configuração / Sistema
+- **`/usuarios-admin`** — lista admin_users, troca de role inline (owner/admin/editor/viewer), remoção; convite gera SQL snippet (Supabase Auth não permite convite via anon)
+- **`/auditoria`** — viewer do `audit_log` com filtros por tabela e ação, expand-on-click pra ver diff JSON formatado
+- **`/tracking`** — CRUD de `tracking_scripts` agrupado por placement (head / body_start / body_end), com toggle ativo, notas, modal pra colar código
+- **`/seo`** — CRUD de `seo_routes` (title/description/og_image/canonical/robots por rota)
+- **`/blog`** — CRUD de posts (drafts/published/archived) com title/slug/excerpt/cover/categoria/conteúdo Markdown + meta SEO
+- **`/avaliacoes`** — inbox de `valuation_requests` com cards (filtro de status + dropdown contextual), todos os dados do wizard /avaliar
+- **`/lista-espera`** — inbox de `lancamentos_waitlist` em tabela com export CSV
+
 ### Seções RE/MAX no público (Bloco 8a)
 - TopBar institucional com "Anuncie seu imóvel" + "Equipe" no Header (desktop)
 - `TeamSection.tsx` — "Encontre um Corretor" lendo `brokers` table (foto, CRECI, especialidades, WhatsApp/Phone/Email CTAs)
@@ -138,22 +148,14 @@
 7. **Rotacionar segredos** (decisão sua para o final): SUPABASE_SERVICE_ROLE_KEY, SUPREMO_JWT, DB password
 8. **Popular conteúdo** opcional: `neighborhood_guides`, `lancamentos_waitlist` ativar a seção, banners, testimonials, etc
 
-### Bloco 8b — Admin SPA refactor (🔜 próximo)
-- shadcn pass nas páginas admin (Dashboard, banners, brokers, leads, etc.)
-- Image-crop moderno (react-easy-crop + FocalPointPicker existente)
-- Branding panel light/dark (lê migration 011)
-- SEO Control Center (edita seo_routes + pages.meta_*)
-- Navigation editor (header + drawer + footer — usa migrations 014/015)
-- UI strings editor (migration 017)
-- Audit log viewer (migration 010)
-- Admin users + roles UI (migration 009)
-- Pages CMS com draft/publish/archive + revisões (migration 016)
-- Posts editor (migration 022) — novo CRUD pra blog
-- Brokers editor enriquecido (especialidades, foto crop, ordenação drag)
-- Valuation requests inbox (migration 019)
-- Lancamentos waitlist inbox (migration 019)
-- Tracking scripts editor (migration 012 — slot system head/body)
-- MFA + idle timeout
+### Bloco 8b — Admin polish (🔜 não-urgente, pra depois do Bloco 9)
+- Branding panel light/dark separado em SiteConfigPage (migration 011)
+- Pages CMS com revisions (migration 016) — UI de drafts/publish/archive
+- Navigation editor (migrations 014/015) — header/drawer/footer drag-and-drop
+- UI strings editor (migration 017) — textos editáveis
+- Brokers editor enriquecido (especialidades chip, foto crop, drag-order)
+- MFA + idle timeout (Supabase Auth + react-idle-timer)
+- Image upload com FocalPointPicker já existe — refinar UX
 
 ### Pendente Bloco 8a (você popular conteúdo)
 - Inserir corretores em `brokers` (admin SPA já edita, mas verifique RLS funciona após migrations 009)

@@ -12,6 +12,13 @@ import LeadsPage from '@/pages/leads/LeadsPage'
 import BrokersPage from '@/pages/brokers/BrokersPage'
 import StatsPage from '@/pages/stats/StatsPage'
 import HomeLayoutPage from '@/pages/home-layout/HomeLayoutPage'
+import AdminUsersPage from '@/pages/admin-users/AdminUsersPage'
+import AuditLogPage from '@/pages/audit-log/AuditLogPage'
+import TrackingScriptsPage from '@/pages/tracking/TrackingScriptsPage'
+import SeoRoutesPage from '@/pages/seo/SeoRoutesPage'
+import PostsPage from '@/pages/posts/PostsPage'
+import ValuationRequestsPage from '@/pages/inboxes/ValuationRequestsPage'
+import WaitlistPage from '@/pages/inboxes/WaitlistPage'
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +75,34 @@ export const router = createBrowserRouter([
       {
         path: '/layout-home',
         element: <HomeLayoutPage />,
+      },
+      {
+        path: '/blog',
+        element: <PostsPage />,
+      },
+      {
+        path: '/avaliacoes',
+        element: <ValuationRequestsPage />,
+      },
+      {
+        path: '/lista-espera',
+        element: <WaitlistPage />,
+      },
+      {
+        path: '/seo',
+        element: <SeoRoutesPage />,
+      },
+      {
+        path: '/tracking',
+        element: <TrackingScriptsPage />,
+      },
+      {
+        path: '/usuarios-admin',
+        element: <AdminUsersPage />,
+      },
+      {
+        path: '/auditoria',
+        element: <AuditLogPage />,
       },
     ],
   },
