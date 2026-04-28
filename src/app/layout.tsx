@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Raleway } from 'next/font/google'
+import { Raleway, Inter } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -13,6 +13,13 @@ const raleway = Raleway({
   variable: '--font-raleway',
   display: 'swap',
   weight: ['300', '400', '500', '600', '700', '800'],
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
@@ -166,14 +173,41 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const accent = config.accent_color || '#f2d22e'
   const tertiary = config.tertiary_color || '#ededd1'
 
+  // Migration 011: keys de tema dark + theme_default (light/dark/system)
+  const primaryDark = config.primary_color_dark || '#0a1a6e'
+  const accentDark = config.accent_color_dark || '#f2d22e'
+  const tertiaryDark = config.tertiary_color_dark || '#1a1a1a'
+  const themeDefault = config.theme_default || 'light'
+
   const brandCss = `:root {
   --brand-primary: ${primary};
   --brand-accent: ${accent};
   --brand-tertiary: ${tertiary};
+}
+[data-theme="dark"] {
+  --brand-primary: ${primaryDark};
+  --brand-accent: ${accentDark};
+  --brand-tertiary: ${tertiaryDark};
 }`
 
+  // Script anti-flash: aplica o tema ANTES da hidratação para evitar flash
+  // de tema errado em primeira pintura (FOUC). Lê preferência do localStorage,
+  // cai para theme_default, e respeita 'system' via prefers-color-scheme.
+  const themeBootstrap = `(function(){try{
+  var saved = localStorage.getItem('theme');
+  var pref = saved || ${JSON.stringify(themeDefault)};
+  var resolved = pref === 'system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : pref;
+  document.documentElement.setAttribute('data-theme', resolved);
+}catch(e){}})();`
+
   return (
-    <html lang="pt-BR" className={`${raleway.variable} h-full`}>
+    <html
+      lang="pt-BR"
+      data-theme={themeDefault === 'system' ? 'light' : themeDefault}
+      className={`${raleway.variable} ${inter.variable} h-full`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -182,6 +216,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://snap.licdn.com" />
         <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
         <style dangerouslySetInnerHTML={{ __html: brandCss }} />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body className="min-h-full flex flex-col font-sans">
         {/* Skip link — focável só via teclado (Tab no início da página).
