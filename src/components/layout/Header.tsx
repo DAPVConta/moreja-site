@@ -134,7 +134,7 @@ export function Header({
   phone,
   email,
   whatsapp,
-  businessHours = 'Seg–Sex 8h–18h · Sáb 8h–12h',
+  businessHours,
 }: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
@@ -218,10 +218,12 @@ export function Header({
                 </a>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-white/70">
-              <Clock size={13} aria-hidden="true" />
-              <span>{businessHours}</span>
-            </div>
+            {businessHours && (
+              <div className="flex items-center gap-1.5 text-white/70">
+                <Clock size={13} aria-hidden="true" />
+                <span>{businessHours}</span>
+              </div>
+            )}
           </div>
 
           {/* B2B / institutional shortcuts (RE/MAX-inspired) */}

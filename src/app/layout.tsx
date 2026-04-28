@@ -265,11 +265,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           phone={config.phone}
           email={config.email}
           whatsapp={config.whatsapp_full || config.whatsapp}
+          businessHours={config.business_hours}
         />
         <main id="main-content" className="flex-1">{children}</main>
         <Footer
           logoUrl={config.logo_footer_url || config.logo_url}
           companyName={config.company_name}
+          phone={config.phone}
+          whatsappFull={config.whatsapp_full}
+          email={config.email}
+          address={config.address}
+          creci={config.creci}
+          instagram={config.instagram}
+          facebook={config.facebook}
+          youtube={config.youtube}
         />
 
         <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
