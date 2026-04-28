@@ -2,18 +2,28 @@
 -- EXECUTE_BLOCK_2.sql — Cole TODO este arquivo no Supabase SQL Editor
 --
 -- Inclui as migrations 021..024 (Blocos 7 e 9).
---
--- ⚠ ATENÇÃO: A migration 021 ATIVA pg_cron e usa GUCs.
--- ANTES de rodar, defina os settings (rode separado primeiro):
---
---   ALTER DATABASE postgres SET app.settings.supabase_url
---     = 'https://yxlepgmlhcnqhwshymup.supabase.co';
---   ALTER DATABASE postgres SET app.settings.service_role_key
---     = 'COLE_SEU_SERVICE_ROLE_AQUI';
---   SELECT pg_reload_conf();
---
--- Depois cole este arquivo inteiro.
 -- 100% IDEMPOTENTE — pode rodar quantas vezes quiser.
+--
+-- ⚠ ANTES de rodar este arquivo: seed os secrets no supabase_vault
+-- (rode UMA VEZ no SQL Editor, separado deste arquivo):
+--
+--   SELECT vault.create_secret(
+--     'https://yxlepgmlhcnqhwshymup.supabase.co',
+--     'project_url',
+--     'URL do projeto Supabase p/ funções internas'
+--   );
+--
+--   SELECT vault.create_secret(
+--     'COLE_SEU_SERVICE_ROLE_KEY_AQUI',
+--     'service_role_key',
+--     'Service role JWT — usado pelo cron supremo-retry'
+--   );
+--
+-- Onde achar a service_role_key: Supabase Dashboard → Settings → API →
+-- "service_role" (secret). É um JWT que começa com eyJ... — não confundir
+-- com anon key.
+--
+-- Depois cole este arquivo inteiro e Run.
 -- ════════════════════════════════════════════════════════════════
 
 
@@ -23,48 +33,66 @@
 -- ────────────────────────────────────────────────────────────────
 -- 021 — pg_cron schedule p/ supremo-retry worker
 --
--- Habilita as extensões pg_cron + pg_net (já vêm no Supabase Pro+) e
--- agenda chamada da Edge Function `supremo-retry` a cada 5 minutos.
+-- Habilita pg_cron + pg_net e agenda chamada da Edge Function
+-- `supremo-retry` a cada 5 minutos.
 --
--- A função lê leads com supremo_status IN ('pending','retry') e tenta
--- POSTar no Supremo. Após 5 tentativas, marca 'failed' e desiste.
+-- Os secrets (URL do projeto + service_role_key) são lidos do
+-- supabase_vault (extensão default do Supabase, criptografada at rest).
 --
--- IMPORTANTE: você precisa preencher os GUCs antes de aplicar:
+-- ⚠ ANTES de aplicar, seed os secrets no Vault (rode UMA VEZ via SQL
+-- Editor com sessão de owner — é seguro porque vault é encrypted):
 --
---   ALTER DATABASE postgres SET app.settings.supabase_url       = 'https://yxlepgmlhcnqhwshymup.supabase.co';
---   ALTER DATABASE postgres SET app.settings.service_role_key   = 'eyJ...';   -- ⚠ mantenha em segredo
---   SELECT pg_reload_conf();
+--   SELECT vault.create_secret(
+--     'https://yxlepgmlhcnqhwshymup.supabase.co',
+--     'project_url',
+--     'Supabase project URL para functions internas'
+--   );
+--   SELECT vault.create_secret(
+--     'COLE_SEU_SERVICE_ROLE_KEY_AQUI',
+--     'service_role_key',
+--     'Service role key para chamar edge functions a partir de cron'
+--   );
 --
--- (ou usar Supabase Dashboard → Database → Cron Jobs UI, que já injeta
---  esses settings automaticamente.)
+-- Se já existem (re-aplicação), o create_secret retorna o id existente
+-- — não duplica.
 -- ────────────────────────────────────────────────────────────────
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
--- Remove qualquer agendamento antigo com esse nome (idempotente)
-SELECT cron.unschedule('supremo-retry-every-5min')
-  WHERE EXISTS (
-    SELECT 1 FROM cron.job WHERE jobname = 'supremo-retry-every-5min'
-  );
-
 -- Função wrapper que dispara a Edge Function via http
+-- Lê secrets do vault.decrypted_secrets (view restrita)
 CREATE OR REPLACE FUNCTION trigger_supremo_retry()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, vault, extensions
 AS $$
 DECLARE
-  v_url  text := current_setting('app.settings.supabase_url', true);
-  v_key  text := current_setting('app.settings.service_role_key', true);
+  v_url  text;
+  v_key  text;
   v_resp bigint;
 BEGIN
+  -- Lê do Vault (decrypted_secrets é a view oficial)
+  SELECT decrypted_secret INTO v_url
+    FROM vault.decrypted_secrets
+   WHERE name = 'project_url'
+   LIMIT 1;
+
+  SELECT decrypted_secret INTO v_key
+    FROM vault.decrypted_secrets
+   WHERE name = 'service_role_key'
+   LIMIT 1;
+
   IF v_url IS NULL OR v_key IS NULL THEN
-    RAISE WARNING 'supremo-retry: missing app.settings.supabase_url or service_role_key';
+    RAISE WARNING
+      'supremo-retry: vault não tem ''project_url'' ou ''service_role_key''. '
+      'Rode no SQL Editor: '
+      'SELECT vault.create_secret(''https://...supabase.co'', ''project_url''); '
+      'SELECT vault.create_secret(''eyJ...'', ''service_role_key'');';
     RETURN;
   END IF;
 
-  -- Net.http_post é assíncrono (retorna request id)
   SELECT net.http_post(
     url := v_url || '/functions/v1/supremo-retry',
     headers := jsonb_build_object(
@@ -77,7 +105,14 @@ BEGIN
 END;
 $$;
 
--- Schedule a cada 5min
+-- Schedule a cada 5min — idempotente
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'supremo-retry-every-5min') THEN
+    PERFORM cron.unschedule('supremo-retry-every-5min');
+  END IF;
+END $$;
+
 SELECT cron.schedule(
   'supremo-retry-every-5min',
   '*/5 * * * *',
@@ -86,7 +121,7 @@ SELECT cron.schedule(
 
 COMMENT ON FUNCTION trigger_supremo_retry IS
   'Wrapper plpgsql para pg_cron disparar a edge function supremo-retry. '
-  'Lê GUCs app.settings.supabase_url e app.settings.service_role_key.';
+  'Lê secrets do supabase_vault (vault.decrypted_secrets).';
 
 -- ════════════════════════════════════════════════════════════════
 -- 022_blog_posts.sql
