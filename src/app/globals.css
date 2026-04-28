@@ -421,6 +421,20 @@
   .prose-property h3 { font-size: 1rem; }
   .prose-property h4 { font-size: 0.95rem; }
   .prose-property br + br { display: none; } /* colapsa <br><br> excessivo */
+
+  /* ── CategoryCards bento grid — Phase 6 ─────────────────────────────────────
+     Sets explicit row heights only at lg+ so row-span-2 on the hero card has a
+     concrete size to span. Mobile/tablet rows are auto-sized (implicit grid).
+     280px per row × 2 rows = 560px total bento height at lg+. ── */
+  .category-bento-grid {
+    /* mobile: implicit rows — auto height driven by aspect-ratio on each card */
+  }
+
+  @media (min-width: 1024px) {
+    .category-bento-grid {
+      grid-template-rows: 280px 280px;
+    }
+  }
 }
 
 @layer utilities {
@@ -533,5 +547,107 @@
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+}
+
+/* ── Testimonials marquee — Phase 6 ─────────────────────────────────────────
+   Infinite horizontal scroll. The inner flex row contains two copies of the
+   items list so the seam is never visible. translateX(-50%) returns to the
+   exact start when 50% of the doubled width has scrolled past.
+
+   .testimonials-marquee-track   — clipping viewport (overflow-hidden)
+   .testimonials-marquee-inner   — doubled flex row, runs the marquee animation
+   .testimonials-marquee-item    — individual card slot with fixed width
+
+   The global prefers-reduced-motion rule in @layer base collapses
+   animation-duration to 0.01ms for *, effectively pausing the marquee —
+   no extra media query needed here.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.testimonials-marquee-track {
+  overflow: hidden;
+  /* 1px bleed on each side masks subpixel aliasing at the clipping edge */
+  padding-inline: 0;
+}
+
+.testimonials-marquee-inner {
+  display: flex;
+  gap: 1.5rem;               /* 24px — matches gap-6 in the grid fallback */
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+/* Pause-on-hover: user explicitly wants to read the card */
+.testimonials-marquee-inner:hover {
+  animation-play-state: paused;
+}
+
+.testimonials-marquee-item {
+  /* 340px card width — wide enough for comfortable reading, narrow enough
+     to show 3+ cards at 1280px. Flex-shrink-0 prevents squeezing. */
+  width: 340px;
+  flex-shrink: 0;
+}
+
+/* ── Conic-gradient spinning border — Phase 6 ────────────────────────────────
+   @property registers --angle as an animatable CSS custom property.
+   Without it, browsers cannot tween between angle values in conic-gradient().
+
+   The .testimonial-conic-shell wrapper uses a ::before pseudo-element as the
+   gradient layer, positioned behind the glass card via z-index. The 1.5px
+   padding on the shell acts as the "border" thickness.
+
+   Fallback for browsers without @property support: the conic-gradient still
+   renders but freezes at 0deg — visually it shows a static yellow arc which
+   is an acceptable degradation. The .conic-fallback class adds a pulsing
+   box-shadow instead (applied via @supports).
+────────────────────────────────────────────────────────────────────────────── */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes conic-spin {
+  from { --angle: 0deg; }
+  to   { --angle: 360deg; }
+}
+
+.testimonial-conic-shell {
+  position: relative;
+  /* The background of the shell IS the gradient ring — exposed as a 1.5px
+     frame around the inner card (which covers most of the shell area). */
+  background: conic-gradient(
+    from var(--angle),
+    rgb(242 210 46 / 0.0)  0%,
+    rgb(242 210 46 / 0.8) 15%,
+    rgb(242 210 46 / 0.0) 30%
+  );
+  animation: conic-spin 4s linear infinite;
+}
+
+/* When @property is NOT supported, fall back to a static glow border */
+@supports not (animation-timeline: scroll()) {
+  /* intentionally empty — @property lack is handled by initial-value freeze,
+     which already looks acceptable. No extra rule needed. */
+}
+
+/* Glow pulse fallback for very old browsers (no @property, no conic support):
+   applied when the shell's ::before would be invisible */
+@supports not (background: conic-gradient(from 0deg, red, blue)) {
+  .testimonial-conic-shell {
+    background: transparent;
+    box-shadow: 0 0 0 1.5px rgb(242 210 46 / 0.35);
+    animation: conic-fallback-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes conic-fallback-glow {
+    0%,  100% { box-shadow: 0 0 0 1.5px rgb(242 210 46 / 0.25); }
+    50%        { box-shadow: 0 0 0 1.5px rgb(242 210 46 / 0.65),
+                             0 0 12px 2px  rgb(242 210 46 / 0.20); }
   }
 }

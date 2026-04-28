@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Building2 } from 'lucide-react'
 import { PropertyCard, PropertyCardSkeleton } from '@/components/properties/PropertyCard'
 import {
+  AnimatedChip,
   Carousel,
   CarouselViewport,
   CarouselItem,
@@ -74,26 +75,44 @@ export function CommercialFeatured({
   const skeletonCount = 6
 
   return (
-    <section className="section bg-white border-t border-gray-100">
+    // bg-mesh-navy: navy base + radial yellow/white hints from globals.css
+    <section className="section bg-mesh-navy">
       <div className="container-page">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white bg-[#010744] rounded-full px-3 py-1 mb-3">
-              <Building2 size={14} aria-hidden="true" />
+            {/* ghost variant: white ring + white/90 text — correct for navy bg */}
+            <AnimatedChip
+              variant="ghost"
+              icon={Building2}
+              pulse={false}
+              className="mb-3"
+            >
               Comercial
-            </div>
-            <h2 className="section-title">{title}</h2>
-            <p className="section-subtitle mb-0">{subtitle}</p>
+            </AnimatedChip>
+
+            {/* Heading and subtitle in white over navy */}
+            <h2 className="section-title text-white">{title}</h2>
+            <p className="section-subtitle text-white/70 mb-0">{subtitle}</p>
           </div>
+
           <Link
             href={hrefAll}
-            className="flex items-center gap-2 text-[#010744] font-semibold hover:text-[#f2d22e]
-                       transition-colors duration-150 group shrink-0"
+            className="
+              flex items-center gap-2
+              text-white/80 font-semibold
+              hover:text-[#f2d22e]
+              transition-colors duration-150
+              group shrink-0
+              focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2
+              focus-visible:ring-offset-[#010744]
+              motion-reduce:transition-none
+            "
           >
             Ver todos comerciais
             <ArrowRight
               size={18}
-              className="group-hover:translate-x-1 transition-transform duration-150"
+              className="group-hover:translate-x-1 transition-transform duration-150 motion-reduce:transition-none"
               aria-hidden="true"
             />
           </Link>
@@ -126,8 +145,9 @@ export function CommercialFeatured({
                 ))}
           </CarouselViewport>
 
+          {/* variant="white" sobre fundo navy: bolinhas brancas semitransparentes */}
           <div className="mt-5 flex items-center justify-between gap-4">
-            <CarouselDots variant="navy" />
+            <CarouselDots variant="white" />
             <div className="hidden sm:flex items-center gap-2">
               <CarouselPrev size="sm" />
               <CarouselNext size="sm" />

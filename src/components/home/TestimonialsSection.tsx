@@ -1,11 +1,30 @@
+'use client'
+
+/**
+ * TestimonialsSection — marquee infinito + conic-gradient border.
+ *
+ * Desktop (lg+):
+ *   - Faixa de cards deslizando continuamente da direita para a esquerda.
+ *   - Lista duplicada para loop seamless.
+ *   - Pausa ao hover no container.
+ *   - prefers-reduced-motion: grid 3 colunas estático.
+ *
+ * Mobile/tablet (< lg):
+ *   - Scroll horizontal snap-x (mesmo comportamento anterior).
+ *
+ * Conic-gradient border animado:
+ *   - Implementado via CSS custom property @property --angle animada.
+ *   - Fallback: box-shadow glow amarelo pulsante para browsers sem suporte.
+ */
+
 import { Star } from 'lucide-react'
+import { useReducedMotion } from 'framer-motion'
 import type { Testimonial } from '@/types/site'
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[]
 }
 
-/** Depoimentos de fallback usados enquanto o banco estiver vazio. */
 const FALLBACK_TESTIMONIALS: Testimonial[] = [
   {
     id: 'ft-1',
@@ -69,6 +88,8 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
   },
 ]
 
+// ── StarRating ──────────────────────────────────────────────────────────────
+
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
@@ -84,12 +105,73 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
+// ── TestimonialCard ─────────────────────────────────────────────────────────
+
+interface CardProps {
+  t: Testimonial
+  /** When true, wraps in conic-border shell for the animated ring. */
+  withConicBorder?: boolean
+}
+
+function TestimonialCard({ t, withConicBorder = false }: CardProps) {
+  const inner = (
+    <article
+      className="
+        bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl
+        p-6 flex flex-col gap-4 h-full
+        hover:border-white/20 transition-colors duration-150
+      "
+    >
+      <StarRating rating={t.rating} />
+      <blockquote className="text-gray-200 text-sm leading-relaxed flex-1">
+        &ldquo;{t.text}&rdquo;
+      </blockquote>
+      <footer className="flex items-center gap-3">
+        {t.photo_url ? (
+          <img
+            src={t.photo_url}
+            alt={t.name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-10 h-10 rounded-full bg-[#f2d22e] flex items-center justify-center text-[#010744] font-bold text-sm shrink-0"
+            aria-hidden="true"
+          >
+            {t.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div>
+          <p className="text-white font-semibold text-sm">{t.name}</p>
+          {t.role && <p className="text-gray-400 text-xs">{t.role}</p>}
+        </div>
+      </footer>
+    </article>
+  )
+
+  if (!withConicBorder) return inner
+
+  // Conic-gradient border shell — uses the .testimonial-conic-shell class
+  // defined in globals.css via @property --angle + @keyframes conic-spin.
+  // The shell is position:relative, rounded, p-[1.5px], and the ::before
+  // pseudo creates the spinning gradient ring behind the glass card.
+  return (
+    <div className="testimonial-conic-shell rounded-2xl p-[1.5px]">
+      {inner}
+    </div>
+  )
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+
 export function TestimonialsSection({ testimonials: testimonialsProp }: TestimonialsSectionProps) {
-  // Usar fallback quando banco estiver vazio
+  const shouldReduceMotion = useReducedMotion()
   const testimonials = testimonialsProp.length > 0 ? testimonialsProp : FALLBACK_TESTIMONIALS
+  // Use at most 6 items for the marquee to keep the initial frame lean.
+  const items = testimonials.slice(0, 6)
 
   return (
-    <section className="section bg-[#010744]">
+    <section className="section bg-[#010744] overflow-hidden">
       <div className="container-page">
         <div className="text-center mb-10 md:mb-12">
           <h2 className="heading-h2 text-white mb-2">
@@ -99,58 +181,68 @@ export function TestimonialsSection({ testimonials: testimonialsProp }: Testimon
             A satisfação dos nossos clientes é nossa maior conquista
           </p>
         </div>
+      </div>
 
-        {/* Mobile: carrossel snap-x; desktop: grid 2/3 cols.
-            Scroll-padding alinha o card ao container-page. */}
-        <div
-          className="
-            -mx-4 sm:-mx-6 px-4 sm:px-6
-            flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6
-            overflow-x-auto md:overflow-visible
-            snap-x snap-mandatory md:snap-none
-            scroll-smooth scrollbar-thin
-            pb-4 md:pb-0
-          "
-        >
-          {testimonials.slice(0, 6).map((t) => (
-            <article
-              key={t.id}
-              className="
-                snap-center md:snap-align-none
-                shrink-0 md:shrink
-                w-[85%] sm:w-[60%] md:w-auto
-                bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl
-                p-6 flex flex-col gap-4
-                hover:border-white/20 transition-colors
-              "
-            >
-              <StarRating rating={t.rating} />
-              <blockquote className="text-gray-200 text-sm leading-relaxed flex-1">
-                &ldquo;{t.text}&rdquo;
-              </blockquote>
-              <footer className="flex items-center gap-3">
-                {t.photo_url ? (
-                  <img
-                    src={t.photo_url}
-                    alt={t.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className="w-10 h-10 rounded-full bg-[#f2d22e] flex items-center justify-center text-[#010744] font-bold text-sm"
-                    aria-hidden="true"
-                  >
-                    {t.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <p className="text-white font-semibold text-sm">{t.name}</p>
-                  {t.role && <p className="text-gray-400 text-xs">{t.role}</p>}
+      {/* ── Desktop: marquee infinito (lg+) ── */}
+      {/* The marquee bleeds to viewport edges for a cinematic feel while
+          the heading above is correctly contained in container-page. */}
+      <div className="hidden lg:block">
+        {shouldReduceMotion ? (
+          // Reduced-motion fallback: static 3-col grid inside container
+          <div className="container-page grid grid-cols-3 gap-6">
+            {items.map((t) => (
+              <TestimonialCard key={t.id} t={t} withConicBorder />
+            ))}
+          </div>
+        ) : (
+          <div
+            className="testimonials-marquee-track"
+            aria-live="off"
+            aria-label="Depoimentos de clientes — rolagem automática"
+          >
+            {/* Original list — visible to screen readers */}
+            <div className="testimonials-marquee-inner">
+              {items.map((t) => (
+                <div key={t.id} className="testimonials-marquee-item">
+                  <TestimonialCard t={t} withConicBorder />
                 </div>
-              </footer>
-            </article>
-          ))}
-        </div>
+              ))}
+              {/* Duplicate list — hidden from assistive tech, creates seamless loop */}
+              {items.map((t) => (
+                <div
+                  key={`dup-${t.id}`}
+                  className="testimonials-marquee-item"
+                  aria-hidden="true"
+                >
+                  <TestimonialCard t={t} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Mobile / tablet (< lg): snap scroll horizontal ── */}
+      <div
+        className="
+          lg:hidden
+          -mx-4 sm:-mx-6 px-4 sm:px-6
+          flex gap-4 sm:gap-6
+          overflow-x-auto
+          snap-x snap-mandatory
+          scroll-smooth scrollbar-thin
+          pb-4
+        "
+        aria-label="Depoimentos de clientes"
+      >
+        {items.map((t) => (
+          <div
+            key={t.id}
+            className="snap-center shrink-0 w-[85%] sm:w-[60%]"
+          >
+            <TestimonialCard t={t} />
+          </div>
+        ))}
       </div>
     </section>
   )
