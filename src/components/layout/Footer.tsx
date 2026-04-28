@@ -4,6 +4,7 @@ import { MoRejaLogo } from './Header'
 import { NewsletterForm } from './NewsletterForm'
 import { TrustBadges } from './TrustBadges'
 import { ManageConsentLink } from '@/components/seo/CookieConsent'
+import type { SiteConfig } from '@/types/site'
 
 // Social media SVG icons (lucide-react doesn't have brand icons)
 function IconInstagram() {
@@ -55,12 +56,81 @@ const accordionSections = [
   { title: 'Alugar', links: rentLinks },
 ]
 
-interface FooterProps {
-  logoUrl?: string | null
-  companyName?: string
+// Social link item — renders nothing when href is empty
+interface SocialLinkProps {
+  href: string
+  label: string
+  icon: React.ReactNode
+  className: string
 }
 
-export function Footer({ logoUrl, companyName }: FooterProps = {}) {
+function SocialLink({ href, label, icon, className }: SocialLinkProps) {
+  if (!href) return null
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className={className}
+    >
+      {icon}
+    </a>
+  )
+}
+
+export interface FooterProps {
+  // identity
+  logoUrl?: string | null
+  companyName?: string
+  // contact — all optional; fallback to empty = not rendered
+  phone?: string
+  whatsappFull?: string
+  email?: string
+  address?: string
+  creci?: string
+  // social — empty string = not rendered
+  instagram?: string
+  facebook?: string
+  youtube?: string
+}
+
+// Build tel href from a raw phone string — strips non-digits, prefixes '+'
+function buildTel(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  return digits ? `tel:+${digits}` : '#'
+}
+
+// Build maps href from address string
+function buildMaps(addr: string): string {
+  return addr
+    ? `https://maps.google.com/?q=${encodeURIComponent(addr)}`
+    : '#'
+}
+
+export function Footer({
+  logoUrl,
+  companyName = 'Morejá Imobiliária', /* TODO(content) */
+  phone = '',
+  whatsappFull = '',
+  email = '',
+  address = '',
+  creci = '',
+  instagram = '',
+  facebook = '',
+  youtube = '',
+}: FooterProps = {}) {
+  const resolvedName = companyName || 'Morejá Imobiliária'
+  const displayCreci = creci || '' /* TODO(content): cadastrar CRECI no admin */
+  const displayAddress = address || '' /* TODO(content): cadastrar endereço no admin */
+  const displayPhone = phone || '' /* TODO(content): cadastrar telefone no admin */
+  const displayEmail = email || '' /* TODO(content): cadastrar e-mail no admin */
+
+  const socialIconClass =
+    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors'
+  const socialIconClassActive =
+    'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors'
+
   return (
     <footer className="text-white" style={{ background: 'var(--brand-primary, #010744)' }}>
       {/* ═══════════════════════ MOBILE LAYOUT ═══════════════════════ */}
@@ -68,30 +138,34 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-6">
           {/* 1. Quick CTAs */}
           <div className="grid grid-cols-2 gap-3">
-            <a
-              href="tel:+5511999999999"
-              className="flex items-center justify-center gap-2 h-12 rounded-xl bg-white/10 active:bg-white/15 text-sm font-semibold transition-colors"
-              aria-label="Ligar para a Morejá"
-            >
-              <Phone size={18} className="text-[#f2d22e]" aria-hidden="true" />
-              Ligar
-            </a>
-            <a
-              href="https://wa.me/5511999999999"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 h-12 rounded-xl bg-green-500 active:bg-green-600 text-sm font-semibold transition-colors"
-              aria-label="WhatsApp da Morejá"
-            >
-              <MessageCircle size={18} aria-hidden="true" />
-              WhatsApp
-            </a>
+            {displayPhone && (
+              <a
+                href={buildTel(displayPhone)}
+                className="flex items-center justify-center gap-2 h-12 rounded-xl bg-white/10 active:bg-white/15 text-sm font-semibold transition-colors"
+                aria-label={`Ligar para a ${resolvedName}`}
+              >
+                <Phone size={18} className="text-[#f2d22e]" aria-hidden="true" />
+                Ligar
+              </a>
+            )}
+            {whatsappFull && (
+              <a
+                href={`https://wa.me/${whatsappFull.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 h-12 rounded-xl bg-green-500 active:bg-green-600 text-sm font-semibold transition-colors"
+                aria-label={`WhatsApp da ${resolvedName}`}
+              >
+                <MessageCircle size={18} aria-hidden="true" />
+                WhatsApp
+              </a>
+            )}
           </div>
 
           {/* 2. Brand */}
           <div className="mt-8 text-center">
             <div className="inline-block">
-              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={companyName} />
+              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={resolvedName} />
             </div>
             <p className="mt-3 text-sm text-gray-300 leading-relaxed max-w-[18rem] mx-auto">
               Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
@@ -100,44 +174,50 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
 
           {/* 3. Contato - actionable info cards */}
           <div className="mt-7 grid grid-cols-1 gap-2">
-            <a
-              href="https://maps.google.com/?q=Rua+Exemplo+123+São+Paulo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
-            >
-              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
-                <MapPin size={18} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 text-sm">
-                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Endereço</p>
-                <p className="text-white">Rua Exemplo, 123 — São Paulo/SP</p>
-              </div>
-            </a>
-            <a
-              href="tel:+5511999999999"
-              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
-            >
-              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
-                <Phone size={18} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 text-sm">
-                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Telefone</p>
-                <p className="text-white">(11) 9 9999-9999</p>
-              </div>
-            </a>
-            <a
-              href="mailto:contato@moreja.com.br"
-              className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
-            >
-              <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
-                <Mail size={18} aria-hidden="true" />
-              </span>
-              <div className="min-w-0 text-sm">
-                <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">E-mail</p>
-                <p className="text-white truncate">contato@moreja.com.br</p>
-              </div>
-            </a>
+            {displayAddress && (
+              <a
+                href={buildMaps(displayAddress)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                  <MapPin size={18} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 text-sm">
+                  <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Endereço</p>
+                  <p className="text-white">{displayAddress}</p>
+                </div>
+              </a>
+            )}
+            {displayPhone && (
+              <a
+                href={buildTel(displayPhone)}
+                className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                  <Phone size={18} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 text-sm">
+                  <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">Telefone</p>
+                  <p className="text-white">{displayPhone}</p>
+                </div>
+              </a>
+            )}
+            {displayEmail && (
+              <a
+                href={`mailto:${displayEmail}`}
+                className="flex items-center gap-3 rounded-xl bg-white/5 active:bg-white/10 px-4 py-3 transition-colors"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f2d22e]/15 text-[#f2d22e] shrink-0">
+                  <Mail size={18} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 text-sm">
+                  <p className="text-gray-400 text-[11px] uppercase tracking-wider font-semibold">E-mail</p>
+                  <p className="text-white truncate">{displayEmail}</p>
+                </div>
+              </a>
+            )}
           </div>
 
           {/* 4. Navegação - accordions */}
@@ -176,40 +256,18 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
           </div>
 
           {/* 6. Social */}
-          <div className="mt-7">
-            <p className="text-center text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-3">
-              Siga-nos
-            </p>
-            <div className="flex justify-center gap-3">
-              <a
-                href="https://instagram.com/morejaimoveis"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram da Morejá"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
-              >
-                <IconInstagram />
-              </a>
-              <a
-                href="https://facebook.com/morejaimoveis"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook da Morejá"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
-              >
-                <IconFacebook />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube da Morejá"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors"
-              >
-                <IconYoutube />
-              </a>
+          {(instagram || facebook || youtube) && (
+            <div className="mt-7">
+              <p className="text-center text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-3">
+                Siga-nos
+              </p>
+              <div className="flex justify-center gap-3">
+                <SocialLink href={instagram} label={`Instagram da ${resolvedName}`} icon={<IconInstagram />} className={socialIconClassActive} />
+                <SocialLink href={facebook} label={`Facebook da ${resolvedName}`} icon={<IconFacebook />} className={socialIconClassActive} />
+                <SocialLink href={youtube} label={`YouTube da ${resolvedName}`} icon={<IconYoutube />} className={socialIconClassActive} />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 7. Selos de confiança — mobile */}
           <div className="mt-7 pt-6 border-t border-white/10">
@@ -237,39 +295,17 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
           <div className="grid grid-cols-4 gap-10">
             {/* Brand */}
             <div>
-              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={companyName} />
+              <MoRejaLogo variant="yellow" logoUrl={logoUrl} companyName={resolvedName} />
               <p className="mt-4 text-sm text-gray-300 leading-relaxed">
                 Realizando o sonho da casa própria com qualidade, transparência e o atendimento que você merece.
               </p>
-              <div className="flex gap-3 mt-6">
-                <a
-                  href="https://instagram.com/morejaimoveis"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram da Morejá"
-                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
-                >
-                  <IconInstagram />
-                </a>
-                <a
-                  href="https://facebook.com/morejaimoveis"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook da Morejá"
-                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
-                >
-                  <IconFacebook />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube da Morejá"
-                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-[#f2d22e] hover:text-[#010744] transition-colors"
-                >
-                  <IconYoutube />
-                </a>
-              </div>
+              {(instagram || facebook || youtube) && (
+                <div className="flex gap-3 mt-6">
+                  <SocialLink href={instagram} label={`Instagram da ${resolvedName}`} icon={<IconInstagram />} className={socialIconClass} />
+                  <SocialLink href={facebook} label={`Facebook da ${resolvedName}`} icon={<IconFacebook />} className={socialIconClass} />
+                  <SocialLink href={youtube} label={`YouTube da ${resolvedName}`} icon={<IconYoutube />} className={socialIconClass} />
+                </div>
+              )}
             </div>
 
             {/* Empresa */}
@@ -318,22 +354,28 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
             <div>
               <h3 className="font-bold text-[#f2d22e] uppercase tracking-wider text-xs mb-5">Contato</h3>
               <ul className="space-y-4">
-                <li className="flex gap-3 text-sm text-gray-300">
-                  <MapPin size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
-                  <span>Rua Exemplo, 123<br />São Paulo — SP</span>
-                </li>
-                <li>
-                  <a href="tel:+5511999999999" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                    <Phone size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
-                    (11) 9 9999-9999
-                  </a>
-                </li>
-                <li>
-                  <a href="mailto:contato@moreja.com.br" className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
-                    <Mail size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
-                    contato@moreja.com.br
-                  </a>
-                </li>
+                {displayAddress && (
+                  <li className="flex gap-3 text-sm text-gray-300">
+                    <MapPin size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                    <span>{displayAddress}</span>
+                  </li>
+                )}
+                {displayPhone && (
+                  <li>
+                    <a href={buildTel(displayPhone)} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                      <Phone size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                      {displayPhone}
+                    </a>
+                  </li>
+                )}
+                {displayEmail && (
+                  <li>
+                    <a href={`mailto:${displayEmail}`} className="flex gap-3 text-sm text-gray-300 hover:text-[#f2d22e] transition-colors">
+                      <Mail size={16} className="text-[#f2d22e] shrink-0 mt-0.5" />
+                      {displayEmail}
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
           </div>
@@ -348,11 +390,15 @@ export function Footer({ logoUrl, companyName }: FooterProps = {}) {
       {/* ═══════════════════════ BOTTOM BAR (shared) ═══════════════════════ */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 text-xs text-gray-400 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} Morejá Imobiliária. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} {resolvedName}. Todos os direitos reservados.</p>
           <div className="flex items-center gap-3">
             <ManageConsentLink className="hover:text-[#f2d22e] transition-colors cursor-pointer" />
-            <span aria-hidden="true">·</span>
-            <p>CRECI-SP 00000-J</p>
+            {displayCreci && (
+              <>
+                <span aria-hidden="true">·</span>
+                <p>{displayCreci}</p>
+              </>
+            )}
           </div>
         </div>
       </div>

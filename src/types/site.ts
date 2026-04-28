@@ -14,6 +14,7 @@ export interface SiteConfig {
   email: string
   address: string
   creci: string
+  business_hours: string  // ex: "Seg–Sex 8h–18h · Sáb 8h–12h" (migration pendente)
 
   // Redes sociais
   instagram: string
