@@ -67,7 +67,7 @@ CREATE INDEX IF NOT EXISTS banners_active_position_idx
   ON banners (page, position) WHERE active = true;
 
 CREATE INDEX IF NOT EXISTS testimonials_active_idx
-  ON testimonials (sort_order, created_at DESC) WHERE active = true;
+  ON testimonials (created_at DESC) WHERE active = true;
 
 CREATE INDEX IF NOT EXISTS brokers_active_idx
   ON brokers (sort_order, name) WHERE active = true;
