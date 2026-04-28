@@ -204,16 +204,54 @@ async function fetchLocalProperty(id: string): Promise<Property | null> {
 export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promise<PropertyListResponse> {
   try {
     const data = await proxyFetch('empreendimentos', {
+      finalidade: filters.finalidade,
+      tipo: filters.tipo,
+      bairro: filters.bairro,
       cidade: filters.cidade,
+      preco_min: filters.preco_min,
+      preco_max: filters.preco_max,
+      area_min: filters.area_min,
+      area_max: filters.area_max,
+      quartos: filters.quartos,
       q: filters.q,
+      order: filters.order,
+      destaque: filters.destaque ? '1' : undefined,
       page: filters.page ?? 1,
       limit: filters.limit ?? 12,
     })
-
     return data as PropertyListResponse
   } catch (err) {
     console.error('fetchEmpreendimentos error:', err)
     return { data: [], total: 0, page: 1, limit: 12, pages: 0 }
+  }
+}
+
+/**
+ * Tipologias / unidades de um empreendimento.
+ * Endpoint Supremo: /empreendimentos/{id}/unidades (ou /tipologias).
+ */
+export interface EmpreendimentoUnit {
+  id: string
+  nome: string
+  area: number
+  quartos: number
+  suites: number
+  banheiros: number
+  vagas: number
+  preco: number
+  planta_url?: string
+}
+
+export async function fetchUnits(empId: string): Promise<EmpreendimentoUnit[]> {
+  try {
+    const data = await proxyFetch(`empreendimentos/${empId}/unidades`, {})
+    if (data && Array.isArray((data as { data?: unknown[] }).data)) {
+      return (data as { data: EmpreendimentoUnit[] }).data
+    }
+    return []
+  } catch (err) {
+    console.error(`fetchUnits(${empId}) error:`, err)
+    return []
   }
 }
 

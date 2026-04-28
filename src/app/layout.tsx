@@ -13,6 +13,7 @@ import {
   BodyStartScripts,
 } from '@/components/seo/ThirdPartyScripts'
 import { CookieConsent } from '@/components/seo/CookieConsent'
+import { LeadTrackingInit } from '@/components/seo/LeadTrackingInit'
 import { getSiteConfig } from '@/lib/site-config'
 
 const raleway = Raleway({
@@ -272,6 +273,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* Cookie consent LGPD — banner granular (Aceitar / Recusar / Personalizar) */}
         <CookieConsent />
+
+        {/* First-touch UTM tracking init (sticky em localStorage) */}
+        <LeadTrackingInit />
 
         {/* Third-party scripts — loaded afterInteractive, IDs from DB,
             todos respeitam Consent Mode v2 */}

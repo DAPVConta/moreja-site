@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { Send, Check } from 'lucide-react'
+import { collectLeadTracking } from '@/lib/lead-tracking'
+import { trackLead } from '@/components/seo/PixelEvents'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -33,6 +35,10 @@ export function ContactForm() {
     setError('')
 
     try {
+      // Pixel + CAPI client-side (gera event_id compartilhado)
+      const event_id = trackLead('pagina_contato', { email, phone: telefone })
+      const tracking = collectLeadTracking()
+
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-lead`, {
         method: 'POST',
         headers: {
@@ -45,6 +51,8 @@ export function ContactForm() {
           telefone,
           mensagem: assunto ? `[${assunto}] ${mensagem}` : mensagem,
           origem: 'pagina_contato',
+          event_id,
+          ...tracking,
         }),
       })
 

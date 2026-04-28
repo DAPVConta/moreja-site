@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { Send, Check } from 'lucide-react'
+import { collectLeadTracking } from '@/lib/lead-tracking'
+import { trackLead } from '@/components/seo/PixelEvents'
 
 interface LeadFormInlineProps {
   imovelId: string
@@ -31,6 +33,9 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
     setError('')
 
     try {
+      const event_id = trackLead('pagina_imovel', { email, phone: telefone })
+      const tracking = collectLeadTracking()
+
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-lead`, {
         method: 'POST',
         headers: {
@@ -45,11 +50,16 @@ export function LeadFormInline({ imovelId, imovelCodigo, imovelTitulo }: LeadFor
           imovel_id: imovelId,
           imovel_codigo: imovelCodigo,
           origem: 'pagina_imovel',
+          event_id,
+          ...tracking,
         }),
       })
 
       if (!res.ok) throw new Error('Erro ao enviar')
       setSuccess(true)
+      try {
+        sessionStorage.setItem(`moreja:lead-sent:${imovelId}`, '1')
+      } catch { /* ignore */ }
     } catch {
       setError('Erro ao enviar. Tente novamente.')
     } finally {
