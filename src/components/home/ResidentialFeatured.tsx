@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { ArrowRight, Home } from 'lucide-react'
 import { PropertyCard, PropertyCardSkeleton } from '@/components/properties/PropertyCard'
+import {
+  Carousel,
+  CarouselViewport,
+  CarouselItem,
+  CarouselPrev,
+  CarouselNext,
+  CarouselDotsEmbla as CarouselDots,
+} from '@/components/ui'
 import type { Property } from '@/types/property'
 
 interface ResidentialFeaturedProps {
@@ -27,6 +35,21 @@ export function ResidentialFeatured({
     })
     .slice(0, 6)
 
+  if (residentials.length === 0 && !loading) {
+    return (
+      <section className="section bg-[#fafbff]">
+        <div className="container-page text-center py-16 text-gray-400">
+          <p className="text-lg">Nenhum imóvel residencial em destaque.</p>
+          <Link href={hrefAll} className="btn-primary mt-4 inline-block">
+            Ver catálogo residencial
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
+  const skeletonCount = 6
+
   return (
     <section className="section bg-[#fafbff]">
       <div className="container-page">
@@ -41,44 +64,53 @@ export function ResidentialFeatured({
           </div>
           <Link
             href={hrefAll}
-            className="flex items-center gap-2 text-[#010744] font-semibold hover:text-[#f2d22e] transition-colors group shrink-0"
+            className="flex items-center gap-2 text-[#010744] font-semibold hover:text-[#f2d22e]
+                       transition-colors duration-150 group shrink-0"
           >
             Ver todos residenciais
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition-transform duration-150"
+              aria-hidden="true"
+            />
           </Link>
         </div>
 
-        <div
-          className="
-            -mx-4 sm:mx-0 px-4 sm:px-0
-            flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6
-            overflow-x-auto sm:overflow-visible
-            snap-x snap-mandatory sm:snap-none
-            scroll-smooth scrollbar-thin
-            pb-4 sm:pb-0
-          "
+        <Carousel
+          options={{ loop: false, align: 'start' }}
+          ariaLabel="Imóveis residenciais em destaque"
+          className="w-full"
         >
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto">
-                  <PropertyCardSkeleton />
-                </div>
-              ))
-            : residentials.map((p, i) => (
-                <div key={p.id} className="snap-center shrink-0 sm:shrink w-[85%] sm:w-auto">
-                  <PropertyCard property={p} priority={i < 3} />
-                </div>
-              ))}
-        </div>
+          <CarouselViewport className="-mx-4 sm:mx-0 px-4 sm:px-0">
+            {loading
+              ? Array.from({ length: skeletonCount }).map((_, i) => (
+                  <CarouselItem
+                    key={`skeleton-${i}`}
+                    basis="85%"
+                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                  >
+                    <PropertyCardSkeleton />
+                  </CarouselItem>
+                ))
+              : residentials.map((p, i) => (
+                  <CarouselItem
+                    key={p.id}
+                    basis="85%"
+                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                  >
+                    <PropertyCard property={p} priority={i < 3} />
+                  </CarouselItem>
+                ))}
+          </CarouselViewport>
 
-        {residentials.length === 0 && !loading && (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-lg">Nenhum imóvel residencial em destaque.</p>
-            <Link href={hrefAll} className="btn-primary mt-4 inline-block">
-              Ver catálogo residencial
-            </Link>
+          <div className="mt-5 flex items-center justify-between gap-4">
+            <CarouselDots variant="navy" />
+            <div className="hidden sm:flex items-center gap-2">
+              <CarouselPrev size="sm" />
+              <CarouselNext size="sm" />
+            </div>
           </div>
-        )}
+        </Carousel>
       </div>
     </section>
   )

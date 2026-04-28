@@ -490,3 +490,37 @@
 .animated-chip-pulse {
   animation: chip-pulse 2s ease-in-out infinite;
 }
+
+/* ── Shimmer skeleton keyframe ───────────────────────────────────────────────
+   Used by .skeleton-shimmer class in PropertyCardSkeleton.
+   The global prefers-reduced-motion rule already disables animation-duration,
+   so no extra media query is needed here.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    110deg,
+    #ededd1 8%,
+    #ffffff 18%,
+    #ededd1 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* ── View Transition — reduced motion: collapse all durations ────────────────
+   Complements the existing *{} rule in @layer base by also covering
+   ::view-transition-* pseudo-elements that live outside the normal DOM cascade.
+────────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
