@@ -336,7 +336,9 @@ export function Footer({
                 Receba antes de todo mundo as melhores oportunidades de imóveis residenciais e comerciais da nossa região.
               </p>
             </div>
-            <NewsletterForm variant="dark" />
+            {/* compact: esconde h3/subtítulo internos do form para evitar
+                duplicidade com a coluna de texto à esquerda. */}
+            <NewsletterForm variant="dark" compact />
           </div>
 
           {/* ── Live presence indicator ───────────────────────────────────── */}

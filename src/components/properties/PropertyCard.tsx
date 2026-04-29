@@ -142,28 +142,11 @@ export function PropertyCard({
       className="group relative overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300
                  hover:-translate-y-1 hover:shadow-xl"
     >
-      {/* Favorite + Compare buttons — z-acima do Link, não disparam navegação */}
-      <div className="absolute right-3 top-3 z-20 flex flex-col gap-2">
+      {/* Favorite — único elemento no canto superior direito da imagem.
+          O CompareToggle foi movido para a área de conteúdo (rodapé do card) onde
+          fica como link sutil, evitando duas pílulas competindo no hero da foto. */}
+      <div className="absolute right-3 top-3 z-20">
         <FavoriteButton propertyId={property.id} />
-        <CompareToggle
-          property={{
-            id: property.id,
-            titulo: property.titulo,
-            preco: property.preco,
-            finalidade: property.finalidade,
-            tipo: property.tipo,
-            bairro: property.bairro,
-            cidade: property.cidade,
-            area_total: property.area_total,
-            quartos: property.quartos,
-            banheiros: property.banheiros,
-            vagas: property.vagas ?? 0,
-            fotos: property.fotos,
-            href: `/imovel/${property.id}`,
-            preco_condominio: property.preco_condominio,
-            preco_iptu: property.preco_iptu,
-          }}
-        />
       </div>
 
       <Link href={`/imovel/${property.id}`} className="block">
@@ -257,41 +240,66 @@ export function PropertyCard({
             </>
           )}
 
-          {/* Badges canto superior esquerdo */}
-          <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5 max-w-[calc(100%-5rem)]">
-            <Badge variant="default">{property.tipo}</Badge>
-            <Badge variant={property.finalidade === 'Venda' ? 'accent' : 'secondary'}>
-              {property.finalidade}
-            </Badge>
-            {isLaunch && <Badge variant="launch">Lançamento</Badge>}
-            {isPremium && <Badge variant="exclusive">Morejá Premium</Badge>}
+          {/* Pílula primária canto superior esquerdo — combina tipo + finalidade
+              em uma única pill compacta com glassmorphism, evitando 4 badges
+              empilhadas que dominavam a foto. */}
+          <div className="absolute left-3 top-3 z-10 max-w-[calc(100%-4rem)]">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#010744]/85
+                         backdrop-blur-sm px-3 py-1 text-[11px] font-semibold uppercase
+                         tracking-wide text-white shadow-md"
+            >
+              <span className="truncate">{property.tipo}</span>
+              <span aria-hidden="true" className="opacity-50">·</span>
+              <span
+                className={cn(
+                  'truncate',
+                  property.finalidade === 'Venda' ? 'text-[#f2d22e]' : 'text-white',
+                )}
+              >
+                {property.finalidade}
+              </span>
+            </span>
           </div>
 
-          {/* Badges promocionais canto inferior esquerdo */}
-          <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1.5">
-            {priceDropped && <Badge variant="priceDrop">Baixou de preço</Badge>}
-            {property.destaque && !isLaunch && !priceDropped && (
-              <Badge variant="exclusive">Destaque</Badge>
-            )}
-          </div>
+          {/* Selo de status — UM único chip canto inferior esquerdo, escolhido
+              por prioridade (Lançamento > Baixou de preço > Premium > Destaque).
+              Substitui o cluster anterior de 4 badges concorrentes. */}
+          {(isLaunch || priceDropped || isPremium || property.destaque) && (
+            <div className="absolute bottom-3 left-3 z-10">
+              {isLaunch ? (
+                <Badge variant="launch">Lançamento</Badge>
+              ) : priceDropped ? (
+                <Badge variant="priceDrop">Baixou de preço</Badge>
+              ) : isPremium ? (
+                <Badge variant="exclusive">Morejá Premium</Badge>
+              ) : (
+                <Badge variant="exclusive">Destaque</Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
         <div className="p-4 sm:p-5">
+          {/* Eyebrow: localização leve, deixa o título respirar */}
+          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-gray-400">
+            <MapPin size={12} className="shrink-0 text-[#f2d22e]" aria-hidden="true" />
+            <span className="truncate">
+              {property.bairro}
+              {property.cidade && (
+                <span className="text-gray-300"> · {property.cidade}</span>
+              )}
+            </span>
+          </div>
+
           <h3
-            className="mb-2 line-clamp-2 text-base font-semibold leading-snug text-[#010744]
+            className="mb-3 line-clamp-2 text-base font-semibold leading-snug text-[#010744]
                        transition-colors group-hover:underline group-hover:underline-offset-4
                        group-hover:decoration-[#f2d22e] group-hover:decoration-2"
           >
             {property.titulo}
           </h3>
-
-          <div className="mb-3 flex items-center gap-1.5 text-sm text-gray-500">
-            <MapPin size={14} className="shrink-0 text-[#f2d22e]" aria-hidden="true" />
-            <span className="truncate">
-              {property.bairro}, {property.cidade}
-            </span>
-          </div>
 
           {/* Price */}
           <p className="mb-4 text-xl font-bold text-[#010744]">
@@ -301,35 +309,62 @@ export function PropertyCard({
             )}
           </p>
 
-          {/* Features */}
-          <div className="flex items-center gap-4 border-t border-gray-100 pt-3 text-sm text-gray-500">
+          {/* Features — gap-3 enxuto + whitespace-nowrap em cada item evita
+              quebra esquisita do "200 m²" que estava acontecendo. Área alinhada
+              à direita via ml-auto. */}
+          <div className="flex items-center gap-3 border-t border-gray-100 pt-3 text-sm text-gray-500">
             {property.quartos > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1 whitespace-nowrap" title={`${property.quartos} quartos`}>
                 <Bed size={15} className="text-[#010744]" aria-label="Quartos" />
                 {property.quartos}
               </span>
             )}
             {property.banheiros > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1 whitespace-nowrap" title={`${property.banheiros} banheiros`}>
                 <Bath size={15} className="text-[#010744]" aria-label="Banheiros" />
                 {property.banheiros}
               </span>
             )}
             {property.vagas != null && property.vagas > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1 whitespace-nowrap" title={`${property.vagas} vagas`}>
                 <Car size={15} className="text-[#010744]" aria-label="Vagas" />
                 {property.vagas}
               </span>
             )}
             {property.area_total > 0 && (
-              <span className="ml-auto flex items-center gap-1.5">
-                <Maximize2 size={15} className="text-[#010744]" aria-label="Área" />
+              <span className="ml-auto flex items-center gap-1 whitespace-nowrap" title={`${formatArea(property.area_total)}`}>
+                <Maximize2 size={14} className="text-[#010744]" aria-label="Área" />
                 {formatArea(property.area_total)}
               </span>
             )}
           </div>
         </div>
       </Link>
+
+      {/* Compare toggle — fora do <Link> para não disparar navegação no click,
+          posicionado discretamente no rodapé do card como link de utility,
+          em vez de competir com o botão de favorito sobre a foto. */}
+      <div className="border-t border-gray-100 px-4 pb-3 pt-2 sm:px-5">
+        <CompareToggle
+          property={{
+            id: property.id,
+            titulo: property.titulo,
+            preco: property.preco,
+            finalidade: property.finalidade,
+            tipo: property.tipo,
+            bairro: property.bairro,
+            cidade: property.cidade,
+            area_total: property.area_total,
+            quartos: property.quartos,
+            banheiros: property.banheiros,
+            vagas: property.vagas ?? 0,
+            fotos: property.fotos,
+            href: `/imovel/${property.id}`,
+            preco_condominio: property.preco_condominio,
+            preco_iptu: property.preco_iptu,
+          }}
+        />
+      </div>
     </article>
   )
 }

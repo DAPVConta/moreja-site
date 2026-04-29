@@ -21,10 +21,17 @@ type Status = 'idle' | 'submitting' | 'success' | 'error'
 export function NewsletterForm({
   variant = 'dark',
   subscribersCount = 1247,
+  compact = false,
 }: {
   variant?: 'dark' | 'light'
   /** Exibido na linha de social proof. Default 1.247. */
   subscribersCount?: number
+  /**
+   * Quando true, esconde o h3 "Newsletter" e o subtítulo internos —
+   * use quando o componente está dentro de um wrapper que já forneceu
+   * eyebrow/heading/descrição (ex.: banner do Footer desktop).
+   */
+  compact?: boolean
 } = {}) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<Status>('idle')
@@ -98,13 +105,17 @@ export function NewsletterForm({
 
   return (
     <div>
-      {/* Label */}
-      <h3 className={`font-bold uppercase tracking-wider text-xs mb-3 ${textHeading}`}>
-        Newsletter
-      </h3>
-      <p className={`text-sm mb-4 leading-relaxed ${textMuted}`}>
-        Receba lançamentos exclusivos e oportunidades antes de todo mundo.
-      </p>
+      {/* Label + intro — escondidos no modo compact (consumidor já fornece) */}
+      {!compact && (
+        <>
+          <h3 className={`font-bold uppercase tracking-wider text-xs mb-3 ${textHeading}`}>
+            Newsletter
+          </h3>
+          <p className={`text-sm mb-4 leading-relaxed ${textMuted}`}>
+            Receba lançamentos exclusivos e oportunidades antes de todo mundo.
+          </p>
+        </>
+      )}
 
       {/* ── Success state ─────────────────────────────────────────── */}
       {status === 'success' ? (
