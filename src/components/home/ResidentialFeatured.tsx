@@ -74,9 +74,9 @@ export function ResidentialFeatured({
   })
 
   // Usar fallback quando banco estiver vazio
-  const residentials = (filtered.length > 0 ? filtered : FALLBACK_RESIDENTIAL).slice(0, 6)
+  const residentials = (filtered.length > 0 ? filtered : FALLBACK_RESIDENTIAL).slice(0, 5)
 
-  const skeletonCount = 6
+  const skeletonCount = 5
 
   return (
     <section className="section bg-[#fafbff]">
@@ -114,8 +114,8 @@ export function ResidentialFeatured({
               ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <CarouselItem
                     key={`skeleton-${i}`}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCardSkeleton />
                   </CarouselItem>
@@ -123,8 +123,8 @@ export function ResidentialFeatured({
               : residentials.map((p, i) => (
                   <CarouselItem
                     key={p.id}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCard property={p} priority={i < 3} />
                   </CarouselItem>

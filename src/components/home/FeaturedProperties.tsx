@@ -63,19 +63,10 @@ const FALLBACK_FEATURED: Property[] = [
     fotos: ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
-  {
-    id: 'feat-6', codigo: 'MRJ-F06', titulo: 'Casa em Olinda — Ampliada',
-    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
-    preco: 650000, bairro: 'Carmo', cidade: 'Olinda', estado: 'PE',
-    area_total: 200, quartos: 4, suites: 1, banheiros: 3, vagas: 2,
-    descricao: 'Casa ampliada com quintal em rua tranquila de Olinda, próximo ao centro histórico.',
-    fotos: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
 ]
 
 export function FeaturedProperties({ properties, loading = false }: FeaturedPropertiesProps) {
-  const skeletonCount = 6
+  const skeletonCount = 5
 
   // Usar fallback quando banco estiver vazio
   const displayProperties = properties.length > 0 ? properties : FALLBACK_FEATURED
@@ -126,8 +117,8 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
               ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <CarouselItem
                     key={`skeleton-${i}`}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCardSkeleton />
                   </CarouselItem>
@@ -135,8 +126,8 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
               : displayProperties.map((property, index) => (
                   <CarouselItem
                     key={property.id}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCard property={property} priority={index < 3} />
                   </CarouselItem>

@@ -70,9 +70,9 @@ export function CommercialFeatured({
   })
 
   // Usar fallback quando banco estiver vazio
-  const commercials = (filtered.length > 0 ? filtered : FALLBACK_COMMERCIAL).slice(0, 6)
+  const commercials = (filtered.length > 0 ? filtered : FALLBACK_COMMERCIAL).slice(0, 5)
 
-  const skeletonCount = 6
+  const skeletonCount = 5
 
   return (
     // bg-mesh-navy: navy base + radial yellow/white hints from globals.css
@@ -128,8 +128,8 @@ export function CommercialFeatured({
               ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <CarouselItem
                     key={`skeleton-${i}`}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCardSkeleton />
                   </CarouselItem>
@@ -137,8 +137,8 @@ export function CommercialFeatured({
               : commercials.map((p, i) => (
                   <CarouselItem
                     key={p.id}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCard property={p} priority={i < 3} />
                   </CarouselItem>
