@@ -85,13 +85,19 @@ export function HeroBackdrop({
       {/* Overlay UNIFORME — 40% navy (config via overlayOpacity prop, default
           0.4). Antes era um gradient 135deg de 0.6 → 0.35, mas o cliente pediu
           "overlay de 40%" que se interpreta como uma camada navy uniforme em
-          40%, não um gradient variável. A foto fica visível em sua cor natural,
-          com 40% de tinta navy por cima dando contraste para texto branco. */}
+          40%, não um gradient variável.
+          Defensive fallback: se o banco vier com valor inválido/0/undefined,
+          usa 0.4. Antes admin podia inadvertidamente zerar o overlay e deixar
+          o texto branco ilegível sobre foto clara. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backgroundColor: `rgba(1, 7, 68, ${overlayOpacity})`,
+          backgroundColor: `rgba(1, 7, 68, ${
+            typeof overlayOpacity === 'number' && overlayOpacity > 0
+              ? overlayOpacity
+              : 0.4
+          })`,
         }}
       />
     </>
