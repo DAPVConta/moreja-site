@@ -454,10 +454,16 @@ export function Header({
       <header
         className={[
           'sticky top-0 z-50 w-full',
-          // Transition específica (não 'all') para evitar que cor/opacity de
-          // children como o logo herdem animação na hidratação inicial — antes
-          // o logo aparecia "esmaecido" no primeiro carregamento.
-          'transition-[transform,background-color,box-shadow,border-color] duration-300 will-change-transform',
+          // Transition APENAS de transform (hide-on-scroll). Antes incluía
+          // background-color, que criava 300ms onde:
+          //  - variant da logo mudava INSTANTANEAMENTE de white → navy
+          //  - mas bg do header ainda transitando de transparent → white/80
+          // Resultado: durante esses 300ms, letras navy sobre bg ainda
+          // quase-transparente = quase-hero-navy = LOGO INVISÍVEL.
+          // Sem transição em bg/shadow/border, a troca é síncrona com o
+          // variant da logo. Perdemos o fade suave do bg, mas ganhamos
+          // legibilidade da logo em qualquer scroll.
+          'transition-transform duration-300 will-change-transform',
           hidden ? '-translate-y-full' : 'translate-y-0',
           scrolled
             ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
