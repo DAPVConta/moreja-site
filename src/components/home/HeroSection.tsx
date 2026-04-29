@@ -25,11 +25,17 @@ interface HeroSectionProps {
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
 }
 
+// Imagem default do hero — quando home_sections.config.hero_search.bg_image
+// está vazio. Foto de skyline urbano premium, renderizada a 35% de opacity
+// pelo HeroBackdrop. Quando o admin cadastrar imagem própria, esta cai.
+const DEFAULT_HERO_BG =
+  'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1920&q=80'
+
 export function HeroSection({
   title = 'Encontre o imóvel',
   highlight = 'dos seus sonhos',
   subtitle = 'A Morejá Imobiliária oferece os melhores imóveis residenciais e comerciais. Compre, alugue ou invista com segurança e qualidade.',
-  bgImage,
+  bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
   overlayOpacity = 0.15,

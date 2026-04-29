@@ -281,32 +281,24 @@ export function Header({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dragX, setDragX] = useState(0)
   const dragStart = useRef<number | null>(null)
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
   const lastScrollY = useRef(0)
 
-  // ── Liquid-glass: IntersectionObserver on a sentinel at 80px ──
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // When sentinel is NOT intersecting (scrolled past 80px), apply glass
-        setScrolled(!entry.isIntersecting)
-      },
-      { threshold: 0, rootMargin: '0px' },
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [])
-
-  // ── Hide on scroll-down, show on scroll-up ──
-  // Threshold de 6px para evitar tremor em micro-scrolls. Sempre visível
-  // nos primeiros 80px (área do hero) e quando o menu mobile está aberto.
+  // ── Liquid-glass + hide-on-scroll-down via UM scroll listener.
+  // Antes usava IntersectionObserver com sentinel `fixed top-[80px]` que
+  // ficava ETERNAMENTE no viewport (fixed = não scrolla), então
+  // `isIntersecting` era sempre true e `scrolled` nunca virava true. Bug:
+  // header nunca virava liquid-glass branco, links de nav ficavam white
+  // sobre fundo branco da página = invisíveis.
+  // Solução: scroll listener único atualiza scrolled (glass) E hidden
+  // (translate). Threshold 6px no delta evita tremor.
   useEffect(() => {
     function onScroll() {
       const y = window.scrollY
       const dy = y - lastScrollY.current
+      // Liquid-glass: aplica quando passar de 80px do topo
+      setScrolled(y > 80)
+      // Hide-on-scroll-down: rolando pra baixo esconde, pra cima reaparece.
+      // Sempre visível nos primeiros 80px e quando menu mobile aberto.
       if (mobileOpen || y < 80) {
         setHidden(false)
       } else if (Math.abs(dy) > 6) {
@@ -314,6 +306,8 @@ export function Header({
       }
       lastScrollY.current = y
     }
+    // Rodar uma vez na montagem caso a página já esteja scrollada
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [mobileOpen])
@@ -432,13 +426,6 @@ export function Header({
 
   return (
     <>
-      {/* ── Sentinel for IntersectionObserver — 80px below viewport top ── */}
-      <div
-        ref={sentinelRef}
-        aria-hidden="true"
-        className="fixed top-[80px] left-0 right-0 h-px pointer-events-none z-[-1]"
-      />
-
       {/* ── Top bar — marquee (desktop only) ── */}
       {hasTopBar && (
         <div
