@@ -255,8 +255,12 @@ export function PropertyCard({
   const aspectClass = aspect === 'square' ? 'aspect-square' : 'aspect-[16/9] sm:aspect-[4/3]'
 
   return (
+    // h-full + flex-col garantem que cards na mesma row tenham a mesma
+    // altura (Embla aplica align-items stretch por default no track flex).
+    // O footer de stats usa `mt-auto` para grudar no rodapé do card mesmo
+    // quando título tem 1 linha em vez de 2 — alinhamento perfeito da row.
     <article
-      className="group relative overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300
+      className="group relative h-full flex flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300
                  motion-safe:hover:-translate-y-1 hover:shadow-xl"
     >
       {/* Stack de actions no canto superior direito da imagem: favorite +
@@ -457,11 +461,10 @@ export function PropertyCard({
         </div>
       </Link>
 
-      {/* Footer com stats — FORA do <Link>, mas é só leitura (sem botões
-          interativos), então sem problema de aninhamento. Compare voltou
-          para a área da imagem (top-right, abaixo do favorite). Aqui sobra
-          espaço para o "200 m²" sempre caber. */}
-      <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 sm:px-5 text-[13px] text-gray-600">
+      {/* Footer com stats — mt-auto cola no rodapé do card mesmo quando o
+          título usa 1 linha em vez de 2, garantindo alinhamento de altura
+          consistente entre cards da mesma row (Embla flex stretch). */}
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 sm:px-5 text-[13px] text-gray-600">
         <div className="flex items-center gap-3">
           {property.quartos > 0 && (
             <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
