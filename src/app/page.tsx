@@ -29,7 +29,6 @@ import { BannersSection } from '@/components/home/BannersSection'
 import { TeamSection } from '@/components/home/TeamSection'
 import { PropertyValuationCTA } from '@/components/home/PropertyValuationCTA'
 import { BlogPreview } from '@/components/home/BlogPreview'
-import { CoverageMap } from '@/components/home/CoverageMap'
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
 import { FaqAccordion } from '@/components/home/FaqAccordion'
 import { CtaAnunciar } from '@/components/home/CtaAnunciar'
@@ -274,21 +273,6 @@ export default async function HomePage() {
           subtitle={c.subtitle}
           ctaLabel={c.cta_label}
           ctaHref={c.cta_href}
-        />
-      )
-    },
-    coverage_map: () => {
-      const c = cfg('coverage_map') as {
-        title?: string; subtitle?: string; city_label?: string; cta_href?: string
-        regions?: { name: string; slug: string; count?: number; highlight?: boolean }[]
-      }
-      return (
-        <CoverageMap
-          title={c.title}
-          subtitle={c.subtitle}
-          cityLabel={c.city_label}
-          ctaHref={c.cta_href}
-          regions={c.regions ?? []}
         />
       )
     },
