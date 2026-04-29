@@ -62,21 +62,15 @@ export function HeroBackdrop({
           priority
           fetchPriority="high"
           sizes="100vw"
-          // w-full h-full + object-cover ensures full-bleed coverage
-          // independente do aspect-ratio da foto fonte.
           className="object-cover w-full h-full"
           style={{
             objectPosition: `${bgFocalX}% ${bgFocalY}%`,
-            // Imagem esmaecida em 35% — sai de 100% de presença (que competia
-            // com o título e a busca) para apenas 35%, deixando o gradient
-            // navy de fundo dominar e o conteúdo ler com clareza.
-            opacity: 0.35,
-            // Pequena escala extra (105%) compensa o shift do parallax
-            // sem precisar de paddingBottom que estava causando issue
-            // de cobertura horizontal.
+            // Imagem em 100% de opacity — antes ia a 35% (dimming primário)
+            // mas combinado com overlay forte ficava escuro demais, escondendo
+            // a foto. Agora a imagem aparece em sua intensidade natural; o
+            // dimming de legibilidade vem 100% do overlay (40% por padrão).
             transform: 'scale(1.05)',
             transformOrigin: 'center center',
-            // CSS scroll-driven parallax — supported in Chrome 115+, Safari 18+.
             animationName: 'hero-parallax',
             animationDuration: '1s',
             animationTimingFunction: 'linear',
@@ -88,15 +82,16 @@ export function HeroBackdrop({
         />
       </div>
 
-      {/* Gradient overlay — tints and darkens for text legibility */}
+      {/* Overlay UNIFORME — 40% navy (config via overlayOpacity prop, default
+          0.4). Antes era um gradient 135deg de 0.6 → 0.35, mas o cliente pediu
+          "overlay de 40%" que se interpreta como uma camada navy uniforme em
+          40%, não um gradient variável. A foto fica visível em sua cor natural,
+          com 40% de tinta navy por cima dando contraste para texto branco. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(135deg,
-            rgba(1,7,68,${overlayOpacity + 0.2}) 0%,
-            rgba(1,7,68,${overlayOpacity}) 60%,
-            rgba(26,31,110,${overlayOpacity - 0.05}) 100%)`,
+          backgroundColor: `rgba(1, 7, 68, ${overlayOpacity})`,
         }}
       />
     </>
