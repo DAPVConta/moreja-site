@@ -27,14 +27,16 @@ interface HeroSectionProps {
 }
 
 // Imagem default do hero — quando home_sections.config.hero_search.bg_image
-// está vazio. Foto explícita de família feliz entrando em casa nova,
-// transmitindo a emoção do "imóvel dos sonhos". O admin pode trocar via:
-//   /admin/layout-home → seção hero_search → campo bg_image (URL)
+// está vazio. Foto cadastrada no bucket Supabase do projeto: família
+// feliz entrando em casa nova com mala e cachorro. Tom emotivo +
+// aspirational, exatamente o sentimento de "imóvel dos sonhos".
+// O admin pode trocar via:
+//   /admin/layout-home → seção hero_search → campo bg_image (URL/upload)
 //   /admin/layout-home → seção hero_search → campo overlay_opacity (0–1)
 // Renderizada a 35% de opacity pelo HeroBackdrop, com overlay navy 40%
-// por cima — ainda permite ler bem o título branco e os links do header.
+// por cima — equilibra visibilidade da foto com legibilidade do título.
 const DEFAULT_HERO_BG =
-  'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1920&q=85'
+  'https://yxlepgmlhcnqhwshymup.supabase.co/storage/v1/object/public/site/home/hero/medium-shot-couple-buying-new-home_1776376279500.webp'
 
 export function HeroSection({
   title = 'Encontre o imóvel',
