@@ -391,7 +391,7 @@ export function PropertyCard({
             preço e título não estourarem em cards estreitos. */}
         <div className="p-4 sm:p-5">
           {/* Eyebrow editorial: bairro · cidade */}
-          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
+          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
             <span className="truncate block">
               {property.bairro}
               {property.cidade && (
@@ -400,11 +400,11 @@ export function PropertyCard({
             </span>
           </div>
 
-          {/* Título — text-[15px] em mobile (era text-base/16px) para caber em
-              cards estreitos sem quebrar em 3 linhas. min-h-[2.5rem] = 40px =
-              2 × leading-5/20px. text-balance evita órfã/viúva. */}
+          {/* Título — text-sm (14px) com leading-tight (1.25 ≈ 17.5px).
+              min-h-[2.25rem] = 36px ≈ 2 × 17.5px (folga de 1px).
+              text-balance evita órfã/viúva. */}
           <h3
-            className="mb-2.5 line-clamp-2 min-h-[2.5rem] text-[15px] font-semibold leading-5 text-[#010744]
+            className="mb-2 line-clamp-2 min-h-[2.25rem] text-sm font-semibold leading-tight text-[#010744]
                        text-balance
                        transition-colors group-hover:underline group-hover:underline-offset-[5px]
                        group-hover:decoration-[#010744] group-hover:decoration-2"
@@ -412,13 +412,13 @@ export function PropertyCard({
             {property.titulo}
           </h3>
 
-          {/* Price + microtag de qualidade. text-xl mobile / text-2xl desktop
-              evita overflow de "R$ 2.100.000" em cards de ~280px. */}
-          <div className="mb-3 flex items-baseline gap-2 flex-wrap">
-            <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-[#010744]">
+          {/* Price + microtag de qualidade. text-lg mobile / text-xl desktop —
+              ainda dominante na hierarquia mas sem estourar o card. */}
+          <div className="mb-3 flex items-baseline gap-1.5 flex-wrap">
+            <p className="text-lg sm:text-xl font-bold tracking-tight tabular-nums text-[#010744]">
               {formatPrice(property.preco)}
               {property.finalidade === 'Locação' && (
-                <span className="ml-0.5 text-xs font-normal text-gray-500">/mês</span>
+                <span className="ml-0.5 text-[11px] font-normal text-gray-500">/mês</span>
               )}
             </p>
             {priceDropped && precoAnterior && (
@@ -444,9 +444,10 @@ export function PropertyCard({
             )}
           </div>
 
-          {/* Features — pr-10 reserva espaço para o CompareIconButton absolute,
-              evitando que o número da área seja cortado em cards estreitos. */}
-          <div className="flex items-center gap-2.5 border-t border-gray-100 pt-2.5 pr-10 text-[13px] text-gray-600">
+          {/* Features — pr-14 reserva 56px (44px do botão Compare + folga)
+              para o CompareIconButton absolute (bottom-3 right-3) NÃO
+              cobrir o número da área em cards estreitos. */}
+          <div className="flex items-center gap-2.5 border-t border-gray-100 pt-2.5 pr-14 text-[13px] text-gray-600">
             {property.quartos > 0 && (
               <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
                 <Bed size={14} className="text-[#010744]" aria-label="Quartos" />

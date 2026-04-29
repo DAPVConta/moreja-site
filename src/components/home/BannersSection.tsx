@@ -45,7 +45,9 @@ const FALLBACK_BANNERS: Banner[] = [
 export function BannersSection({
   banners: bannersProp,
   autoplay = true,
-  intervalSeconds = 5,
+  // Default 4s — pedido do cliente. Configurável via
+  // home_sections.config.banners.interval_seconds.
+  intervalSeconds = 4,
 }: BannersSectionProps) {
   // Usar fallback quando banco estiver vazio
   const banners = bannersProp.length > 0 ? bannersProp : FALLBACK_BANNERS

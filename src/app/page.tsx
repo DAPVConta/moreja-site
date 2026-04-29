@@ -139,7 +139,7 @@ export default async function HomePage() {
         <BannersSection
           banners={homeBanners}
           autoplay={c.autoplay ?? true}
-          intervalSeconds={c.interval_seconds ?? 5}
+          intervalSeconds={c.interval_seconds ?? 4}
         />
       )
     },

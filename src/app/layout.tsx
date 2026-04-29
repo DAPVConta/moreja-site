@@ -286,7 +286,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           youtube={config.youtube}
         />
 
-        <WhatsAppFab whatsapp={config.whatsapp_full || config.whatsapp} />
+        {/* Default 5581900000000 (Recife area) quando admin não cadastrou —
+            placeholder visível para o usuário ver o FAB; admin substitui via
+            site_config.whatsapp_full. */}
+        <WhatsAppFab
+          whatsapp={config.whatsapp_full || config.whatsapp || '5581900000000'}
+        />
         <BackToTopFab />
 
         {/* Pílula flutuante p/ comparador (só aparece com 1+ items) */}
