@@ -26,11 +26,11 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Overlay forte (0.6) garante contraste do título branco e dos links do
-  // header transparente independente da imagem escolhida. A imagem por baixo
-  // já está a 35% de opacity (esmaecida), e o overlay adiciona a camada
-  // navy que dá legibilidade ao texto.
-  overlayOpacity = 0.6,
+  // Default 40% navy uniform overlay. Imagem segue a 100% (sem dimming
+  // próprio), o overlay sozinho dá o contraste necessário para o título
+  // branco e os links do header transparente. Configurável via
+  // home_sections.config.hero_search.overlay_opacity (slider no admin).
+  overlayOpacity = 0.4,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (
