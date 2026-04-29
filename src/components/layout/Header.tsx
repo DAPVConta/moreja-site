@@ -454,8 +454,10 @@ export function Header({
       <header
         className={[
           'sticky top-0 z-50 w-full',
-          'transition-all duration-300 will-change-transform',
-          // hide-on-scroll-down: translate p/ cima quando hidden=true
+          // Transition específica (não 'all') para evitar que cor/opacity de
+          // children como o logo herdem animação na hidratação inicial — antes
+          // o logo aparecia "esmaecido" no primeiro carregamento.
+          'transition-[transform,background-color,box-shadow,border-color] duration-300 will-change-transform',
           hidden ? '-translate-y-full' : 'translate-y-0',
           scrolled
             ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
@@ -465,7 +467,9 @@ export function Header({
         <div className="container-page">
           <div
             className={[
-              'flex items-center justify-between transition-all duration-300',
+              // transition-[height] específica em vez de transition-all para
+              // não animar cor/opacity de children no primeiro paint.
+              'flex items-center justify-between transition-[height] duration-300',
               scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20',
             ].join(' ')}
           >

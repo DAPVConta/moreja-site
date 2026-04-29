@@ -96,9 +96,11 @@ function FavoriteButton({ propertyId }: { propertyId: string }) {
       onClick={handleClick}
       aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
       aria-pressed={isFavorite}
+      // Reduzido de h-11 → h-8 (~50% menos prominente). Mantém touch
+      // ergonomia razoável; em mobile o tap target ainda é confortável.
       className={cn(
         'inline-flex items-center justify-center',
-        'h-11 w-11 rounded-full',
+        'h-8 w-8 rounded-full',
         'bg-white/90 backdrop-blur-sm shadow-md',
         'transition-all duration-150',
         'hover:bg-white motion-safe:hover:scale-105',
@@ -107,7 +109,7 @@ function FavoriteButton({ propertyId }: { propertyId: string }) {
       )}
     >
       <Heart
-        size={18}
+        size={14}
         aria-hidden="true"
         className={cn(
           'transition-colors duration-150',
@@ -174,11 +176,11 @@ function CompareIconButton({
       onClick={handleClick}
       aria-pressed={active}
       aria-label={active ? 'Remover do comparador' : 'Adicionar ao comparador'}
-      // Glassmorphism igual ao FavoriteButton (ambos vivem sobre a foto).
-      // 44×44 = WCAG 2.5.5. Active dispara estado navy+yellow para feedback.
+      // Glassmorphism igual ao FavoriteButton (par visual). h-8 ~50% menor
+      // que o tamanho anterior (h-11), conforme pedido do cliente.
       className={cn(
         'inline-flex items-center justify-center',
-        'h-11 w-11 rounded-full',
+        'h-8 w-8 rounded-full',
         'backdrop-blur-sm shadow-md',
         'transition-all duration-150',
         active
@@ -188,7 +190,7 @@ function CompareIconButton({
         'cursor-pointer',
       )}
     >
-      <Icon size={18} aria-hidden="true" />
+      <Icon size={14} aria-hidden="true" />
     </button>
   )
 }
@@ -362,14 +364,13 @@ export function PropertyCard({
           )}
 
           {/* Pílula primária canto superior esquerdo — APENAS finalidade.
-              Tipo (Apartamento/Casa/etc) está implícito no título e foi cortado
-              por causar truncate quando longo (e por ser redundante — minimalist
-              da rodada 2 ganhou). Letra maior + tracking para sustentar peso. */}
+              Reduzida ~50% (text-[8px] + px-2 py-0.5) conforme pedido do
+              cliente; menos prominente sobre a foto. */}
           <div className="absolute left-3 top-3 z-10">
             <span
               className={cn(
-                'inline-flex items-center rounded-full backdrop-blur-sm px-3 py-1.5',
-                'text-[11px] font-bold uppercase tracking-[0.18em] shadow-md',
+                'inline-flex items-center rounded-full backdrop-blur-sm px-2 py-0.5',
+                'text-[8px] font-bold uppercase tracking-[0.15em] shadow-md',
                 property.finalidade === 'Venda'
                   ? 'bg-[#010744]/85 text-[#f2d22e]'
                   : 'bg-[#010744]/85 text-white',
