@@ -77,13 +77,16 @@ export interface HomeSection {
   config: Record<string, unknown>
 }
 
+// Retorna TODAS as seções (ativas e inativas). O filtro de `active` é feito
+// no consumer — assim conseguimos distinguir "tabela vazia" (instalação nova,
+// dispara fallback hardcoded) de "todas inativas" (admin desligou tudo,
+// home fica vazia de fato).
 export const getHomeSections = cache(async (): Promise<HomeSection[]> => {
   try {
     const supabase = await createSupabaseServerClient()
     const { data } = await supabase
       .from('home_sections')
       .select('*')
-      .eq('active', true)
       .order('position', { ascending: true })
 
     return (data ?? []) as HomeSection[]

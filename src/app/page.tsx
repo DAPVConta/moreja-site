@@ -249,9 +249,11 @@ export default async function HomePage() {
     },
   }
 
-  // Fallback: se a tabela estiver vazia, renderiza a ordem canônica da home
+  // Fallback: se a tabela estiver LITERALMENTE vazia (instalação nova, sem
+  // rows em home_sections), renderiza a ordem canônica. Se tiver rows mas
+  // todas inativas, respeita a vontade do admin e renderiza vazio.
   const ordered = sections.length > 0
-    ? sections
+    ? sections.filter((s) => s.active)
     : [
         { id: '1',  section_type: 'hero_search',          label: '', position:  0, active: true, config: {} },
         { id: '2',  section_type: 'banners',               label: '', position:  1, active: true, config: {} },
