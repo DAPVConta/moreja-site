@@ -175,11 +175,13 @@ function CompareIconButton({
       aria-pressed={active}
       aria-label={active ? 'Remover do comparador' : 'Adicionar ao comparador'}
       className={cn(
-        'inline-flex items-center justify-center',
-        'h-9 w-9 rounded-full transition-colors duration-150',
+        'inline-flex items-center justify-center shrink-0',
+        // 44×44 atende WCAG 2.5.5 (touch target). Padding negativo via -m
+        // para não quebrar o ritmo da stats row que vive em text-sm/14px.
+        'h-11 w-11 -my-2 rounded-full transition-colors duration-150',
         active
-          ? 'bg-[#010744] text-[#f2d22e]'
-          : 'bg-gray-50 text-gray-500 hover:bg-[#010744] hover:text-white',
+          ? 'bg-[#010744] text-[#f2d22e] border border-[#010744]'
+          : 'bg-white border border-[#010744]/15 text-[#010744]/70 hover:border-[#f2d22e] hover:text-[#010744]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2',
         'cursor-pointer',
       )}
@@ -267,6 +269,7 @@ export function PropertyCard({
         >
           {photos.map((src, i) => {
             const finalSrc = imgErr[i] ? PLACEHOLDER : src
+            const isActive = i === photoIdx
             const imgEl = (
               <Image
                 src={finalSrc}
@@ -275,7 +278,7 @@ export function PropertyCard({
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className={cn(
                   'object-cover transition-opacity duration-500',
-                  i === photoIdx ? 'opacity-100' : 'opacity-0',
+                  isActive ? 'opacity-100' : 'opacity-0',
                   'motion-safe:group-hover:scale-105',
                 )}
                 priority={i === 0 ? priority : false}
@@ -283,12 +286,14 @@ export function PropertyCard({
                 onError={() => setImgErr((prev) => ({ ...prev, [i]: true }))}
               />
             )
+            // aria-hidden nas fotos não-ativas para leitores de tela não lerem
+            // todas as 5 imagens (detail nice-to-have da rodada 2)
             return i === 0 ? (
               <ViewTransition key={i} name={`property-photo-${property.id}`}>
                 {imgEl}
               </ViewTransition>
             ) : (
-              <span key={i} className="contents">
+              <span key={i} className="contents" aria-hidden={!isActive}>
                 {imgEl}
               </span>
             )
@@ -350,37 +355,33 @@ export function PropertyCard({
             </>
           )}
 
-          {/* Pílula primária canto superior esquerdo — tipo · finalidade */}
-          <div className="absolute left-3 top-3 z-10 max-w-[calc(100%-4rem)]">
+          {/* Pílula primária canto superior esquerdo — APENAS finalidade.
+              Tipo (Apartamento/Casa/etc) está implícito no título e foi cortado
+              por causar truncate quando longo (e por ser redundante — minimalist
+              da rodada 2 ganhou). Letra maior + tracking para sustentar peso. */}
+          <div className="absolute left-3 top-3 z-10">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#010744]/85
-                         backdrop-blur-sm px-3 py-1 text-[11px] font-semibold uppercase
-                         tracking-wide text-white shadow-md"
+              className={cn(
+                'inline-flex items-center rounded-full backdrop-blur-sm px-3 py-1.5',
+                'text-[11px] font-bold uppercase tracking-[0.18em] shadow-md',
+                property.finalidade === 'Venda'
+                  ? 'bg-[#010744]/85 text-[#f2d22e]'
+                  : 'bg-[#010744]/85 text-white',
+              )}
             >
-              <span className="truncate">{property.tipo}</span>
-              <span aria-hidden="true" className="opacity-50">·</span>
-              <span
-                className={cn(
-                  'truncate',
-                  property.finalidade === 'Venda' ? 'text-[#f2d22e]' : 'text-white',
-                )}
-              >
-                {property.finalidade}
-              </span>
+              {property.finalidade}
             </span>
           </div>
 
-          {/* Selo de status — UM único chip por prioridade (Lançamento > Baixou > Premium > Destaque) */}
-          {(isLaunch || priceDropped || isPremium || property.destaque) && (
+          {/* Selo de URGÊNCIA — apenas Lançamento ou Baixou de preço sobre a
+              foto. Premium/Destaque (qualidade) viraram microtag inline com o
+              preço (ver bloco de conteúdo). Reduz competição visual sobre a foto. */}
+          {(isLaunch || priceDropped) && (
             <div className="absolute bottom-3 left-3 z-10">
               {isLaunch ? (
                 <Badge variant="launch">Lançamento</Badge>
-              ) : priceDropped ? (
-                <Badge variant="priceDrop">Baixou de preço</Badge>
-              ) : isPremium ? (
-                <Badge variant="exclusive">Morejá Premium</Badge>
               ) : (
-                <Badge variant="exclusive">Destaque</Badge>
+                <Badge variant="priceDrop">Baixou de preço</Badge>
               )}
             </div>
           )}
@@ -388,27 +389,32 @@ export function PropertyCard({
 
         {/* Content — padding p-5 sm:p-6 (respiração premium) */}
         <div className="p-5 sm:p-6">
-          {/* Eyebrow editorial: bairro · cidade. Sem MapPin (decoração); cor com contraste AA */}
+          {/* Eyebrow editorial: bairro · cidade. Separador subido para /55 (era
+              /40 que falhava AA). Sem MapPin (decoração). */}
           <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
             <span className="truncate">
               {property.bairro}
               {property.cidade && (
-                <span className="text-[#010744]/40"> · {property.cidade}</span>
+                <span className="text-[#010744]/55"> · {property.cidade}</span>
               )}
             </span>
           </div>
 
-          {/* Título — text-balance + min-h reservada para 2 linhas (sem pulo no grid) */}
+          {/* Título — min-h ajustado para 2.75rem (44px = 2 × leading-6/22px),
+              hover-underline em decoration-2 navy (decoration-1 amarelo era
+              quase invisível). text-balance evita órfã/viúva. */}
           <h3
-            className="mb-3 line-clamp-2 min-h-[3rem] text-base font-semibold leading-snug text-[#010744]
+            className="mb-3 line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-6 text-[#010744]
                        text-balance
-                       transition-colors group-hover:underline group-hover:underline-offset-4
-                       group-hover:decoration-[#f2d22e] group-hover:decoration-1"
+                       transition-colors group-hover:underline group-hover:underline-offset-[6px]
+                       group-hover:decoration-[#010744] group-hover:decoration-2"
           >
             {property.titulo}
           </h3>
 
-          {/* Price — text-2xl + tabular-nums + preço anterior riscado quando aplicável */}
+          {/* Price + microtag de qualidade — Premium/Destaque viraram tag inline
+              ao lado do preço, em vez de competir sobre a foto. Hierarquia:
+              preço grande domina, tag pequena é adendo. */}
           <div className="mb-4 flex items-baseline gap-2 flex-wrap">
             <p className="text-2xl sm:text-[1.6rem] font-bold tracking-tight tabular-nums text-[#010744]">
               {formatPrice(property.preco)}
@@ -424,9 +430,24 @@ export function PropertyCard({
                 {formatPrice(precoAnterior)}
               </span>
             )}
+            {(isPremium || (property.destaque && !isLaunch && !priceDropped)) && (
+              <span
+                className={cn(
+                  'inline-flex items-center px-2 py-0.5 rounded-full',
+                  'text-[10px] font-bold uppercase tracking-wider',
+                  isPremium
+                    ? 'bg-[#f2d22e] text-[#010744]'
+                    : 'bg-[#010744]/10 text-[#010744]',
+                )}
+              >
+                {isPremium ? 'Premium' : 'Destaque'}
+              </span>
+            )}
           </div>
 
-          {/* Features — tabular-nums em todos os números, ícones consistentes em navy */}
+          {/* Features — tabular-nums em todos os números. CompareIconButton
+              foi para o final da row (substitui o ml-auto da área), evita
+              colisão com Badge bottom-left em viewports estreitas. */}
           <div className="flex items-center gap-3 border-t border-gray-100 pt-3 text-sm text-gray-600">
             {property.quartos > 0 && (
               <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
@@ -456,10 +477,11 @@ export function PropertyCard({
         </div>
       </Link>
 
-      {/* CompareToggle inline — icon-only no canto inferior direito do conteúdo,
-          fora do <Link> para não disparar navegação. Substituí o bloco com border-t
-          que fragmentava o card em 3 faixas. */}
-      <div className="absolute bottom-3 right-3 z-10">
+      {/* Compare — fora do <Link> (HTML5 não permite <button> dentro de <a>),
+          posicionado absolute alinhado com o canto inferior direito da stats
+          row. Não colide com Badge bottom-left da imagem porque está fora da
+          área da imagem (image area termina antes do padding do conteúdo). */}
+      <div className="absolute bottom-4 right-4 sm:bottom-5 sm:right-5 z-10">
         <CompareIconButton property={property} />
       </div>
     </article>

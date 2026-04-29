@@ -141,7 +141,14 @@ export function Footer({
     'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-[#f2d22e] active:text-[#010744] transition-colors duration-200'
 
   return (
-    <footer className="text-white relative overflow-hidden" style={{ background: 'var(--brand-primary, #010744)' }}>
+    <footer
+      className="text-white relative overflow-hidden bg-[#010744]"
+      // Usa `backgroundColor` (não-shorthand) em vez de `background:`. Se a var
+      // `--brand-primary` resolver para valor malformado (admin salvou string
+      // vazia/inválida), o `background:` shorthand descartaria a declaração
+      // inteira → body branco vazaria. backgroundColor honra o fallback.
+      style={{ backgroundColor: 'var(--brand-primary, #010744)' }}
+    >
 
       {/* ═══════════════════════ MOBILE LAYOUT ═══════════════════════ */}
       <div className="lg:hidden relative">
