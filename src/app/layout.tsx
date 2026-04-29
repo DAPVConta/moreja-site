@@ -19,6 +19,7 @@ import { CookieConsent } from '@/components/seo/CookieConsent'
 import { LeadTrackingInit } from '@/components/seo/LeadTrackingInit'
 import { getSiteConfig } from '@/lib/site-config'
 import { CommandPalette } from '@/components/layout/CommandPalette'
+import { Toaster } from 'react-hot-toast'
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -306,6 +307,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Third-party scripts — loaded afterInteractive, IDs from DB,
             todos respeitam Consent Mode v2 */}
         <ThirdPartyScripts />
+
+        {/* Toast notifications — react-hot-toast, z-index via --z-toast (80).
+            Position top-right preserves bottom-right for FABs. */}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background:  '#010744',
+              color:       '#ffffff',
+              fontFamily:  'var(--font-raleway), system-ui, sans-serif',
+              fontSize:    '0.875rem',
+              borderRadius: '0.75rem',
+              padding:     '0.75rem 1rem',
+            },
+            success: {
+              iconTheme: { primary: '#f2d22e', secondary: '#010744' },
+            },
+            error: {
+              iconTheme: { primary: '#ef4444', secondary: '#ffffff' },
+            },
+          }}
+        />
       </body>
     </html>
   )
