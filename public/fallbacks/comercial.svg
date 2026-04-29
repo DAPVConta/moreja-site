@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagem comercial">
+  <defs>
+    <linearGradient id="bgC" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#010744"/>
+      <stop offset="1" stop-color="#0a1080"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgC)"/>
+  <!-- towers -->
+  <g fill="#f2d22e" opacity="0.85">
+    <rect x="220" y="160" width="120" height="320"/>
+    <rect x="360" y="100" width="160" height="380"/>
+    <rect x="540" y="200" width="100" height="280"/>
+  </g>
+  <!-- windows -->
+  <g fill="#010744">
+    <g>
+      <rect x="240" y="180" width="20" height="20"/><rect x="280" y="180" width="20" height="20"/>
+      <rect x="240" y="220" width="20" height="20"/><rect x="280" y="220" width="20" height="20"/>
+      <rect x="240" y="260" width="20" height="20"/><rect x="280" y="260" width="20" height="20"/>
+      <rect x="240" y="300" width="20" height="20"/><rect x="280" y="300" width="20" height="20"/>
+      <rect x="240" y="340" width="20" height="20"/><rect x="280" y="340" width="20" height="20"/>
+      <rect x="240" y="380" width="20" height="20"/><rect x="280" y="380" width="20" height="20"/>
+      <rect x="240" y="420" width="20" height="20"/><rect x="280" y="420" width="20" height="20"/>
+    </g>
+    <g>
+      <rect x="380" y="120" width="24" height="24"/><rect x="420" y="120" width="24" height="24"/><rect x="460" y="120" width="24" height="24"/>
+      <rect x="380" y="160" width="24" height="24"/><rect x="420" y="160" width="24" height="24"/><rect x="460" y="160" width="24" height="24"/>
+      <rect x="380" y="200" width="24" height="24"/><rect x="420" y="200" width="24" height="24"/><rect x="460" y="200" width="24" height="24"/>
+      <rect x="380" y="240" width="24" height="24"/><rect x="420" y="240" width="24" height="24"/><rect x="460" y="240" width="24" height="24"/>
+      <rect x="380" y="280" width="24" height="24"/><rect x="420" y="280" width="24" height="24"/><rect x="460" y="280" width="24" height="24"/>
+      <rect x="380" y="320" width="24" height="24"/><rect x="420" y="320" width="24" height="24"/><rect x="460" y="320" width="24" height="24"/>
+      <rect x="380" y="360" width="24" height="24"/><rect x="420" y="360" width="24" height="24"/><rect x="460" y="360" width="24" height="24"/>
+      <rect x="380" y="400" width="24" height="24"/><rect x="420" y="400" width="24" height="24"/><rect x="460" y="400" width="24" height="24"/>
+      <rect x="380" y="440" width="24" height="24"/><rect x="420" y="440" width="24" height="24"/><rect x="460" y="440" width="24" height="24"/>
+    </g>
+    <g>
+      <rect x="560" y="220" width="20" height="20"/><rect x="600" y="220" width="20" height="20"/>
+      <rect x="560" y="260" width="20" height="20"/><rect x="600" y="260" width="20" height="20"/>
+      <rect x="560" y="300" width="20" height="20"/><rect x="600" y="300" width="20" height="20"/>
+      <rect x="560" y="340" width="20" height="20"/><rect x="600" y="340" width="20" height="20"/>
+      <rect x="560" y="380" width="20" height="20"/><rect x="600" y="380" width="20" height="20"/>
+      <rect x="560" y="420" width="20" height="20"/><rect x="600" y="420" width="20" height="20"/>
+    </g>
+  </g>
+  <text x="400" y="540" font-family="Raleway, system-ui, sans-serif" font-size="24" font-weight="700" fill="#f2d22e" text-anchor="middle" letter-spacing="6">COMERCIAL</text>
+</svg>

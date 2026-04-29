@@ -38,7 +38,7 @@ interface PropertyCardProps {
   premiumThreshold?: number
 }
 
-const PLACEHOLDER = 'https://placehold.co/600x400/ededd1/010744?text=Sem+Foto'
+const PLACEHOLDER = '/fallbacks/imovel-1.svg'
 
 // ─── FavoriteButton ──────────────────────────────────────────────────────────
 

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagem empreendimento">
+  <defs>
+    <linearGradient id="bgE" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d22e"/>
+      <stop offset="1" stop-color="#fce999"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgE)"/>
+  <!-- modern angled tower -->
+  <g fill="#010744">
+    <polygon points="240,80 560,80 540,520 260,520"/>
+    <g fill="#f2d22e" opacity="0.95">
+      <rect x="280" y="120" width="80" height="40"/><rect x="380" y="120" width="80" height="40"/><rect x="480" y="120" width="40" height="40"/>
+      <rect x="280" y="180" width="80" height="40"/><rect x="380" y="180" width="80" height="40"/><rect x="480" y="180" width="40" height="40"/>
+      <rect x="280" y="240" width="80" height="40"/><rect x="380" y="240" width="80" height="40"/><rect x="480" y="240" width="40" height="40"/>
+      <rect x="280" y="300" width="80" height="40"/><rect x="380" y="300" width="80" height="40"/><rect x="480" y="300" width="40" height="40"/>
+      <rect x="280" y="360" width="80" height="40"/><rect x="380" y="360" width="80" height="40"/><rect x="480" y="360" width="40" height="40"/>
+      <rect x="280" y="420" width="80" height="40"/><rect x="380" y="420" width="80" height="40"/><rect x="480" y="420" width="40" height="40"/>
+    </g>
+  </g>
+  <text x="400" y="560" font-family="Raleway, system-ui, sans-serif" font-size="20" font-weight="700" fill="#010744" text-anchor="middle" letter-spacing="5">EMPREENDIMENTOS</text>
+</svg>

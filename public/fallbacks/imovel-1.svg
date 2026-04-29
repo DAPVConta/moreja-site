@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Foto de imóvel">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1f6e"/>
+      <stop offset="1" stop-color="#010744"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g1)"/>
+  <!-- soft sun glow -->
+  <circle cx="640" cy="160" r="120" fill="#f2d22e" opacity="0.18"/>
+  <!-- skyline -->
+  <g fill="#f2d22e" opacity="0.9">
+    <rect x="120" y="260" width="100" height="240"/>
+    <rect x="240" y="200" width="140" height="300"/>
+    <rect x="400" y="240" width="120" height="260"/>
+    <rect x="540" y="180" width="160" height="320"/>
+  </g>
+  <g fill="#010744" opacity="0.95">
+    <rect x="140" y="280" width="20" height="20"/><rect x="180" y="280" width="20" height="20"/>
+    <rect x="140" y="320" width="20" height="20"/><rect x="180" y="320" width="20" height="20"/>
+    <rect x="140" y="360" width="20" height="20"/><rect x="180" y="360" width="20" height="20"/>
+    <rect x="140" y="400" width="20" height="20"/><rect x="180" y="400" width="20" height="20"/>
+    <rect x="260" y="220" width="24" height="24"/><rect x="300" y="220" width="24" height="24"/><rect x="340" y="220" width="24" height="24"/>
+    <rect x="260" y="260" width="24" height="24"/><rect x="300" y="260" width="24" height="24"/><rect x="340" y="260" width="24" height="24"/>
+    <rect x="260" y="300" width="24" height="24"/><rect x="300" y="300" width="24" height="24"/><rect x="340" y="300" width="24" height="24"/>
+    <rect x="260" y="340" width="24" height="24"/><rect x="300" y="340" width="24" height="24"/><rect x="340" y="340" width="24" height="24"/>
+    <rect x="260" y="380" width="24" height="24"/><rect x="300" y="380" width="24" height="24"/><rect x="340" y="380" width="24" height="24"/>
+    <rect x="260" y="420" width="24" height="24"/><rect x="300" y="420" width="24" height="24"/><rect x="340" y="420" width="24" height="24"/>
+    <rect x="420" y="260" width="20" height="20"/><rect x="460" y="260" width="20" height="20"/><rect x="500" y="260" width="20" height="20"/>
+    <rect x="420" y="300" width="20" height="20"/><rect x="460" y="300" width="20" height="20"/><rect x="500" y="300" width="20" height="20"/>
+    <rect x="420" y="340" width="20" height="20"/><rect x="460" y="340" width="20" height="20"/><rect x="500" y="340" width="20" height="20"/>
+    <rect x="420" y="380" width="20" height="20"/><rect x="460" y="380" width="20" height="20"/><rect x="500" y="380" width="20" height="20"/>
+    <rect x="420" y="420" width="20" height="20"/><rect x="460" y="420" width="20" height="20"/><rect x="500" y="420" width="20" height="20"/>
+    <rect x="560" y="200" width="22" height="22"/><rect x="600" y="200" width="22" height="22"/><rect x="640" y="200" width="22" height="22"/><rect x="680" y="200" width="22" height="22"/>
+    <rect x="560" y="240" width="22" height="22"/><rect x="600" y="240" width="22" height="22"/><rect x="640" y="240" width="22" height="22"/><rect x="680" y="240" width="22" height="22"/>
+    <rect x="560" y="280" width="22" height="22"/><rect x="600" y="280" width="22" height="22"/><rect x="640" y="280" width="22" height="22"/><rect x="680" y="280" width="22" height="22"/>
+    <rect x="560" y="320" width="22" height="22"/><rect x="600" y="320" width="22" height="22"/><rect x="640" y="320" width="22" height="22"/><rect x="680" y="320" width="22" height="22"/>
+    <rect x="560" y="360" width="22" height="22"/><rect x="600" y="360" width="22" height="22"/><rect x="640" y="360" width="22" height="22"/><rect x="680" y="360" width="22" height="22"/>
+    <rect x="560" y="400" width="22" height="22"/><rect x="600" y="400" width="22" height="22"/><rect x="640" y="400" width="22" height="22"/><rect x="680" y="400" width="22" height="22"/>
+  </g>
+  <text x="400" y="555" font-family="Raleway, system-ui, sans-serif" font-size="14" font-weight="700" fill="#f2d22e" text-anchor="middle" letter-spacing="6" opacity="0.6">MOREJÁ IMOBILIÁRIA</text>
+</svg>

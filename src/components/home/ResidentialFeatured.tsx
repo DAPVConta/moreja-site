@@ -27,7 +27,7 @@ const FALLBACK_RESIDENTIAL: Property[] = [
     preco: 580000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
     area_total: 85, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
     descricao: 'Apartamento bem localizado em Boa Viagem, a poucos metros da praia.',
-    fotos: ['https://placehold.co/800x600/010744/f2d22e?text=Apto+Boa+Viagem'],
+    fotos: ['/fallbacks/imovel-1.svg'],
     destaque: true,
   },
   {
@@ -36,7 +36,7 @@ const FALLBACK_RESIDENTIAL: Property[] = [
     preco: 920000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
     area_total: 220, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
     descricao: 'Casa espaçosa em condomínio fechado, bairro nobre de Casa Forte.',
-    fotos: ['https://placehold.co/800x600/1a1f6e/f2d22e?text=Casa+Casa+Forte'],
+    fotos: ['/fallbacks/imovel-2.svg'],
     destaque: true,
   },
   {
@@ -45,7 +45,7 @@ const FALLBACK_RESIDENTIAL: Property[] = [
     preco: 750000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
     area_total: 110, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
     descricao: 'Apartamento reformado no bairro das Graças, próximo ao Parque Amorim.',
-    fotos: ['https://placehold.co/800x600/ededd1/010744?text=Apto+Graças'],
+    fotos: ['/fallbacks/imovel-3.svg'],
     destaque: true,
   },
   {
@@ -54,7 +54,7 @@ const FALLBACK_RESIDENTIAL: Property[] = [
     preco: 1200000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
     area_total: 180, quartos: 4, suites: 3, banheiros: 4, vagas: 2,
     descricao: 'Cobertura duplex com vista para o mar no Pina.',
-    fotos: ['https://placehold.co/800x600/010744/ededd1?text=Cobertura+Pina'],
+    fotos: ['/fallbacks/imovel-1.svg'],
     destaque: true,
   },
 ]

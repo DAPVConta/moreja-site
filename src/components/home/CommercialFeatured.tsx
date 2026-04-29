@@ -28,7 +28,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 320000, bairro: 'Recife Antigo', cidade: 'Recife', estado: 'PE',
     area_total: 45, quartos: 0, banheiros: 1, vagas: 1,
     descricao: 'Sala comercial em edifício corporativo no coração do Recife Antigo.',
-    fotos: ['https://placehold.co/800x600/010744/f2d22e?text=Sala+Recife+Antigo'],
+    fotos: ['/fallbacks/comercial.svg'],
     destaque: true,
   },
   {
@@ -37,7 +37,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 8500, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
     area_total: 80, quartos: 0, banheiros: 2, vagas: 2,
     descricao: 'Ponto comercial de alto fluxo em Boa Viagem, ideal para varejo.',
-    fotos: ['https://placehold.co/800x600/1a1f6e/f2d22e?text=Loja+Boa+Viagem'],
+    fotos: ['/fallbacks/comercial.svg'],
     destaque: true,
   },
   {
@@ -46,7 +46,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 1500000, bairro: 'Distrito Industrial', cidade: 'Caruaru', estado: 'PE',
     area_total: 1200, quartos: 0, banheiros: 4, vagas: 10,
     descricao: 'Galpão com piso industrial, docas e área administrativa.',
-    fotos: ['https://placehold.co/800x600/ededd1/010744?text=Galpão+Caruaru'],
+    fotos: ['/fallbacks/comercial.svg'],
     destaque: true,
   },
 ]

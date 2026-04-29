@@ -592,6 +592,21 @@
   animation: shimmer-badge 2s ease-in-out infinite;
 }
 
+/* ── TrustStats dot pulse — Phase 11 ────────────────────────────────────────
+   Yellow radial pulse on milestone dots. Triggered via .trust-dot-pulse class
+   when the section enters the viewport.
+   The global prefers-reduced-motion rule in @layer base sets animation-duration
+   to 0.01ms, effectively freezing the pulse — no extra media query needed.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes trust-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(242 210 46 / 0); }
+  50%       { box-shadow: 0 0 0 6px rgb(242 210 46 / 0.30); }
+}
+
+.trust-dot-pulse {
+  animation: trust-dot-pulse 2s ease-in-out infinite;
+}
+
 /* ── View Transition — reduced motion: collapse all durations ────────────────
    Complements the existing *{} rule in @layer base by also covering
    ::view-transition-* pseudo-elements that live outside the normal DOM cascade.

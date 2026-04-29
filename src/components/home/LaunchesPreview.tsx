@@ -63,7 +63,7 @@ const defaultLaunches: Launch[] = [
     status: 'Lançamento',
     delivery: 'Entrega 2027',
     priceFrom: 'A partir de R$ 580 mil',
-    image: 'https://placehold.co/800x600/010744/f2d22e?text=Aurora+Vista',
+    image: '/fallbacks/lancamento.svg',
   },
   {
     id: '2',
@@ -73,7 +73,7 @@ const defaultLaunches: Launch[] = [
     status: 'Em obras',
     delivery: 'Entrega 2026',
     priceFrom: 'A partir de R$ 920 mil',
-    image: 'https://placehold.co/800x600/f2d22e/010744?text=Horizonte',
+    image: '/fallbacks/lancamento.svg',
     progress: 68,
   },
   {
@@ -84,7 +84,7 @@ const defaultLaunches: Launch[] = [
     status: 'Pré-lançamento',
     delivery: 'Previsão 2028',
     priceFrom: 'Sob consulta',
-    image: 'https://placehold.co/800x600/ededd1/010744?text=Park+Residence',
+    image: '/fallbacks/lancamento.svg',
   },
 ]
 

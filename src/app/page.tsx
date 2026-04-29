@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 import { fetchFeaturedProperties } from '@/lib/properties'
 
 // ISR: revalidate da home a cada 5min — cobre updates em featured properties,
@@ -32,29 +30,7 @@ import { BlogPreview } from '@/components/home/BlogPreview'
 import { CoverageMap } from '@/components/home/CoverageMap'
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
 import { FaqAccordion } from '@/components/home/FaqAccordion'
-
-function CtaAnunciarSection() {
-  return (
-    <section className="section bg-[#ededd1]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#010744] mb-4">
-          Quer vender ou alugar seu imóvel?
-        </h2>
-        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Conte com a Morejá para encontrar o melhor negócio. Nossa equipe de
-          corretores está pronta para ajudar você.
-        </p>
-        <Link
-          href="/contato"
-          className="btn-primary inline-flex items-center gap-2 text-lg"
-        >
-          Anunciar meu imóvel
-          <ArrowRight size={20} />
-        </Link>
-      </div>
-    </section>
-  )
-}
+import { CtaAnunciar } from '@/components/home/CtaAnunciar'
 
 export default async function HomePage() {
   const [
@@ -109,9 +85,9 @@ export default async function HomePage() {
     },
     stats: () => <StatsSection stats={stats} />,
     testimonials: () => <TestimonialsSection testimonials={testimonials} />,
-    cta_anunciar: () => <CtaAnunciarSection />,
+    cta_anunciar: () => <CtaAnunciar />,
     trust_stats: () => {
-      const c = cfg('trust_stats') as { title?: string; items?: { value: string; label: string }[] }
+      const c = cfg('trust_stats') as { title?: string; items?: { value: string; label: string; year?: string }[] }
       return <TrustStats title={c.title} items={c.items} />
     },
     value_proposition: () => {
