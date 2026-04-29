@@ -77,10 +77,9 @@ export interface HomeSection {
   config: Record<string, unknown>
 }
 
-// Retorna TODAS as seções (ativas e inativas). O filtro de `active` é feito
-// no consumer — assim conseguimos distinguir "tabela vazia" (instalação nova,
-// dispara fallback hardcoded) de "todas inativas" (admin desligou tudo,
-// home fica vazia de fato).
+// Visitantes anônimos: RLS `public_read_active_home_sections` (migration 006)
+// já filtra `active = true` no banco, então a query só retorna seções ativas.
+// Não precisamos repetir o filtro aqui nem no consumer.
 export const getHomeSections = cache(async (): Promise<HomeSection[]> => {
   try {
     const supabase = await createSupabaseServerClient()

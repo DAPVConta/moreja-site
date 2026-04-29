@@ -249,30 +249,15 @@ export default async function HomePage() {
     },
   }
 
-  // Fallback: se a tabela estiver LITERALMENTE vazia (instalação nova, sem
-  // rows em home_sections), renderiza a ordem canônica. Se tiver rows mas
-  // todas inativas, respeita a vontade do admin e renderiza vazio.
-  const ordered = sections.length > 0
-    ? sections.filter((s) => s.active)
-    : [
-        { id: '1',  section_type: 'hero_search',          label: '', position:  0, active: true, config: {} },
-        { id: '2',  section_type: 'banners',               label: '', position:  1, active: true, config: {} },
-        { id: '3',  section_type: 'featured_properties',  label: '', position:  2, active: true, config: {} },
-        { id: '4',  section_type: 'category_cards',        label: '', position:  3, active: true, config: {} },
-        { id: '5',  section_type: 'stats',                 label: '', position:  4, active: true, config: {} },
-        { id: '6',  section_type: 'testimonials',          label: '', position:  5, active: true, config: {} },
-        { id: '7',  section_type: 'cta_anunciar',          label: '', position:  6, active: true, config: {} },
-        { id: '8',  section_type: 'trust_stats',           label: '', position:  7, active: true, config: {} },
-        { id: '9',  section_type: 'value_proposition',     label: '', position:  8, active: true, config: {} },
-        { id: '10', section_type: 'residential_featured',  label: '', position:  9, active: true, config: {} },
-        { id: '11', section_type: 'commercial_featured',   label: '', position: 10, active: true, config: {} },
-        { id: '12', section_type: 'coverage_map',          label: '', position: 11, active: true, config: {} },
-        { id: '13', section_type: 'launches_preview',      label: '', position: 12, active: true, config: {} },
-      ]
-
+  // home_sections é fonte da verdade. RLS já filtra `active = true` para
+  // visitantes anônimos (policy `public_read_active_home_sections` em
+  // migration 006), então `sections` já vem só com as ativas.
+  // Tabela sempre seedada via migrations 006 + 008 + 025; se vier vazia
+  // (instalação nova mal aplicada), home renderiza vazio — isso é um sinal
+  // pra reaplicar as migrations, não algo pra mascarar com fallback.
   return (
     <>
-      {ordered.map((s) => {
+      {sections.map((s) => {
         const render = sectionMap[s.section_type]
         if (!render) return null
         return <div key={s.id}>{render()}</div>
