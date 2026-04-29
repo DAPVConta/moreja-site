@@ -1,7 +1,37 @@
+'use client'
+
+/**
+ * ValueProposition — Phase 10
+ *
+ * Upgrades over Phase 9:
+ *  - Sticky image on desktop (lg:sticky lg:top-24) while narrative text scrolls.
+ *    Disabled on mobile — reverts to single-column static layout.
+ *  - 3 narrative blocks on the right, each fade-in via Reveal.
+ *  - Perks in 2×2 micro-card grid (Lucide icon + title + 1-line description).
+ *  - Stacked trust badges (3 seals with slight rotation) replacing single badge.
+ *  - AnimatedChip eyebrow.
+ *  - prefers-reduced-motion: sticky + reveals still work (CSS handles the
+ *    transition collapse via the global @layer base rule in globals.css).
+ *  - Mobile (<lg): static single-column, no sticky.
+ */
+
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import {
+  ArrowRight,
+  ShieldCheck,
+  Users,
+  MapPin,
+  FileCheck,
+  Award,
+  Star,
+  BadgeCheck,
+  type LucideIcon,
+} from 'lucide-react'
 import { Reveal } from '@/components/ui/Reveal'
+import { AnimatedChip } from '@/components/ui'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ValuePropositionProps {
   eyebrow?: string
@@ -11,76 +41,255 @@ interface ValuePropositionProps {
   ctaHref?: string
 }
 
-const perks = [
-  'Atendimento próximo em cada etapa',
-  'Tecnologia e transparência',
-  'Equipe especializada em cada bairro',
-  'Da busca à escritura',
+// ─── Perks data ───────────────────────────────────────────────────────────────
+
+interface Perk {
+  icon: LucideIcon
+  title: string
+  description: string
+}
+
+const perks: Perk[] = [
+  {
+    icon: Users,
+    title: 'Atendimento próximo',
+    description: 'Cada etapa acompanhada por um consultor dedicado.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Transparência total',
+    description: 'Documentação e histórico do imóvel sem surpresas.',
+  },
+  {
+    icon: MapPin,
+    title: 'Especialistas por bairro',
+    description: 'Equipe com conhecimento hiperlocal de cada região.',
+  },
+  {
+    icon: FileCheck,
+    title: 'Da busca à escritura',
+    description: 'Assessoria jurídica e financeira em todo o processo.',
+  },
 ]
+
+// ─── Stacked trust badges ─────────────────────────────────────────────────────
+
+function StackedBadges() {
+  return (
+    <div
+      className="absolute bottom-6 left-6 flex items-end"
+      aria-label="Selos de confiança"
+    >
+      {/* Badge 3 — deepest, most rotated */}
+      <div
+        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-md p-2.5
+                   flex flex-col items-center gap-0.5 origin-bottom-left"
+        style={{ transform: 'rotate(-5deg) translateX(-4px)', zIndex: 1 }}
+        aria-hidden="true"
+      >
+        <Star size={14} className="text-[#f2d22e]" aria-hidden="true" />
+        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
+          Google
+          <br />
+          Reviews
+        </span>
+        <span className="text-[10px] font-extrabold text-[#010744]">4.9★</span>
+      </div>
+
+      {/* Badge 2 — middle */}
+      <div
+        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-lg p-2.5
+                   flex flex-col items-center gap-0.5 origin-bottom-left"
+        style={{ transform: 'rotate(3deg) translateX(8px)', zIndex: 2 }}
+        aria-hidden="true"
+      >
+        <BadgeCheck size={14} className="text-green-600" aria-hidden="true" />
+        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
+          CRECI
+          <br />
+          Verificado
+        </span>
+        <span className="text-[10px] font-extrabold text-green-600">Ativo</span>
+      </div>
+
+      {/* Badge 1 — front, least rotated */}
+      <div
+        className="relative w-[110px] bg-white rounded-xl shadow-xl p-2.5
+                   flex flex-col items-center gap-0.5 origin-bottom-left"
+        style={{ transform: 'rotate(-1deg) translateX(20px)', zIndex: 3 }}
+      >
+        <Award size={14} className="text-[#f2d22e]" aria-hidden="true" />
+        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
+          Reclame Aqui
+          <br />
+          RA1000
+        </span>
+        <span className="text-[10px] font-extrabold text-[#010744]">Ótimo</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── PerkCard ─────────────────────────────────────────────────────────────────
+
+function PerkCard({ perk }: { perk: Perk }) {
+  const Icon = perk.icon
+  return (
+    <div
+      className="rounded-xl bg-[#010744]/[0.03] border border-[#010744]/[0.06]
+                 p-4 flex gap-3 items-start
+                 hover:bg-[#010744]/[0.06] hover:scale-[1.02]
+                 transition-all duration-200 cursor-default"
+    >
+      <div
+        className="shrink-0 w-8 h-8 rounded-lg bg-[#f2d22e]/10
+                   flex items-center justify-center"
+      >
+        <Icon size={16} className="text-[#010744]" aria-hidden="true" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-[#010744] leading-tight mb-0.5">
+          {perk.title}
+        </p>
+        <p className="text-xs text-gray-500 leading-relaxed">{perk.description}</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Narrative blocks ─────────────────────────────────────────────────────────
+
+interface NarrativeBlock {
+  label: string
+  heading: string
+  body: string
+}
+
+const narrativeBlocks: NarrativeBlock[] = [
+  {
+    label: 'Nossa missão',
+    heading: 'Conte com a experiência de quem conhece cada bairro',
+    body: 'Atuamos com imóveis residenciais e comerciais, oferecendo assessoria completa — da busca à escritura. Transparência, tecnologia e atendimento próximo em cada etapa.',
+  },
+  {
+    label: 'Nossa diferença',
+    heading: 'Tecnologia para simplificar, pessoas para cuidar',
+    body: 'Combinamos ferramentas digitais com uma equipe de especialistas locais para que você encontre o imóvel certo no tempo certo, sem burocracia desnecessária.',
+  },
+  {
+    label: 'Nosso compromisso',
+    heading: 'Do primeiro contato ao último registro',
+    body: 'Estamos presentes em cada fase: da avaliação do imóvel ao financiamento, passando pela negociação e chegando à assinatura. Uma jornada completa, sem surpresas.',
+  },
+]
+
+// ─── Section ──────────────────────────────────────────────────────────────────
 
 export function ValueProposition({
   eyebrow = 'Sobre a Morejá',
-  title = 'Conte com a experiência de quem conhece cada bairro',
-  body = 'Atuamos com imóveis residenciais e comerciais, oferecendo assessoria completa — da busca à escritura. Transparência, tecnologia e atendimento próximo em cada etapa.',
   ctaLabel = 'Conheça a Morejá',
   ctaHref = '/sobre',
 }: ValuePropositionProps) {
   return (
-    <section className="section bg-white">
+    <section className="section bg-white overflow-hidden">
       <div className="container-page">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left: image */}
-          <Reveal className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
-            <Image
-              src="https://placehold.co/800x600/010744/f2d22e?text=Morejá+Imobiliária"
-              alt=""
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#010744]/60 via-transparent to-transparent" />
-            {/* Floating badge */}
-            <div className="absolute bottom-6 left-6 bg-white rounded-xl p-4 shadow-lg flex items-center gap-3 max-w-[240px]">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#f2d22e]">
-                <CheckCircle2 className="w-5 h-5 text-[#010744]" aria-hidden="true" />
-              </div>
-              <p className="text-sm font-semibold text-[#010744] leading-tight">
-                98% de clientes <br /> satisfeitos
-              </p>
+        {/*
+         * Desktop layout: 2 columns.
+         *   Left  — sticky image column (self-start enables sticky scroll behaviour).
+         *   Right — scrollable narrative column (min-height drives the sticky travel).
+         *
+         * Mobile (<lg): single column, image on top, content below. Sticky is
+         * removed entirely so it doesn't eat vertical space on small screens.
+         *
+         * The outer grid grows tall enough on desktop for the sticky image to
+         * have meaningful travel distance. lg:min-h-[140vh] is not set on the
+         * grid itself (that would force a fixed viewport height) — instead the
+         * right column's natural height (3 narrative blocks + perks + CTA) drives
+         * the grid tall enough. No artificial padding needed.
+         */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 lg:items-start">
+
+          {/* ── Left: sticky image ─────────────────────────────────────────── */}
+          <Reveal className="lg:sticky lg:top-24 lg:self-start">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
+              <Image
+                src="https://placehold.co/800x600/010744/f2d22e?text=Morejá+Imobiliária"
+                alt="Equipe Morejá Imobiliária em atendimento"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+              {/* Gradient overlay for text legibility */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-tr from-[#010744]/60 via-transparent to-transparent"
+              />
+              {/* Stacked trust badges */}
+              <StackedBadges />
             </div>
           </Reveal>
 
-          {/* Right: content */}
-          <Reveal delay={120}>
-            {eyebrow && (
-              <span className="inline-block text-xs font-bold tracking-widest uppercase text-[#f2d22e] mb-3">
-                {eyebrow}
-              </span>
-            )}
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#010744] leading-tight mb-5">
-              {title}
-            </h2>
-            <p className="text-lg text-gray-600 leading-relaxed mb-8">{body}</p>
+          {/* ── Right: narrative blocks + perks + CTA ─────────────────────── */}
+          <div className="flex flex-col gap-14">
 
-            <ul className="grid sm:grid-cols-2 gap-3 mb-8">
-              {perks.map((perk) => (
-                <li key={perk} className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckCircle2 className="w-4 h-4 text-[#010744] shrink-0" aria-hidden="true" />
-                  {perk}
-                </li>
-              ))}
-            </ul>
-
-            {ctaLabel && ctaHref && (
-              <Link
-                href={ctaHref}
-                className="btn-primary text-base"
+            {/* Narrative block 1 — includes eyebrow + main heading */}
+            <Reveal delay={80}>
+              <AnimatedChip
+                icon={Award}
+                variant="gold"
+                className="mb-4"
               >
-                {ctaLabel}
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
+                {eyebrow}
+              </AnimatedChip>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#010744] leading-tight mb-4">
+                {narrativeBlocks[0].heading}
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed max-w-prose">
+                {narrativeBlocks[0].body}
+              </p>
+            </Reveal>
+
+            {/* Narrative block 2 */}
+            <Reveal delay={120}>
+              <span className="eyebrow">{narrativeBlocks[1].label}</span>
+              <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
+                {narrativeBlocks[1].heading}
+              </h3>
+              <p className="text-base text-gray-600 leading-relaxed max-w-prose">
+                {narrativeBlocks[1].body}
+              </p>
+            </Reveal>
+
+            {/* Perks 2×2 micro-cards */}
+            <Reveal delay={160}>
+              <div className="grid grid-cols-2 gap-3">
+                {perks.map((perk) => (
+                  <PerkCard key={perk.title} perk={perk} />
+                ))}
+              </div>
+            </Reveal>
+
+            {/* Narrative block 3 */}
+            <Reveal delay={200}>
+              <span className="eyebrow">{narrativeBlocks[2].label}</span>
+              <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
+                {narrativeBlocks[2].heading}
+              </h3>
+              <p className="text-base text-gray-600 leading-relaxed max-w-prose">
+                {narrativeBlocks[2].body}
+              </p>
+            </Reveal>
+
+            {/* CTA */}
+            {ctaLabel && ctaHref && (
+              <Reveal delay={240}>
+                <Link href={ctaHref} className="btn-primary text-base self-start">
+                  {ctaLabel}
+                  <ArrowRight size={18} aria-hidden="true" />
+                </Link>
+              </Reveal>
             )}
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>

@@ -569,6 +569,29 @@
   to   { transform: translate3d(0, -12vh, 0); }
 }
 
+/* ── Shimmer badge keyframe — Phase 10 ──────────────────────────────────────
+   Used by LaunchesPreview when status === "Lançamento".
+   Sweeps a lighter highlight left→right over the yellow badge background.
+   Distinct from `.skeleton-shimmer` (which uses cream/white palette for skeletons).
+   The global prefers-reduced-motion rule in @layer base sets animation-duration
+   to 0.01ms, effectively freezing the animation — no extra media query needed.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer-badge {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.shimmer-badge {
+  background: linear-gradient(
+    110deg,
+    #f2d22e 25%,
+    #fffde0 45%,
+    #f2d22e 65%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-badge 2s ease-in-out infinite;
+}
+
 /* ── View Transition — reduced motion: collapse all durations ────────────────
    Complements the existing *{} rule in @layer base by also covering
    ::view-transition-* pseudo-elements that live outside the normal DOM cascade.
