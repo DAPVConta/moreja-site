@@ -44,17 +44,16 @@ export function HeroBackdrop({
   return (
     <>
       {/*
-        Wrapper overflow-hidden garante que os 12vh extras de imagem não
-        extravasam para fora do hero. A CSS custom property --parallax-range
-        é usada inline para evitar strings de animation complexas no TSX.
+        Wrapper full-cover (inset-0) garantindo que a imagem cobre 100% da
+        seção, sem tira de bg navy aparecendo nas bordas. Antes usava
+        `inset-x-0 top-0 bottom-0` + `paddingBottom: 12vh` que criava
+        layout-shift na borda direita em alguns viewports.
+        O parallax shift de 12vh agora vive em scale via transform-origin
+        bottom — mais robusto.
       */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 bottom-0 overflow-hidden"
-        style={{
-          // Extra height so the -12vh shift never reveals a gap at the bottom
-          paddingBottom: '12vh',
-        }}
+        className="absolute inset-0 overflow-hidden"
       >
         <Image
           src={bgImage}
@@ -63,23 +62,25 @@ export function HeroBackdrop({
           priority
           fetchPriority="high"
           sizes="100vw"
-          className="object-cover"
+          // w-full h-full + object-cover ensures full-bleed coverage
+          // independente do aspect-ratio da foto fonte.
+          className="object-cover w-full h-full"
           style={{
             objectPosition: `${bgFocalX}% ${bgFocalY}%`,
             // Imagem esmaecida em 35% — sai de 100% de presença (que competia
             // com o título e a busca) para apenas 35%, deixando o gradient
             // navy de fundo dominar e o conteúdo ler com clareza.
             opacity: 0.35,
+            // Pequena escala extra (105%) compensa o shift do parallax
+            // sem precisar de paddingBottom que estava causando issue
+            // de cobertura horizontal.
+            transform: 'scale(1.05)',
+            transformOrigin: 'center center',
             // CSS scroll-driven parallax — supported in Chrome 115+, Safari 18+.
-            // @supports guard: browsers that don't support animation-timeline
-            // simply ignore these properties and render a static image.
             animationName: 'hero-parallax',
-            animationDuration: '1s',               // irrelevant with scroll-driven; sets scale
+            animationDuration: '1s',
             animationTimingFunction: 'linear',
             animationFillMode: 'both',
-            // animationTimeline and animationRange are CSS scroll-driven API
-            // (Chrome 115+, Safari 18+). TypeScript may or may not know these
-            // depending on lib version — cast to avoid version-skew errors.
             animationTimeline: 'scroll(root)' as string,
             animationRange: '0 50vh' as string,
             willChange: 'transform',
