@@ -267,10 +267,15 @@ export function Header({
 }: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
+  // Hide-on-scroll-down (Linear/Apple pattern) — esconde ao rolar pra baixo,
+  // reaparece ao rolar pra cima. Evita o efeito leitoso de header glass
+  // sobrepondo seções navy (footer/lançamentos) e libera vertical real estate.
+  const [hidden, setHidden] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dragX, setDragX] = useState(0)
   const dragStart = useRef<number | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const lastScrollY = useRef(0)
 
   // ── Liquid-glass: IntersectionObserver on a sentinel at 80px ──
   useEffect(() => {
@@ -287,6 +292,24 @@ export function Header({
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
+
+  // ── Hide on scroll-down, show on scroll-up ──
+  // Threshold de 6px para evitar tremor em micro-scrolls. Sempre visível
+  // nos primeiros 80px (área do hero) e quando o menu mobile está aberto.
+  useEffect(() => {
+    function onScroll() {
+      const y = window.scrollY
+      const dy = y - lastScrollY.current
+      if (mobileOpen || y < 80) {
+        setHidden(false)
+      } else if (Math.abs(dy) > 6) {
+        setHidden(dy > 0)
+      }
+      lastScrollY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [mobileOpen])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -433,11 +456,13 @@ export function Header({
         </div>
       )}
 
-      {/* ── Main header — liquid-glass ── */}
+      {/* ── Main header — liquid-glass + hide-on-scroll-down ── */}
       <header
         className={[
           'sticky top-0 z-50 w-full',
-          'transition-all duration-300',
+          'transition-all duration-300 will-change-transform',
+          // hide-on-scroll-down: translate p/ cima quando hidden=true
+          hidden ? '-translate-y-full' : 'translate-y-0',
           scrolled
             ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
             : 'bg-transparent shadow-none border-b border-transparent',
