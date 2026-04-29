@@ -34,8 +34,13 @@ export function middleware(request: NextRequest) {
     // strict-dynamic: scripts marcados com nonce podem carregar outros scripts
     // (necessário pra GTM/GA4/Meta Pixel que injetam scripts dinamicamente)
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: 'unsafe-inline'`,
-    // styles: nonce + inline (next/font injeta inline; styled-jsx similar)
-    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    // styles: 'unsafe-inline' apenas. Não usamos nonce em style-src porque
+    // CSP3 ignora 'unsafe-inline' quando nonce está presente, e o React
+    // aplica `style={{}}` como atributo HTML sem nonce — quebraria tudo.
+    // O style inline do brandCss em layout.tsx ainda funciona via unsafe-inline.
+    // Trade-off aceito: scripts (vetor crítico de XSS) seguem com nonce
+    // strict-dynamic; estilos relaxados.
+    `style-src 'self' 'unsafe-inline'`,
     // images: self + Supremo CDN + Supabase storage + brand img CDNs
     `img-src 'self' data: blob: https://*.supremocrm.com.br https://*.sistemasupremo.com.br https://yxlepgmlhcnqhwshymup.supabase.co https://*.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com`,
     // fonts: Google Fonts + self (next/font baixa para self)
