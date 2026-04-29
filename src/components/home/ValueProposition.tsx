@@ -1,18 +1,21 @@
 'use client'
 
 /**
- * ValueProposition — Phase 10
+ * ValueProposition — refactor solicitado pelo cliente
  *
- * Upgrades over Phase 9:
- *  - Sticky image on desktop (lg:sticky lg:top-24) while narrative text scrolls.
- *    Disabled on mobile — reverts to single-column static layout.
- *  - 3 narrative blocks on the right, each fade-in via Reveal.
- *  - Perks in 2×2 micro-card grid (Lucide icon + title + 1-line description).
- *  - Stacked trust badges (3 seals with slight rotation) replacing single badge.
- *  - AnimatedChip eyebrow.
- *  - prefers-reduced-motion: sticky + reveals still work (CSS handles the
- *    transition collapse via the global @layer base rule in globals.css).
- *  - Mobile (<lg): static single-column, no sticky.
+ * Estrutura de DUAS sub-seções horizontais empilhadas:
+ *
+ * 1) Imagem (esquerda) + intro narrativa (direita)
+ *    - Image com single trust badge (Reclame Aqui RA1000 Ótimo) no canto
+ *      inferior esquerdo — antes eram 3 badges empilhadas, simplificado a 1.
+ *    - Direita: AnimatedChip eyebrow + h2 + body, seguido de mini-bloco
+ *      "Nossa diferença" com h3 + body.
+ *
+ * 2) Perks 2×2 (esquerda) + compromisso + CTA (direita)
+ *    - Esquerda: 4 perks em grid 2×2 (Lucide icon + título + descrição).
+ *    - Direita: eyebrow yellow + h3 + body + CTA yellow.
+ *
+ * Mobile (<lg): cada sub-seção vira coluna única, imagem/perks em cima.
  */
 
 import Link from 'next/link'
@@ -24,8 +27,6 @@ import {
   MapPin,
   FileCheck,
   Award,
-  Star,
-  BadgeCheck,
   type LucideIcon,
 } from 'lucide-react'
 import { Reveal } from '@/components/ui/Reveal'
@@ -41,7 +42,7 @@ interface ValuePropositionProps {
   ctaHref?: string
 }
 
-// ─── Perks data ───────────────────────────────────────────────────────────────
+// ─── Perks ────────────────────────────────────────────────────────────────────
 
 interface Perk {
   icon: LucideIcon
@@ -72,83 +73,23 @@ const perks: Perk[] = [
   },
 ]
 
-// ─── Stacked trust badges ─────────────────────────────────────────────────────
-
-function StackedBadges() {
-  return (
-    <div
-      className="absolute bottom-6 left-6 flex items-end"
-      aria-label="Selos de confiança"
-    >
-      {/* Badge 3 — deepest, most rotated */}
-      <div
-        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-md p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(-5deg) translateX(-4px)', zIndex: 1 }}
-        aria-hidden="true"
-      >
-        <Star size={14} className="text-[#f2d22e]" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          Google
-          <br />
-          Reviews
-        </span>
-        <span className="text-[10px] font-extrabold text-[#010744]">4.9★</span>
-      </div>
-
-      {/* Badge 2 — middle */}
-      <div
-        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-lg p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(3deg) translateX(8px)', zIndex: 2 }}
-        aria-hidden="true"
-      >
-        <BadgeCheck size={14} className="text-green-600" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          CRECI
-          <br />
-          Verificado
-        </span>
-        <span className="text-[10px] font-extrabold text-green-600">Ativo</span>
-      </div>
-
-      {/* Badge 1 — front, least rotated */}
-      <div
-        className="relative w-[110px] bg-white rounded-xl shadow-xl p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(-1deg) translateX(20px)', zIndex: 3 }}
-      >
-        <Award size={14} className="text-[#f2d22e]" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          Reclame Aqui
-          <br />
-          RA1000
-        </span>
-        <span className="text-[10px] font-extrabold text-[#010744]">Ótimo</span>
-      </div>
-    </div>
-  )
-}
-
-// ─── PerkCard ─────────────────────────────────────────────────────────────────
-
 function PerkCard({ perk }: { perk: Perk }) {
   const Icon = perk.icon
   return (
     <div
-      className="rounded-xl bg-[#010744]/[0.03] border border-[#010744]/[0.06]
-                 p-4 flex gap-3 items-start
-                 hover:bg-[#010744]/[0.06] hover:scale-[1.02]
-                 transition-all duration-200 cursor-default"
+      className="rounded-xl bg-white border border-[#010744]/[0.08] shadow-sm
+                 p-4 sm:p-5 flex gap-3 items-start
+                 hover:border-[#f2d22e]/60 hover:shadow-md
+                 transition-all duration-200"
     >
       <div
-        className="shrink-0 w-8 h-8 rounded-lg bg-[#f2d22e]/10
+        className="shrink-0 w-9 h-9 rounded-lg bg-[#f2d22e]/15
                    flex items-center justify-center"
       >
-        <Icon size={16} className="text-[#010744]" aria-hidden="true" />
+        <Icon size={18} className="text-[#010744]" aria-hidden="true" />
       </div>
-      <div>
-        <p className="text-sm font-semibold text-[#010744] leading-tight mb-0.5">
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-[#010744] leading-tight mb-1">
           {perk.title}
         </p>
         <p className="text-xs text-gray-500 leading-relaxed">{perk.description}</p>
@@ -157,31 +98,26 @@ function PerkCard({ perk }: { perk: Perk }) {
   )
 }
 
-// ─── Narrative blocks ─────────────────────────────────────────────────────────
+// ─── Single trust badge (substitui o stack de 3) ─────────────────────────────
 
-interface NarrativeBlock {
-  label: string
-  heading: string
-  body: string
+function ReclameAquiBadge() {
+  return (
+    <div
+      className="absolute bottom-5 left-5 bg-white rounded-2xl shadow-xl px-3.5 py-2.5
+                 flex items-center gap-2.5"
+      aria-label="Selo Reclame Aqui RA1000 Ótimo"
+    >
+      <div className="shrink-0 w-9 h-9 rounded-full bg-[#f2d22e]/20 flex items-center justify-center">
+        <Award size={18} className="text-[#f2d22e]" aria-hidden="true" />
+      </div>
+      <div className="leading-tight">
+        <p className="text-[10px] font-bold text-[#010744]">Reclame Aqui</p>
+        <p className="text-[10px] font-semibold text-[#010744]/70">RA1000</p>
+        <p className="text-[11px] font-extrabold text-[#010744]">Ótimo</p>
+      </div>
+    </div>
+  )
 }
-
-const narrativeBlocks: NarrativeBlock[] = [
-  {
-    label: 'Nossa missão',
-    heading: 'Conte com a experiência de quem conhece cada bairro',
-    body: 'Atuamos com imóveis residenciais e comerciais, oferecendo assessoria completa — da busca à escritura. Transparência, tecnologia e atendimento próximo em cada etapa.',
-  },
-  {
-    label: 'Nossa diferença',
-    heading: 'Tecnologia para simplificar, pessoas para cuidar',
-    body: 'Combinamos ferramentas digitais com uma equipe de especialistas locais para que você encontre o imóvel certo no tempo certo, sem burocracia desnecessária.',
-  },
-  {
-    label: 'Nosso compromisso',
-    heading: 'Do primeiro contato ao último registro',
-    body: 'Estamos presentes em cada fase: da avaliação do imóvel ao financiamento, passando pela negociação e chegando à assinatura. Uma jornada completa, sem surpresas.',
-  },
-]
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
@@ -192,25 +128,12 @@ export function ValueProposition({
 }: ValuePropositionProps) {
   return (
     <section className="section bg-white overflow-hidden">
-      <div className="container-page">
-        {/*
-         * Desktop layout: 2 columns.
-         *   Left  — sticky image column (self-start enables sticky scroll behaviour).
-         *   Right — scrollable narrative column (min-height drives the sticky travel).
-         *
-         * Mobile (<lg): single column, image on top, content below. Sticky is
-         * removed entirely so it doesn't eat vertical space on small screens.
-         *
-         * The outer grid grows tall enough on desktop for the sticky image to
-         * have meaningful travel distance. lg:min-h-[140vh] is not set on the
-         * grid itself (that would force a fixed viewport height) — instead the
-         * right column's natural height (3 narrative blocks + perks + CTA) drives
-         * the grid tall enough. No artificial padding needed.
-         */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 lg:items-start">
+      <div className="container-page space-y-16 lg:space-y-24">
 
-          {/* ── Left: sticky image ─────────────────────────────────────────── */}
-          <Reveal className="lg:sticky lg:top-24 lg:self-start">
+        {/* ─── Sub-seção A: imagem + intro narrativa ─────────────────────── */}
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 lg:items-center">
+          {/* Esquerda: imagem com selo único Reclame Aqui */}
+          <Reveal>
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
               <Image
                 src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800&q=80"
@@ -219,78 +142,75 @@ export function ValueProposition({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              {/* Gradient overlay for text legibility */}
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-tr from-[#010744]/60 via-transparent to-transparent"
-              />
-              {/* Stacked trust badges */}
-              <StackedBadges />
+              <ReclameAquiBadge />
             </div>
           </Reveal>
 
-          {/* ── Right: narrative blocks + perks + CTA ─────────────────────── */}
-          <div className="flex flex-col gap-14">
-
-            {/* Narrative block 1 — includes eyebrow + main heading */}
-            <Reveal delay={80}>
-              <AnimatedChip
-                icon={Award}
-                variant="gold"
-                className="mb-4"
-              >
+          {/* Direita: eyebrow chip + h2 + body + sub-bloco "Nossa diferença" */}
+          <Reveal delay={80} className="flex flex-col gap-8">
+            <div>
+              <AnimatedChip icon={Users} variant="gold" className="mb-4">
                 {eyebrow}
               </AnimatedChip>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#010744] leading-tight mb-4">
-                {narrativeBlocks[0].heading}
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#010744] leading-tight mb-4 text-balance">
+                Conte com a experiência de quem conhece cada bairro
               </h2>
-              <p className="text-lg text-gray-600 leading-relaxed max-w-prose">
-                {narrativeBlocks[0].body}
+              <p className="text-base text-gray-600 leading-relaxed">
+                Atuamos com imóveis residenciais e comerciais, oferecendo
+                assessoria completa — da busca à escritura. Transparência,
+                tecnologia e atendimento próximo em cada etapa.
               </p>
-            </Reveal>
+            </div>
 
-            {/* Narrative block 2 */}
-            <Reveal delay={120}>
-              <span className="eyebrow">{narrativeBlocks[1].label}</span>
-              <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
-                {narrativeBlocks[1].heading}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#f2d22e] mb-2">
+                Nossa diferença
+              </p>
+              <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3 text-balance">
+                Tecnologia para simplificar, pessoas para cuidar
               </h3>
-              <p className="text-base text-gray-600 leading-relaxed max-w-prose">
-                {narrativeBlocks[1].body}
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Combinamos ferramentas digitais com uma equipe de
+                especialistas locais para que você encontre o imóvel certo
+                no tempo certo, sem burocracia desnecessária.
               </p>
-            </Reveal>
-
-            {/* Perks 2×2 micro-cards */}
-            <Reveal delay={160}>
-              <div className="grid grid-cols-2 gap-3">
-                {perks.map((perk) => (
-                  <PerkCard key={perk.title} perk={perk} />
-                ))}
-              </div>
-            </Reveal>
-
-            {/* Narrative block 3 */}
-            <Reveal delay={200}>
-              <span className="eyebrow">{narrativeBlocks[2].label}</span>
-              <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
-                {narrativeBlocks[2].heading}
-              </h3>
-              <p className="text-base text-gray-600 leading-relaxed max-w-prose">
-                {narrativeBlocks[2].body}
-              </p>
-            </Reveal>
-
-            {/* CTA */}
-            {ctaLabel && ctaHref && (
-              <Reveal delay={240}>
-                <Link href={ctaHref} className="btn-primary text-base self-start">
-                  {ctaLabel}
-                  <ArrowRight size={18} aria-hidden="true" />
-                </Link>
-              </Reveal>
-            )}
-          </div>
+            </div>
+          </Reveal>
         </div>
+
+        {/* ─── Sub-seção B: perks 2×2 + compromisso + CTA ────────────────── */}
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 lg:items-center">
+          {/* Esquerda: perks 2×2 */}
+          <Reveal>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {perks.map((perk) => (
+                <PerkCard key={perk.title} perk={perk} />
+              ))}
+            </div>
+          </Reveal>
+
+          {/* Direita: eyebrow yellow + h3 + body + CTA */}
+          <Reveal delay={80}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#f2d22e] mb-2">
+              Nosso compromisso
+            </p>
+            <h3 className="text-2xl md:text-3xl font-extrabold text-[#010744] leading-tight mb-4 text-balance">
+              Do primeiro contato ao último registro
+            </h3>
+            <p className="text-base text-gray-600 leading-relaxed mb-6">
+              Estamos presentes em cada fase: da avaliação do imóvel ao
+              financiamento, passando pela negociação e chegando à
+              assinatura. Uma jornada completa, sem surpresas.
+            </p>
+            {ctaLabel && ctaHref && (
+              <Link href={ctaHref} className="btn-primary inline-flex items-center gap-2 text-base">
+                {ctaLabel}
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            )}
+          </Reveal>
+        </div>
+
       </div>
     </section>
   )
