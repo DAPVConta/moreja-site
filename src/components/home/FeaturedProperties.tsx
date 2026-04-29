@@ -16,60 +16,10 @@ interface FeaturedPropertiesProps {
   loading?: boolean
 }
 
-/** Imóveis de destaque de fallback — exibidos enquanto o banco estiver vazio. */
-const FALLBACK_FEATURED: Property[] = [
-  {
-    id: 'feat-1', codigo: 'MRJ-F01', titulo: 'Apartamento de Alto Padrão — Boa Viagem',
-    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
-    preco: 890000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
-    area_total: 130, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
-    descricao: 'Apartamento de alto padrão a 200m da praia de Boa Viagem, varanda gourmet.',
-    fotos: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'feat-2', codigo: 'MRJ-F02', titulo: 'Casa com Piscina — Casa Forte',
-    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
-    preco: 1350000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
-    area_total: 280, quartos: 4, suites: 3, banheiros: 4, vagas: 3,
-    descricao: 'Casa com piscina, jardim e ampla área de lazer em condomínio fechado.',
-    fotos: ['https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'feat-3', codigo: 'MRJ-F03', titulo: 'Penthouse nas Graças',
-    tipo: 'Cobertura', subtipo: 'Cobertura', finalidade: 'Venda',
-    preco: 2100000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
-    area_total: 250, quartos: 4, suites: 4, banheiros: 5, vagas: 3,
-    descricao: 'Penthouse exclusivo com terraço privativo e vista panorâmica de Recife.',
-    fotos: ['https://images.unsplash.com/photo-1591474200742-8e512e6f98f8?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'feat-4', codigo: 'MRJ-F04', titulo: 'Studio Moderno — Pina',
-    tipo: 'Apartamento', subtipo: 'Studio', finalidade: 'Venda',
-    preco: 380000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
-    area_total: 42, quartos: 1, suites: 1, banheiros: 1, vagas: 1,
-    descricao: 'Studio inteligente com acabamento premium próximo ao Cais do Pina.',
-    fotos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'feat-5', codigo: 'MRJ-F05', titulo: 'Apartamento na Zona Sul — Imbiribeira',
-    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
-    preco: 490000, bairro: 'Imbiribeira', cidade: 'Recife', estado: 'PE',
-    area_total: 90, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
-    descricao: 'Apartamento com três quartos, bem localizado na zona sul do Recife.',
-    fotos: ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-]
-
 export function FeaturedProperties({ properties, loading = false }: FeaturedPropertiesProps) {
   const skeletonCount = 5
 
-  // Usar fallback quando banco estiver vazio
-  const displayProperties = properties.length > 0 ? properties : FALLBACK_FEATURED
+  if (!loading && properties.length === 0) return null
 
   return (
     <section className="section bg-white">
@@ -123,7 +73,7 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
                     <PropertyCardSkeleton />
                   </CarouselItem>
                 ))
-              : displayProperties.map((property, index) => (
+              : properties.map((property, index) => (
                   <CarouselItem
                     key={property.id}
                     

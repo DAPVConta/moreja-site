@@ -19,46 +19,6 @@ interface ResidentialFeaturedProps {
   hrefAll?: string
 }
 
-/** Imóveis residenciais de fallback — exibidos enquanto o banco estiver vazio. */
-const FALLBACK_RESIDENTIAL: Property[] = [
-  {
-    id: 'res-1', codigo: 'MRJ-001', titulo: 'Apartamento em Boa Viagem',
-    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
-    preco: 580000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
-    area_total: 85, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
-    descricao: 'Apartamento bem localizado em Boa Viagem, a poucos metros da praia.',
-    fotos: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'res-2', codigo: 'MRJ-002', titulo: 'Casa em Casa Forte',
-    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
-    preco: 920000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
-    area_total: 220, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
-    descricao: 'Casa espaçosa em condomínio fechado, bairro nobre de Casa Forte.',
-    fotos: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'res-3', codigo: 'MRJ-003', titulo: 'Apartamento nas Graças',
-    tipo: 'Apartamento', subtipo: 'Apartamento', finalidade: 'Venda',
-    preco: 750000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
-    area_total: 110, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
-    descricao: 'Apartamento reformado no bairro das Graças, próximo ao Parque Amorim.',
-    fotos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-  {
-    id: 'res-4', codigo: 'MRJ-004', titulo: 'Cobertura no Pina',
-    tipo: 'Cobertura', subtipo: 'Cobertura', finalidade: 'Venda',
-    preco: 1200000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
-    area_total: 180, quartos: 4, suites: 3, banheiros: 4, vagas: 2,
-    descricao: 'Cobertura duplex com vista para o mar no Pina.',
-    fotos: ['https://images.unsplash.com/photo-1591474200742-8e512e6f98f8?auto=format&fit=crop&w=800&q=80'],
-    destaque: true,
-  },
-]
-
 export function ResidentialFeatured({
   properties,
   loading = false,
@@ -73,9 +33,9 @@ export function ResidentialFeatured({
     )
   })
 
-  // Usar fallback quando banco estiver vazio
-  const residentials = (filtered.length > 0 ? filtered : FALLBACK_RESIDENTIAL).slice(0, 5)
+  if (!loading && filtered.length === 0) return null
 
+  const residentials = filtered.slice(0, 5)
   const skeletonCount = 5
 
   return (

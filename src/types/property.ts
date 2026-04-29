@@ -36,6 +36,11 @@ export interface Property {
   corretor_foto?: string
   corretor_creci?: string
   corretor_whatsapp?: string
+  estagio_obra?: string
+  construtora_nome?: string
+  mcmv?: boolean
+  ano_construcao?: string | number
+  pet_friendly?: boolean
 }
 
 export interface PropertyFilters {

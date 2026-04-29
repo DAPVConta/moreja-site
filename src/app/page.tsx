@@ -1,4 +1,6 @@
-import { fetchFeaturedProperties } from '@/lib/properties'
+import { fetchFeaturedProperties, fetchFeaturedEmpreendimentos } from '@/lib/properties'
+import type { Property } from '@/types/property'
+import type { Launch } from '@/components/home/LaunchesPreview'
 
 // ISR: revalidate da home a cada 5min — cobre updates em featured properties,
 // banners, testimonials, sections sem rebuild do app.
@@ -32,9 +34,50 @@ import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
 import { FaqAccordion } from '@/components/home/FaqAccordion'
 import { CtaAnunciar } from '@/components/home/CtaAnunciar'
 
+function inferLaunchStatus(p: Property): string {
+  const stage = (p.estagio_obra ?? '').toLowerCase()
+  if (stage.includes('pré') || stage.includes('pre')) return 'Pré-lançamento'
+  if (stage.includes('obra')) return 'Em obras'
+  if (stage.includes('lançamento') || stage.includes('lancamento')) return 'Lançamento'
+  return stage ? p.estagio_obra! : 'Lançamento'
+}
+
+function formatDelivery(p: Property): string | undefined {
+  if (!p.publicado_em) return undefined
+  const year = String(p.publicado_em).slice(0, 4)
+  if (!/^\d{4}$/.test(year)) return undefined
+  return `Entrega ${year}`
+}
+
+function formatPriceFrom(preco: number): string {
+  if (!preco || preco <= 0) return 'Sob consulta'
+  if (preco >= 1_000_000) {
+    const milhoes = (preco / 1_000_000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+    return `A partir de R$ ${milhoes} mi`
+  }
+  const mil = Math.round(preco / 1_000)
+  return `A partir de R$ ${mil} mil`
+}
+
+function empreendimentoToLaunch(p: Property): Launch {
+  const location = [p.bairro, p.cidade, p.estado].filter(Boolean).join(', ')
+  return {
+    id: p.id,
+    name: p.titulo,
+    developer: p.construtora_nome,
+    location,
+    status: inferLaunchStatus(p),
+    delivery: formatDelivery(p),
+    priceFrom: formatPriceFrom(p.preco),
+    image: p.fotos[0] ?? '',
+    href: `/empreendimentos/${p.id}`,
+  }
+}
+
 export default async function HomePage() {
   const [
     featuredProperties,
+    featuredEmpreendimentos,
     stats,
     testimonials,
     sections,
@@ -43,6 +86,7 @@ export default async function HomePage() {
     recentPosts,
   ] = await Promise.all([
     fetchFeaturedProperties(),
+    fetchFeaturedEmpreendimentos(),
     getSiteStats(),
     getTestimonials(),
     getHomeSections(),
@@ -50,6 +94,10 @@ export default async function HomePage() {
     getBrokers(),
     getRecentPosts(3),
   ])
+
+  const supremoLaunches: Launch[] = featuredEmpreendimentos
+    .filter((p) => p.fotos[0])
+    .map(empreendimentoToLaunch)
 
   // Helper: extrai config jsonb de cada seção (caso cadastrada no admin)
   const cfg = (type: string) =>
@@ -146,18 +194,17 @@ export default async function HomePage() {
     launches_preview: () => {
       const c = cfg('launches_preview') as {
         title?: string; subtitle?: string; href_all?: string
-        launches?: {
-          id: string; name: string; developer?: string; location: string
-          status: string; delivery?: string; priceFrom?: string
-          image: string; href?: string
-        }[]
+        launches?: Launch[]
       }
+      // Admin pode curar manualmente via home_sections.config.launches;
+      // se não curou, cai p/ empreendimentos com destaque no Supremo.
+      const launches = c.launches && c.launches.length > 0 ? c.launches : supremoLaunches
       return (
         <LaunchesPreview
           title={c.title}
           subtitle={c.subtitle}
           hrefAll={c.href_all}
-          launches={c.launches}
+          launches={launches}
         />
       )
     },
