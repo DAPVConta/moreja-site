@@ -25,6 +25,7 @@ import {
   Award, CheckCircle2, MapPin, Sparkles, Pencil,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { revalidatePublicPaths } from '@/lib/revalidate'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { SectionEditDialog, EDITABLE_SECTION_TYPES } from './SectionEditDialog'
@@ -482,6 +483,7 @@ export default function HomeLayoutPage() {
       const results = await Promise.all(updates)
       const failed = results.find((r) => r.error)
       if (failed?.error) throw failed.error
+      await revalidatePublicPaths(['/'])
     },
     onSuccess: () => {
       toast.success('Layout da home salvo!')

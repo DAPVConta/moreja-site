@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Plus, Trash2, Save } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { revalidatePublicPaths } from '@/lib/revalidate'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog'
@@ -55,6 +56,7 @@ export function SectionEditDialog({ section, open, onClose }: SectionEditDialogP
         .update({ config })
         .eq('id', section.id)
       if (error) throw error
+      await revalidatePublicPaths(['/'])
     },
     onSuccess: () => {
       toast.success('Configuração salva!')
