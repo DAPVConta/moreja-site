@@ -54,7 +54,7 @@ export function HeroSection({
       className="relative bg-[#010744] text-white overflow-hidden
                  -mt-16 sm:-mt-20 lg:-mt-[7.25rem]
                  pt-16 sm:pt-20 lg:pt-[7.25rem]
-                 min-h-[560px] sm:min-h-[640px] lg:min-h-[720px] flex items-center"
+                 min-h-[440px] sm:min-h-[500px] lg:min-h-[560px] flex items-center"
     >
       {/* ── Background image / gradient ───────────────────────────────── */}
       <HeroBackdrop
@@ -88,20 +88,20 @@ export function HeroSection({
       />
 
       {/* ── Main content ──────────────────────────────────────────────── */}
-      <div className="relative container-page py-16 sm:py-20 md:py-28 w-full">
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+      <div className="relative container-page py-10 sm:py-14 md:py-16 w-full">
+        <div className="text-center mb-6 sm:mb-8">
 
-          {/* Eyebrow — AnimatedChip ghost variant (Ação 5, Fase 3).
-              ghost variant é o correto sobre fundo navy escuro.
-              pulse=true (default) — desabilitado automaticamente via
-              prefers-reduced-motion em globals.css. */}
-          <div className="flex justify-center mb-4 sm:mb-6">
+          {/* Eyebrow — AnimatedChip ghost. */}
+          <div className="flex justify-center mb-3 sm:mb-4">
             <AnimatedChip variant="ghost" icon={Sparkles} pulse>
               Morejá Imobiliária
             </AnimatedChip>
           </div>
 
-          <h1 className="heading-display-xl mb-5 sm:mb-7 max-w-5xl mx-auto">
+          {/* Título reduzido — text-3xl sm:text-4xl lg:text-5xl (era
+              heading-display-xl que ia até ~6rem). Mantém peso editorial
+              extrabold + tracking apertado mas ocupa menos altura vertical. */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight mb-3 sm:mb-4 max-w-4xl mx-auto text-balance">
             {title}
             {highlight && (
               <>
@@ -112,7 +112,7 @@ export function HeroSection({
           </h1>
 
           {subtitle && (
-            <p className="lead text-gray-200 max-w-2xl mx-auto">{subtitle}</p>
+            <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto">{subtitle}</p>
           )}
         </div>
 
