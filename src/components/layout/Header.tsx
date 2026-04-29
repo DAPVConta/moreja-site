@@ -101,18 +101,25 @@ export function MoRejaLogo({
     )
   }
 
-  const color =
+  // Cor das letras (M e REJÁ) segue o variant para contrastar com o fundo.
+  const letterColor =
     variant === 'yellow' ? '#f2d22e' : variant === 'white' ? '#ffffff' : '#010744'
+  // Cor do pin é SEMPRE o acento amarelo da marca — antes assumia a mesma
+  // cor das letras, o que fazia o pin sumir quando o variant era 'white'
+  // (sobre header transparente no hero navy) ou 'yellow' (footer onde letras
+  // já são amarelas). Quando o próprio variant é 'yellow', o pin precisa
+  // de outra cor pra não fundir com as letras — usamos cream da marca.
+  const pinColor = variant === 'yellow' ? '#ededd1' : '#f2d22e'
 
   return (
     <span
       className={`flex items-center gap-0.5 md:gap-1 font-black text-sm md:text-2xl tracking-tight ${className ?? ''}`}
-      style={{ color }}
+      style={{ color: letterColor }}
     >
       M
       <span className="relative inline-flex items-center justify-center">
         <MapPin
-          fill={color}
+          fill={pinColor}
           strokeWidth={0}
           className="absolute w-[17px] h-[17px] md:w-7 md:h-7"
           aria-hidden="true"

@@ -387,12 +387,12 @@ export function PropertyCard({
           )}
         </div>
 
-        {/* Content — padding p-5 sm:p-6 (respiração premium) */}
-        <div className="p-5 sm:p-6">
-          {/* Eyebrow editorial: bairro · cidade. Separador subido para /55 (era
-              /40 que falhava AA). Sem MapPin (decoração). */}
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
-            <span className="truncate">
+        {/* Content — padding reduzido para liberar espaço horizontal pro
+            preço e título não estourarem em cards estreitos. */}
+        <div className="p-4 sm:p-5">
+          {/* Eyebrow editorial: bairro · cidade */}
+          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
+            <span className="truncate block">
               {property.bairro}
               {property.cidade && (
                 <span className="text-[#010744]/55"> · {property.cidade}</span>
@@ -400,31 +400,30 @@ export function PropertyCard({
             </span>
           </div>
 
-          {/* Título — min-h ajustado para 2.75rem (44px = 2 × leading-6/22px),
-              hover-underline em decoration-2 navy (decoration-1 amarelo era
-              quase invisível). text-balance evita órfã/viúva. */}
+          {/* Título — text-[15px] em mobile (era text-base/16px) para caber em
+              cards estreitos sem quebrar em 3 linhas. min-h-[2.5rem] = 40px =
+              2 × leading-5/20px. text-balance evita órfã/viúva. */}
           <h3
-            className="mb-3 line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-6 text-[#010744]
+            className="mb-2.5 line-clamp-2 min-h-[2.5rem] text-[15px] font-semibold leading-5 text-[#010744]
                        text-balance
-                       transition-colors group-hover:underline group-hover:underline-offset-[6px]
+                       transition-colors group-hover:underline group-hover:underline-offset-[5px]
                        group-hover:decoration-[#010744] group-hover:decoration-2"
           >
             {property.titulo}
           </h3>
 
-          {/* Price + microtag de qualidade — Premium/Destaque viraram tag inline
-              ao lado do preço, em vez de competir sobre a foto. Hierarquia:
-              preço grande domina, tag pequena é adendo. */}
-          <div className="mb-4 flex items-baseline gap-2 flex-wrap">
-            <p className="text-2xl sm:text-[1.6rem] font-bold tracking-tight tabular-nums text-[#010744]">
+          {/* Price + microtag de qualidade. text-xl mobile / text-2xl desktop
+              evita overflow de "R$ 2.100.000" em cards de ~280px. */}
+          <div className="mb-3 flex items-baseline gap-2 flex-wrap">
+            <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums text-[#010744]">
               {formatPrice(property.preco)}
               {property.finalidade === 'Locação' && (
-                <span className="ml-0.5 text-sm font-normal text-gray-500">/mês</span>
+                <span className="ml-0.5 text-xs font-normal text-gray-500">/mês</span>
               )}
             </p>
             {priceDropped && precoAnterior && (
               <span
-                className="text-sm text-gray-400 line-through tabular-nums"
+                className="text-xs text-gray-400 line-through tabular-nums"
                 aria-label={`Preço anterior ${formatPrice(precoAnterior)}`}
               >
                 {formatPrice(precoAnterior)}
@@ -445,31 +444,30 @@ export function PropertyCard({
             )}
           </div>
 
-          {/* Features — tabular-nums em todos os números. CompareIconButton
-              foi para o final da row (substitui o ml-auto da área), evita
-              colisão com Badge bottom-left em viewports estreitas. */}
-          <div className="flex items-center gap-3 border-t border-gray-100 pt-3 text-sm text-gray-600">
+          {/* Features — pr-10 reserva espaço para o CompareIconButton absolute,
+              evitando que o número da área seja cortado em cards estreitos. */}
+          <div className="flex items-center gap-2.5 border-t border-gray-100 pt-2.5 pr-10 text-[13px] text-gray-600">
             {property.quartos > 0 && (
               <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Bed size={15} className="text-[#010744]" aria-label="Quartos" />
+                <Bed size={14} className="text-[#010744]" aria-label="Quartos" />
                 {property.quartos}
               </span>
             )}
             {property.banheiros > 0 && (
               <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Bath size={15} className="text-[#010744]" aria-label="Banheiros" />
+                <Bath size={14} className="text-[#010744]" aria-label="Banheiros" />
                 {property.banheiros}
               </span>
             )}
             {property.vagas != null && property.vagas > 0 && (
               <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Car size={15} className="text-[#010744]" aria-label="Vagas" />
+                <Car size={14} className="text-[#010744]" aria-label="Vagas" />
                 {property.vagas}
               </span>
             )}
             {property.area_total > 0 && (
               <span className="ml-auto flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Maximize2 size={14} className="text-[#010744]" aria-label="Área" />
+                <Maximize2 size={13} className="text-[#010744]" aria-label="Área" />
                 {formatArea(property.area_total)}
               </span>
             )}
@@ -478,10 +476,9 @@ export function PropertyCard({
       </Link>
 
       {/* Compare — fora do <Link> (HTML5 não permite <button> dentro de <a>),
-          posicionado absolute alinhado com o canto inferior direito da stats
-          row. Não colide com Badge bottom-left da imagem porque está fora da
-          área da imagem (image area termina antes do padding do conteúdo). */}
-      <div className="absolute bottom-4 right-4 sm:bottom-5 sm:right-5 z-10">
+          posicionado absolute. pr-10 da stats row reserva o espaço para
+          ele NÃO cobrir o número da área. */}
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10">
         <CompareIconButton property={property} />
       </div>
     </article>
@@ -494,15 +491,15 @@ export function PropertyCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-xl bg-white shadow-md" aria-hidden="true">
       <div className="skeleton-shimmer aspect-[16/9] sm:aspect-[4/3]" />
-      <div className="space-y-3 p-5 sm:p-6">
+      <div className="space-y-2.5 p-4 sm:p-5">
         <div className="skeleton-shimmer h-3 w-1/3 rounded-md" />
         <div className="skeleton-shimmer h-4 w-3/4 rounded-md" />
         <div className="skeleton-shimmer h-4 w-1/2 rounded-md" />
-        <div className="skeleton-shimmer h-7 w-2/5 rounded-md" />
-        <div className="flex gap-3 border-t border-gray-100 pt-3">
-          <div className="skeleton-shimmer h-3 w-8 rounded-md" />
-          <div className="skeleton-shimmer h-3 w-8 rounded-md" />
-          <div className="skeleton-shimmer h-3 w-16 rounded-md ml-auto" />
+        <div className="skeleton-shimmer h-6 w-2/5 rounded-md" />
+        <div className="flex gap-2.5 border-t border-gray-100 pt-2.5">
+          <div className="skeleton-shimmer h-3 w-7 rounded-md" />
+          <div className="skeleton-shimmer h-3 w-7 rounded-md" />
+          <div className="skeleton-shimmer h-3 w-14 rounded-md ml-auto" />
         </div>
       </div>
     </div>
