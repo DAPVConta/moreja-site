@@ -174,19 +174,21 @@ function CompareIconButton({
       onClick={handleClick}
       aria-pressed={active}
       aria-label={active ? 'Remover do comparador' : 'Adicionar ao comparador'}
+      // Glassmorphism igual ao FavoriteButton (ambos vivem sobre a foto).
+      // 44×44 = WCAG 2.5.5. Active dispara estado navy+yellow para feedback.
       className={cn(
-        'inline-flex items-center justify-center shrink-0',
-        // 44×44 atende WCAG 2.5.5 (touch target). Padding negativo via -m
-        // para não quebrar o ritmo da stats row que vive em text-sm/14px.
-        'h-11 w-11 -my-2 rounded-full transition-colors duration-150',
+        'inline-flex items-center justify-center',
+        'h-11 w-11 rounded-full',
+        'backdrop-blur-sm shadow-md',
+        'transition-all duration-150',
         active
-          ? 'bg-[#010744] text-[#f2d22e] border border-[#010744]'
-          : 'bg-white border border-[#010744]/15 text-[#010744]/70 hover:border-[#f2d22e] hover:text-[#010744]',
+          ? 'bg-[#010744] text-[#f2d22e]'
+          : 'bg-white/90 text-gray-600 hover:bg-white motion-safe:hover:scale-105',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2',
         'cursor-pointer',
       )}
     >
-      <Icon size={16} aria-hidden="true" />
+      <Icon size={18} aria-hidden="true" />
     </button>
   )
 }
@@ -255,9 +257,13 @@ export function PropertyCard({
       className="group relative overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300
                  motion-safe:hover:-translate-y-1 hover:shadow-xl"
     >
-      {/* Favorite — único elemento no canto superior direito da imagem. */}
-      <div className="absolute right-3 top-3 z-20">
+      {/* Stack de actions no canto superior direito da imagem: favorite +
+          compare empilhados verticalmente. Ambos 44×44 com glassmorphism.
+          Move o Compare para fora da stats row para que m² nunca fique
+          cortado por causa de espaço apertado em cards estreitos. */}
+      <div className="absolute right-3 top-3 z-20 flex flex-col gap-2">
         <FavoriteButton propertyId={property.id} />
+        <CompareIconButton property={property} />
       </div>
 
       <Link href={`/imovel/${property.id}`} className="block">
@@ -450,38 +456,37 @@ export function PropertyCard({
         </div>
       </Link>
 
-      {/* Footer com stats + Compare button — FORA do <Link> (válido HTML5,
-          button não pode aninhar dentro de a). Stats à esquerda, Compare
-          à direita via ml-auto. Como vivem na mesma flex row, sem
-          posicionamento absoluto, NÃO sobrepõem. */}
-      <div className="flex items-center gap-2.5 border-t border-gray-100 px-4 py-2.5 sm:px-5 text-[13px] text-gray-600">
-        {property.quartos > 0 && (
-          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-            <Bed size={14} className="text-[#010744]" aria-label="Quartos" />
-            {property.quartos}
-          </span>
-        )}
-        {property.banheiros > 0 && (
-          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-            <Bath size={14} className="text-[#010744]" aria-label="Banheiros" />
-            {property.banheiros}
-          </span>
-        )}
-        {property.vagas != null && property.vagas > 0 && (
-          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-            <Car size={14} className="text-[#010744]" aria-label="Vagas" />
-            {property.vagas}
-          </span>
-        )}
+      {/* Footer com stats — FORA do <Link>, mas é só leitura (sem botões
+          interativos), então sem problema de aninhamento. Compare voltou
+          para a área da imagem (top-right, abaixo do favorite). Aqui sobra
+          espaço para o "200 m²" sempre caber. */}
+      <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 sm:px-5 text-[13px] text-gray-600">
+        <div className="flex items-center gap-3">
+          {property.quartos > 0 && (
+            <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+              <Bed size={14} className="text-[#010744]" aria-label="Quartos" />
+              {property.quartos}
+            </span>
+          )}
+          {property.banheiros > 0 && (
+            <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+              <Bath size={14} className="text-[#010744]" aria-label="Banheiros" />
+              {property.banheiros}
+            </span>
+          )}
+          {property.vagas != null && property.vagas > 0 && (
+            <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+              <Car size={14} className="text-[#010744]" aria-label="Vagas" />
+              {property.vagas}
+            </span>
+          )}
+        </div>
         {property.area_total > 0 && (
           <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
             <Maximize2 size={13} className="text-[#010744]" aria-label="Área" />
             {formatArea(property.area_total)}
           </span>
         )}
-        <span className="ml-auto -my-1.5">
-          <CompareIconButton property={property} />
-        </span>
       </div>
     </article>
   )
