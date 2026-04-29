@@ -17,19 +17,16 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.6 — necessário
-   *  para garantir legibilidade do título branco e dos links de nav (header
-   *  transparente sobre o hero). A imagem em si já é renderizada a 35%
-   *  de opacity pelo HeroBackdrop. */
+  /** Darkness of the overlay over the image (0–1). Default 0.2 — overlay
+   *  leve, foto a ~80% de visibilidade. Admin pode ajustar via
+   *  home_sections.config.hero_search.overlay_opacity. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
 }
 
 // Imagem default do hero — quando home_sections.config.hero_search.bg_image
-// está vazio. Foto de prédio em tom navy/dramático (sem céu claro) que
-// combina com o overlay forte sem competir com o texto branco.
-// Renderizada a 35% de opacity pelo HeroBackdrop.
+// está vazio.
 const DEFAULT_HERO_BG =
   'https://images.unsplash.com/photo-1518883529677-4dcae62cf45e?auto=format&fit=crop&w=1920&q=80'
 
@@ -40,7 +37,7 @@ export function HeroSection({
   bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.6,
+  overlayOpacity = 0.2,
   suggestions,
 }: HeroSectionProps = {}) {
   return (
