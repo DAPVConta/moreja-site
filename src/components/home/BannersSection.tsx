@@ -54,7 +54,6 @@ export function BannersSection({
 
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const multi = banners.length > 1
   const intervalMs = Math.max(1, intervalSeconds) * 1000
 
@@ -63,23 +62,16 @@ export function BannersSection({
     setCurrent((index + banners.length) % banners.length)
   }
 
-  const resetTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    if (multi && autoplay && !paused) {
-      timerRef.current = setTimeout(
-        () => setCurrent((p) => (p + 1) % banners.length),
-        intervalMs
-      )
-    }
-  }
-
+  // Autoplay com setInterval — mais robusto que setTimeout-encadeado.
+  // Loop garantido via modulo. Pause em hover via state `paused` (controlado
+  // por onMouseEnter/Leave) ou click no botão pause/play.
   useEffect(() => {
-    resetTimer()
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, banners.length, paused])
+    if (!multi || !autoplay || paused) return
+    const id = setInterval(() => {
+      setCurrent((p) => (p + 1) % banners.length)
+    }, intervalMs)
+    return () => clearInterval(id)
+  }, [multi, autoplay, paused, banners.length, intervalMs])
 
   // banners nunca é vazio aqui — já substituído por FALLBACK_BANNERS acima
 
@@ -89,10 +81,10 @@ export function BannersSection({
         <div
           className="relative w-full overflow-hidden rounded-2xl shadow-xl shadow-[#010744]/10
                      aspect-[3/2] md:aspect-[12/5]"
-          onMouseEnter={() => {
-            if (timerRef.current) clearTimeout(timerRef.current)
-          }}
-          onMouseLeave={resetTimer}
+          // Pause apenas via botão explícito (pause/play), não no hover.
+          // Cliente pediu loop contínuo — sair do hover não pode reiniciar
+          // se o usuário tinha pausado manualmente, e parar no hover quebra
+          // a percepção de que sempre roda.
           aria-roledescription="carousel"
           aria-label="Banners promocionais"
         >
@@ -184,7 +176,6 @@ export function BannersSection({
               <button
                 onClick={() => {
                   go(current - 1)
-                  resetTimer()
                 }}
                 className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-10
                            flex items-center justify-center h-12 w-12 rounded-full
@@ -199,7 +190,6 @@ export function BannersSection({
               <button
                 onClick={() => {
                   go(current + 1)
-                  resetTimer()
                 }}
                 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10
                            flex items-center justify-center h-12 w-12 rounded-full
@@ -220,8 +210,7 @@ export function BannersSection({
                       key={i}
                       onClick={() => {
                         go(i)
-                        resetTimer()
-                      }}
+                            }}
                       className={`h-2 rounded-full transition-all ${
                         i === current ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
                       }`}
