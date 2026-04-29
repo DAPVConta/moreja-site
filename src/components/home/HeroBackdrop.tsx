@@ -26,10 +26,11 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Reduzido de 0.55 → 0.15 porque a imagem agora já vai a 35% de opacity
-  // (dimming primário). Overlay aqui só adiciona um leve gradient atmosférico
-  // navy→azul-médio para dar profundidade — sem dimming dobrado.
-  overlayOpacity = 0.15,
+  // Overlay forte (0.6) garante contraste do título branco e dos links do
+  // header transparente independente da imagem escolhida. A imagem por baixo
+  // já está a 35% de opacity (esmaecida), e o overlay adiciona a camada
+  // navy que dá legibilidade ao texto.
+  overlayOpacity = 0.6,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (

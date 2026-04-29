@@ -17,19 +17,21 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.15. A imagem
-   *  de fundo já é renderizada a 35% de opacity (HeroBackdrop), então o
-   *  overlay aqui só adiciona tinta atmosférica leve. */
+  /** Darkness of the overlay over the image (0–1). Default 0.6 — necessário
+   *  para garantir legibilidade do título branco e dos links de nav (header
+   *  transparente sobre o hero). A imagem em si já é renderizada a 35%
+   *  de opacity pelo HeroBackdrop. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
 }
 
 // Imagem default do hero — quando home_sections.config.hero_search.bg_image
-// está vazio. Foto de skyline urbano premium, renderizada a 35% de opacity
-// pelo HeroBackdrop. Quando o admin cadastrar imagem própria, esta cai.
+// está vazio. Foto de prédio em tom navy/dramático (sem céu claro) que
+// combina com o overlay forte sem competir com o texto branco.
+// Renderizada a 35% de opacity pelo HeroBackdrop.
 const DEFAULT_HERO_BG =
-  'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1920&q=80'
+  'https://images.unsplash.com/photo-1518883529677-4dcae62cf45e?auto=format&fit=crop&w=1920&q=80'
 
 export function HeroSection({
   title = 'Encontre o imóvel',
@@ -38,7 +40,7 @@ export function HeroSection({
   bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.15,
+  overlayOpacity = 0.6,
   suggestions,
 }: HeroSectionProps = {}) {
   return (
