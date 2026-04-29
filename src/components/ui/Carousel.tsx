@@ -224,17 +224,30 @@ CarouselViewport.displayName = 'CarouselViewport'
 // ─── Item ────────────────────────────────────────────────────────────────────
 
 export interface CarouselItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Minimum width. Default '100%'. Use '50%' for 2-up, '33.333%' for 3-up etc. */
+  /** @deprecated — use `className="basis-[85%] sm:basis-1/2 lg:basis-1/3"`
+   *  diretamente. Inline style aqui sobrescrevia classes responsive. */
   basis?: string
 }
 
-export function CarouselItem({ basis = '100%', className, ...props }: CarouselItemProps) {
+export function CarouselItem({ basis, className, ...props }: CarouselItemProps) {
+  // Default basis 100% via className (Tailwind precisa estática). Consumer
+  // passa overrides responsive via className: `basis-[85%] sm:basis-1/2
+  // lg:basis-1/3`. Antes este componente forçava `style={{ flex: '0 0 ${basis}' }}`
+  // inline → sobrescrevia QUALQUER class responsive por especificidade,
+  // resultando em todos os breakpoints com o tamanho mobile.
+  // O prop `basis` é mantido por backward-compat mas só aplica se className
+  // NÃO tiver `basis-` (deixa as classes responsive vencerem).
+  const hasBasisInClass = typeof className === 'string' && /\bbasis-/.test(className)
   return (
     <div
       role="group"
       aria-roledescription="slide"
-      style={{ flex: `0 0 ${basis}`, minWidth: 0 }}
-      className={cn('min-w-0', className)}
+      className={cn(
+        'min-w-0 shrink-0 grow-0',
+        !hasBasisInClass && 'basis-full',
+        className,
+      )}
+      style={!hasBasisInClass && basis ? { flexBasis: basis } : undefined}
       {...props}
     />
   )

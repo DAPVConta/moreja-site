@@ -17,26 +17,44 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.55 */
+  /** Darkness of the overlay over the image (0–1). Default 0.6 — necessário
+   *  para garantir legibilidade do título branco e dos links de nav (header
+   *  transparente sobre o hero). A imagem em si já é renderizada a 35%
+   *  de opacity pelo HeroBackdrop. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
 }
 
+// Imagem default do hero — quando home_sections.config.hero_search.bg_image
+// está vazio. Foto de prédio em tom navy/dramático (sem céu claro) que
+// combina com o overlay forte sem competir com o texto branco.
+// Renderizada a 35% de opacity pelo HeroBackdrop.
+const DEFAULT_HERO_BG =
+  'https://images.unsplash.com/photo-1518883529677-4dcae62cf45e?auto=format&fit=crop&w=1920&q=80'
+
 export function HeroSection({
   title = 'Encontre o imóvel',
   highlight = 'dos seus sonhos',
   subtitle = 'A Morejá Imobiliária oferece os melhores imóveis residenciais e comerciais. Compre, alugue ou invista com segurança e qualidade.',
-  bgImage,
+  bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.55,
+  overlayOpacity = 0.6,
   suggestions,
 }: HeroSectionProps = {}) {
   return (
+    // mt-[-5rem] (mobile) / mt-[-5rem] sm: / mt-[-9rem] lg: puxam o hero
+    // para baixo do header sticky (que ocupa h-16 mobile / h-20 desktop +
+    // h-9 top-bar lg). pt-* compensa para manter o conteúdo centralizado
+    // visualmente. Resultado: header transparente fica SOBRE o hero navy
+    // (logo/menu brancos sobre fundo escuro = legíveis), em vez de ficar
+    // numa faixa branca acima.
     <section
       className="relative bg-[#010744] text-white overflow-hidden
-                 min-h-[560px] sm:min-h-[640px] lg:min-h-[720px] flex items-center"
+                 -mt-16 sm:-mt-20 lg:-mt-[7.25rem]
+                 pt-16 sm:pt-20 lg:pt-[7.25rem]
+                 min-h-[440px] sm:min-h-[500px] lg:min-h-[560px] flex items-center"
     >
       {/* ── Background image / gradient ───────────────────────────────── */}
       <HeroBackdrop
@@ -70,20 +88,20 @@ export function HeroSection({
       />
 
       {/* ── Main content ──────────────────────────────────────────────── */}
-      <div className="relative container-page py-16 sm:py-20 md:py-28 w-full">
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+      <div className="relative container-page py-10 sm:py-14 md:py-16 w-full">
+        <div className="text-center mb-6 sm:mb-8">
 
-          {/* Eyebrow — AnimatedChip ghost variant (Ação 5, Fase 3).
-              ghost variant é o correto sobre fundo navy escuro.
-              pulse=true (default) — desabilitado automaticamente via
-              prefers-reduced-motion em globals.css. */}
-          <div className="flex justify-center mb-4 sm:mb-6">
+          {/* Eyebrow — AnimatedChip ghost. */}
+          <div className="flex justify-center mb-3 sm:mb-4">
             <AnimatedChip variant="ghost" icon={Sparkles} pulse>
               Morejá Imobiliária
             </AnimatedChip>
           </div>
 
-          <h1 className="heading-display-xl mb-5 sm:mb-7 max-w-5xl mx-auto">
+          {/* Título reduzido — text-3xl sm:text-4xl lg:text-5xl (era
+              heading-display-xl que ia até ~6rem). Mantém peso editorial
+              extrabold + tracking apertado mas ocupa menos altura vertical. */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight mb-3 sm:mb-4 max-w-4xl mx-auto text-balance">
             {title}
             {highlight && (
               <>
@@ -94,7 +112,7 @@ export function HeroSection({
           </h1>
 
           {subtitle && (
-            <p className="lead text-gray-200 max-w-2xl mx-auto">{subtitle}</p>
+            <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto">{subtitle}</p>
           )}
         </div>
 

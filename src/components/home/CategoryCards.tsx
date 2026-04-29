@@ -20,19 +20,19 @@ const defaultCards: CategoryCard[] = [
     title: 'Residencial',
     description: 'Apartamentos, casas e condomínios para sua família',
     href: '/comprar?tipo=Apartamento',
-    bg: '/fallbacks/residencial.svg',
+    bg: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80',
   },
   {
     title: 'Comercial',
     description: 'Salas, galpões e espaços para o seu negócio crescer',
     href: '/comprar?tipo=Comercial',
-    bg: '/fallbacks/comercial.svg',
+    bg: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
   },
   {
     title: 'Empreendimentos',
     description: 'Lançamentos exclusivos e novos empreendimentos',
     href: '/empreendimentos',
-    bg: '/fallbacks/empreendimento.svg',
+    bg: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80',
   },
 ]
 

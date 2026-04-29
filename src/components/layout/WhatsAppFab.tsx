@@ -34,7 +34,10 @@ export function WhatsAppFab({
 
   useEffect(() => {
     if (!whatsapp) return
-    const onScroll = () => setVisible(window.scrollY > 200)
+    // Threshold reduzido de 200 → 60px para o FAB aparecer logo no início
+    // da rolagem (antes ele esperava o usuário sair do hero, mas com hero
+    // sticky/imerso o usuário pode demorar a chegar lá).
+    const onScroll = () => setVisible(window.scrollY > 60)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)

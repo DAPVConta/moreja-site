@@ -24,7 +24,7 @@ const FALLBACK_FEATURED: Property[] = [
     preco: 890000, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
     area_total: 130, quartos: 4, suites: 2, banheiros: 3, vagas: 2,
     descricao: 'Apartamento de alto padrão a 200m da praia de Boa Viagem, varanda gourmet.',
-    fotos: ['/fallbacks/imovel-1.svg'],
+    fotos: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -33,7 +33,7 @@ const FALLBACK_FEATURED: Property[] = [
     preco: 1350000, bairro: 'Casa Forte', cidade: 'Recife', estado: 'PE',
     area_total: 280, quartos: 4, suites: 3, banheiros: 4, vagas: 3,
     descricao: 'Casa com piscina, jardim e ampla área de lazer em condomínio fechado.',
-    fotos: ['/fallbacks/imovel-2.svg'],
+    fotos: ['https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -42,7 +42,7 @@ const FALLBACK_FEATURED: Property[] = [
     preco: 2100000, bairro: 'Graças', cidade: 'Recife', estado: 'PE',
     area_total: 250, quartos: 4, suites: 4, banheiros: 5, vagas: 3,
     descricao: 'Penthouse exclusivo com terraço privativo e vista panorâmica de Recife.',
-    fotos: ['/fallbacks/imovel-3.svg'],
+    fotos: ['https://images.unsplash.com/photo-1591474200742-8e512e6f98f8?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -51,7 +51,7 @@ const FALLBACK_FEATURED: Property[] = [
     preco: 380000, bairro: 'Pina', cidade: 'Recife', estado: 'PE',
     area_total: 42, quartos: 1, suites: 1, banheiros: 1, vagas: 1,
     descricao: 'Studio inteligente com acabamento premium próximo ao Cais do Pina.',
-    fotos: ['/fallbacks/imovel-1.svg'],
+    fotos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -60,22 +60,13 @@ const FALLBACK_FEATURED: Property[] = [
     preco: 490000, bairro: 'Imbiribeira', cidade: 'Recife', estado: 'PE',
     area_total: 90, quartos: 3, suites: 1, banheiros: 2, vagas: 1,
     descricao: 'Apartamento com três quartos, bem localizado na zona sul do Recife.',
-    fotos: ['/fallbacks/imovel-3.svg'],
-    destaque: true,
-  },
-  {
-    id: 'feat-6', codigo: 'MRJ-F06', titulo: 'Casa em Olinda — Ampliada',
-    tipo: 'Casa', subtipo: 'Casa', finalidade: 'Venda',
-    preco: 650000, bairro: 'Carmo', cidade: 'Olinda', estado: 'PE',
-    area_total: 200, quartos: 4, suites: 1, banheiros: 3, vagas: 2,
-    descricao: 'Casa ampliada com quintal em rua tranquila de Olinda, próximo ao centro histórico.',
-    fotos: ['/fallbacks/imovel-2.svg'],
+    fotos: ['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
 ]
 
 export function FeaturedProperties({ properties, loading = false }: FeaturedPropertiesProps) {
-  const skeletonCount = 6
+  const skeletonCount = 5
 
   // Usar fallback quando banco estiver vazio
   const displayProperties = properties.length > 0 ? properties : FALLBACK_FEATURED
@@ -126,8 +117,8 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
               ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <CarouselItem
                     key={`skeleton-${i}`}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCardSkeleton />
                   </CarouselItem>
@@ -135,8 +126,8 @@ export function FeaturedProperties({ properties, loading = false }: FeaturedProp
               : displayProperties.map((property, index) => (
                   <CarouselItem
                     key={property.id}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCard property={property} priority={index < 3} />
                   </CarouselItem>

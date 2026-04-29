@@ -101,18 +101,25 @@ export function MoRejaLogo({
     )
   }
 
-  const color =
+  // Cor das letras (M e REJÁ) segue o variant para contrastar com o fundo.
+  const letterColor =
     variant === 'yellow' ? '#f2d22e' : variant === 'white' ? '#ffffff' : '#010744'
+  // Cor do pin é SEMPRE o acento amarelo da marca — antes assumia a mesma
+  // cor das letras, o que fazia o pin sumir quando o variant era 'white'
+  // (sobre header transparente no hero navy) ou 'yellow' (footer onde letras
+  // já são amarelas). Quando o próprio variant é 'yellow', o pin precisa
+  // de outra cor pra não fundir com as letras — usamos cream da marca.
+  const pinColor = variant === 'yellow' ? '#ededd1' : '#f2d22e'
 
   return (
     <span
       className={`flex items-center gap-0.5 md:gap-1 font-black text-sm md:text-2xl tracking-tight ${className ?? ''}`}
-      style={{ color }}
+      style={{ color: letterColor }}
     >
       M
       <span className="relative inline-flex items-center justify-center">
         <MapPin
-          fill={color}
+          fill={pinColor}
           strokeWidth={0}
           className="absolute w-[17px] h-[17px] md:w-7 md:h-7"
           aria-hidden="true"
@@ -267,26 +274,43 @@ export function Header({
 }: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
+  // Hide-on-scroll-down (Linear/Apple pattern) — esconde ao rolar pra baixo,
+  // reaparece ao rolar pra cima. Evita o efeito leitoso de header glass
+  // sobrepondo seções navy (footer/lançamentos) e libera vertical real estate.
+  const [hidden, setHidden] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dragX, setDragX] = useState(0)
   const dragStart = useRef<number | null>(null)
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const lastScrollY = useRef(0)
 
-  // ── Liquid-glass: IntersectionObserver on a sentinel at 80px ──
+  // ── Liquid-glass + hide-on-scroll-down via UM scroll listener.
+  // Antes usava IntersectionObserver com sentinel `fixed top-[80px]` que
+  // ficava ETERNAMENTE no viewport (fixed = não scrolla), então
+  // `isIntersecting` era sempre true e `scrolled` nunca virava true. Bug:
+  // header nunca virava liquid-glass branco, links de nav ficavam white
+  // sobre fundo branco da página = invisíveis.
+  // Solução: scroll listener único atualiza scrolled (glass) E hidden
+  // (translate). Threshold 6px no delta evita tremor.
   useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // When sentinel is NOT intersecting (scrolled past 80px), apply glass
-        setScrolled(!entry.isIntersecting)
-      },
-      { threshold: 0, rootMargin: '0px' },
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [])
+    function onScroll() {
+      const y = window.scrollY
+      const dy = y - lastScrollY.current
+      // Liquid-glass: aplica quando passar de 80px do topo
+      setScrolled(y > 80)
+      // Hide-on-scroll-down: rolando pra baixo esconde, pra cima reaparece.
+      // Sempre visível nos primeiros 80px e quando menu mobile aberto.
+      if (mobileOpen || y < 80) {
+        setHidden(false)
+      } else if (Math.abs(dy) > 6) {
+        setHidden(dy > 0)
+      }
+      lastScrollY.current = y
+    }
+    // Rodar uma vez na montagem caso a página já esteja scrollada
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [mobileOpen])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -402,13 +426,6 @@ export function Header({
 
   return (
     <>
-      {/* ── Sentinel for IntersectionObserver — 80px below viewport top ── */}
-      <div
-        ref={sentinelRef}
-        aria-hidden="true"
-        className="fixed top-[80px] left-0 right-0 h-px pointer-events-none z-[-1]"
-      />
-
       {/* ── Top bar — marquee (desktop only) ── */}
       {hasTopBar && (
         <div
@@ -433,11 +450,15 @@ export function Header({
         </div>
       )}
 
-      {/* ── Main header — liquid-glass ── */}
+      {/* ── Main header — liquid-glass + hide-on-scroll-down ── */}
       <header
         className={[
           'sticky top-0 z-50 w-full',
-          'transition-all duration-300',
+          // Transition específica (não 'all') para evitar que cor/opacity de
+          // children como o logo herdem animação na hidratação inicial — antes
+          // o logo aparecia "esmaecido" no primeiro carregamento.
+          'transition-[transform,background-color,box-shadow,border-color] duration-300 will-change-transform',
+          hidden ? '-translate-y-full' : 'translate-y-0',
           scrolled
             ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
             : 'bg-transparent shadow-none border-b border-transparent',
@@ -446,7 +467,9 @@ export function Header({
         <div className="container-page">
           <div
             className={[
-              'flex items-center justify-between transition-all duration-300',
+              // transition-[height] específica em vez de transition-all para
+              // não animar cor/opacity de children no primeiro paint.
+              'flex items-center justify-between transition-[height] duration-300',
               scrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20',
             ].join(' ')}
           >

@@ -63,7 +63,7 @@ const defaultLaunches: Launch[] = [
     status: 'Lançamento',
     delivery: 'Entrega 2027',
     priceFrom: 'A partir de R$ 580 mil',
-    image: '/fallbacks/lancamento.svg',
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
   },
   {
     id: '2',
@@ -73,7 +73,7 @@ const defaultLaunches: Launch[] = [
     status: 'Em obras',
     delivery: 'Entrega 2026',
     priceFrom: 'A partir de R$ 920 mil',
-    image: '/fallbacks/lancamento.svg',
+    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80',
     progress: 68,
   },
   {
@@ -84,7 +84,7 @@ const defaultLaunches: Launch[] = [
     status: 'Pré-lançamento',
     delivery: 'Previsão 2028',
     priceFrom: 'Sob consulta',
-    image: '/fallbacks/lancamento.svg',
+    image: 'https://images.unsplash.com/photo-1460472178825-e5240623afd5?auto=format&fit=crop&w=800&q=80',
   },
 ]
 

@@ -28,7 +28,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 320000, bairro: 'Recife Antigo', cidade: 'Recife', estado: 'PE',
     area_total: 45, quartos: 0, banheiros: 1, vagas: 1,
     descricao: 'Sala comercial em edifício corporativo no coração do Recife Antigo.',
-    fotos: ['/fallbacks/comercial.svg'],
+    fotos: ['https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -37,7 +37,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 8500, bairro: 'Boa Viagem', cidade: 'Recife', estado: 'PE',
     area_total: 80, quartos: 0, banheiros: 2, vagas: 2,
     descricao: 'Ponto comercial de alto fluxo em Boa Viagem, ideal para varejo.',
-    fotos: ['/fallbacks/comercial.svg'],
+    fotos: ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
   {
@@ -46,7 +46,7 @@ const FALLBACK_COMMERCIAL: Property[] = [
     preco: 1500000, bairro: 'Distrito Industrial', cidade: 'Caruaru', estado: 'PE',
     area_total: 1200, quartos: 0, banheiros: 4, vagas: 10,
     descricao: 'Galpão com piso industrial, docas e área administrativa.',
-    fotos: ['/fallbacks/comercial.svg'],
+    fotos: ['https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=800&q=80'],
     destaque: true,
   },
 ]
@@ -70,9 +70,9 @@ export function CommercialFeatured({
   })
 
   // Usar fallback quando banco estiver vazio
-  const commercials = (filtered.length > 0 ? filtered : FALLBACK_COMMERCIAL).slice(0, 6)
+  const commercials = (filtered.length > 0 ? filtered : FALLBACK_COMMERCIAL).slice(0, 5)
 
-  const skeletonCount = 6
+  const skeletonCount = 5
 
   return (
     // bg-mesh-navy: navy base + radial yellow/white hints from globals.css
@@ -128,8 +128,8 @@ export function CommercialFeatured({
               ? Array.from({ length: skeletonCount }).map((_, i) => (
                   <CarouselItem
                     key={`skeleton-${i}`}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCardSkeleton />
                   </CarouselItem>
@@ -137,8 +137,8 @@ export function CommercialFeatured({
               : commercials.map((p, i) => (
                   <CarouselItem
                     key={p.id}
-                    basis="85%"
-                    className="sm:basis-1/2 lg:basis-1/3 pr-5 sm:pr-6 last:pr-0"
+                    
+                    className="basis-[85%] sm:basis-1/2 lg:basis-1/5 pr-5 sm:pr-6 last:pr-0"
                   >
                     <PropertyCard property={p} priority={i < 3} />
                   </CarouselItem>
