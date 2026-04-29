@@ -26,7 +26,10 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.55,
+  // Reduzido de 0.55 → 0.15 porque a imagem agora já vai a 35% de opacity
+  // (dimming primário). Overlay aqui só adiciona um leve gradient atmosférico
+  // navy→azul-médio para dar profundidade — sem dimming dobrado.
+  overlayOpacity = 0.15,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (
@@ -62,6 +65,10 @@ export function HeroBackdrop({
           className="object-cover"
           style={{
             objectPosition: `${bgFocalX}% ${bgFocalY}%`,
+            // Imagem esmaecida em 35% — sai de 100% de presença (que competia
+            // com o título e a busca) para apenas 35%, deixando o gradient
+            // navy de fundo dominar e o conteúdo ler com clareza.
+            opacity: 0.35,
             // CSS scroll-driven parallax — supported in Chrome 115+, Safari 18+.
             // @supports guard: browsers that don't support animation-timeline
             // simply ignore these properties and render a static image.

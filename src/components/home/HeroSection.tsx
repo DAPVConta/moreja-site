@@ -17,7 +17,9 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.55 */
+  /** Darkness of the overlay over the image (0–1). Default 0.15. A imagem
+   *  de fundo já é renderizada a 35% de opacity (HeroBackdrop), então o
+   *  overlay aqui só adiciona tinta atmosférica leve. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
@@ -30,7 +32,7 @@ export function HeroSection({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.55,
+  overlayOpacity = 0.15,
   suggestions,
 }: HeroSectionProps = {}) {
   return (
