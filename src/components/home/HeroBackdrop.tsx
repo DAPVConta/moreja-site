@@ -26,11 +26,7 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Overlay forte (0.6) garante contraste do título branco e dos links do
-  // header transparente independente da imagem escolhida. A imagem por baixo
-  // já está a 35% de opacity (esmaecida), e o overlay adiciona a camada
-  // navy que dá legibilidade ao texto.
-  overlayOpacity = 0.6,
+  overlayOpacity = 0.2,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (
@@ -66,10 +62,7 @@ export function HeroBackdrop({
           className="object-cover"
           style={{
             objectPosition: `${bgFocalX}% ${bgFocalY}%`,
-            // Imagem esmaecida em 35% — sai de 100% de presença (que competia
-            // com o título e a busca) para apenas 35%, deixando o gradient
-            // navy de fundo dominar e o conteúdo ler com clareza.
-            opacity: 0.35,
+            opacity: 1,
             // CSS scroll-driven parallax — supported in Chrome 115+, Safari 18+.
             // @supports guard: browsers that don't support animation-timeline
             // simply ignore these properties and render a static image.
