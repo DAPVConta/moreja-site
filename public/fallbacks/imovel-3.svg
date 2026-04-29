@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Foto de imóvel">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2d22e"/>
+      <stop offset="0.7" stop-color="#fce999"/>
+      <stop offset="1" stop-color="#ededd1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g3)"/>
+  <!-- single tower -->
+  <g>
+    <rect x="240" y="80" width="320" height="440" fill="#010744"/>
+    <g fill="#f2d22e">
+      <rect x="270" y="120" width="50" height="50"/><rect x="335" y="120" width="50" height="50"/><rect x="400" y="120" width="50" height="50"/><rect x="465" y="120" width="50" height="50"/>
+      <rect x="270" y="190" width="50" height="50"/><rect x="335" y="190" width="50" height="50"/><rect x="400" y="190" width="50" height="50"/><rect x="465" y="190" width="50" height="50"/>
+      <rect x="270" y="260" width="50" height="50"/><rect x="335" y="260" width="50" height="50"/><rect x="400" y="260" width="50" height="50"/><rect x="465" y="260" width="50" height="50"/>
+      <rect x="270" y="330" width="50" height="50"/><rect x="335" y="330" width="50" height="50"/><rect x="400" y="330" width="50" height="50"/><rect x="465" y="330" width="50" height="50"/>
+      <rect x="270" y="400" width="50" height="50"/><rect x="335" y="400" width="50" height="50"/><rect x="400" y="400" width="50" height="50"/><rect x="465" y="400" width="50" height="50"/>
+    </g>
+    <rect x="270" y="460" width="245" height="50" fill="#ededd1"/>
+  </g>
+  <text x="400" y="555" font-family="Raleway, system-ui, sans-serif" font-size="14" font-weight="700" fill="#010744" text-anchor="middle" letter-spacing="6" opacity="0.6">MOREJÁ IMOBILIÁRIA</text>
+</svg>

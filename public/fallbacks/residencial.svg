@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagem residencial">
+  <defs>
+    <linearGradient id="bgR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#010744"/>
+      <stop offset="1" stop-color="#1a1f6e"/>
+    </linearGradient>
+    <pattern id="dotR" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#f2d22e" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgR)"/>
+  <rect width="800" height="600" fill="url(#dotR)"/>
+  <!-- house silhouette -->
+  <g transform="translate(220 180)" fill="#f2d22e" opacity="0.92">
+    <polygon points="180,0 360,140 360,360 0,360 0,140"/>
+    <rect x="150" y="220" width="60" height="140" fill="#010744"/>
+    <rect x="50" y="180" width="50" height="50" fill="#010744"/>
+    <rect x="260" y="180" width="50" height="50" fill="#010744"/>
+  </g>
+  <text x="400" y="540" font-family="Raleway, system-ui, sans-serif" font-size="24" font-weight="700" fill="#f2d22e" text-anchor="middle" letter-spacing="6">RESIDENCIAL</text>
+</svg>

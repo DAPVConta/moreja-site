@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagem de lançamento imobiliário">
+  <defs>
+    <linearGradient id="gL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1080"/>
+      <stop offset="1" stop-color="#010744"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#gL)"/>
+  <!-- under construction crane silhouette -->
+  <g fill="#f2d22e" opacity="0.95">
+    <rect x="100" y="100" width="14" height="380"/>
+    <rect x="60" y="100" width="280" height="14"/>
+    <line x1="60" y1="114" x2="100" y2="200" stroke="#f2d22e" stroke-width="6"/>
+    <rect x="280" y="114" width="6" height="80"/>
+  </g>
+  <!-- twin towers -->
+  <g fill="#f2d22e" opacity="0.9">
+    <rect x="380" y="160" width="160" height="360"/>
+    <rect x="560" y="220" width="140" height="300"/>
+  </g>
+  <g fill="#010744">
+    <g>
+      <rect x="400" y="180" width="20" height="20"/><rect x="440" y="180" width="20" height="20"/><rect x="480" y="180" width="20" height="20"/><rect x="520" y="180" width="20" height="20"/>
+      <rect x="400" y="220" width="20" height="20"/><rect x="440" y="220" width="20" height="20"/><rect x="480" y="220" width="20" height="20"/><rect x="520" y="220" width="20" height="20"/>
+      <rect x="400" y="260" width="20" height="20"/><rect x="440" y="260" width="20" height="20"/><rect x="480" y="260" width="20" height="20"/><rect x="520" y="260" width="20" height="20"/>
+      <rect x="400" y="300" width="20" height="20"/><rect x="440" y="300" width="20" height="20"/><rect x="480" y="300" width="20" height="20"/><rect x="520" y="300" width="20" height="20"/>
+      <rect x="400" y="340" width="20" height="20"/><rect x="440" y="340" width="20" height="20"/><rect x="480" y="340" width="20" height="20"/><rect x="520" y="340" width="20" height="20"/>
+      <rect x="400" y="380" width="20" height="20"/><rect x="440" y="380" width="20" height="20"/><rect x="480" y="380" width="20" height="20"/><rect x="520" y="380" width="20" height="20"/>
+      <rect x="400" y="420" width="20" height="20"/><rect x="440" y="420" width="20" height="20"/><rect x="480" y="420" width="20" height="20"/><rect x="520" y="420" width="20" height="20"/>
+      <rect x="400" y="460" width="20" height="20"/><rect x="440" y="460" width="20" height="20"/><rect x="480" y="460" width="20" height="20"/><rect x="520" y="460" width="20" height="20"/>
+    </g>
+    <g>
+      <rect x="580" y="240" width="22" height="22"/><rect x="620" y="240" width="22" height="22"/><rect x="660" y="240" width="22" height="22"/>
+      <rect x="580" y="280" width="22" height="22"/><rect x="620" y="280" width="22" height="22"/><rect x="660" y="280" width="22" height="22"/>
+      <rect x="580" y="320" width="22" height="22"/><rect x="620" y="320" width="22" height="22"/><rect x="660" y="320" width="22" height="22"/>
+      <rect x="580" y="360" width="22" height="22"/><rect x="620" y="360" width="22" height="22"/><rect x="660" y="360" width="22" height="22"/>
+      <rect x="580" y="400" width="22" height="22"/><rect x="620" y="400" width="22" height="22"/><rect x="660" y="400" width="22" height="22"/>
+      <rect x="580" y="440" width="22" height="22"/><rect x="620" y="440" width="22" height="22"/><rect x="660" y="440" width="22" height="22"/>
+      <rect x="580" y="480" width="22" height="22"/><rect x="620" y="480" width="22" height="22"/><rect x="660" y="480" width="22" height="22"/>
+    </g>
+  </g>
+  <text x="400" y="555" font-family="Raleway, system-ui, sans-serif" font-size="14" font-weight="700" fill="#f2d22e" text-anchor="middle" letter-spacing="6" opacity="0.7">LANÇAMENTO MOREJÁ</text>
+</svg>

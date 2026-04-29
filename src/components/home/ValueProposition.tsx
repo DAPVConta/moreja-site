@@ -213,7 +213,7 @@ export function ValueProposition({
           <Reveal className="lg:sticky lg:top-24 lg:self-start">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
               <Image
-                src="https://placehold.co/800x600/010744/f2d22e?text=Morejá+Imobiliária"
+                src="/fallbacks/value-prop.svg"
                 alt="Equipe Morejá Imobiliária em atendimento"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

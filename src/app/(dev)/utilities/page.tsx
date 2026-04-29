@@ -58,13 +58,13 @@ const SLIDES = [
 
 // ─── Mock properties for Phase 2 demo ────────────────────────────────────────
 
-// Using Supabase bucket thumbnails already in production (safe hostnames).
-// Fallback: placehold.co is whitelisted in next.config remotePatterns.
+// SVGs locais em /public/fallbacks/ — sem dependência externa, garante
+// que o smoke test funcione offline ou em ambiente sem acesso a CDN.
 const MOCK_PHOTOS = [
-  'https://placehold.co/600x400/010744/f2d22e?text=Foto+1',
-  'https://placehold.co/600x400/f2d22e/010744?text=Foto+2',
-  'https://placehold.co/600x400/ededd1/010744?text=Foto+3',
-  'https://placehold.co/600x400/9fa2d5/ffffff?text=Foto+4',
+  '/fallbacks/imovel-1.svg',
+  '/fallbacks/imovel-2.svg',
+  '/fallbacks/imovel-3.svg',
+  '/fallbacks/lancamento.svg',
 ]
 
 function makeMockProperty(overrides: Partial<Property> & { id: string; titulo: string }): Property {

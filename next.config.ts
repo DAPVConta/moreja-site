@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
     viewTransition: true,
   },
   images: {
+    // SVGs locais em /public/fallbacks/ são gerados por nós (sem JS hostil).
+    // contentSecurityPolicy força sandbox no <img> servido pelo otimizador,
+    // protegendo contra qualquer SVG remoto que venha a ser configurado.
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
