@@ -58,6 +58,7 @@ export async function fetchProperties(filters: PropertyFilters = {}): Promise<Pr
       quartos: filters.quartos,
       q: filters.q,
       order: filters.order,
+      destaque: filters.destaque ? '1' : undefined,
       page: filters.page ?? 1,
       limit: filters.limit ?? 12,
     }) as PropertyListResponse
@@ -114,6 +115,11 @@ export async function fetchEmpreendimento(id: string): Promise<Property | null> 
 
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   const result = await fetchProperties({ destaque: true, limit: 6 })
+  return result.data
+}
+
+export async function fetchFeaturedEmpreendimentos(): Promise<Property[]> {
+  const result = await fetchEmpreendimentos({ destaque: true, limit: 6 })
   return result.data
 }
 

@@ -52,42 +52,6 @@ export interface LaunchesPreviewProps {
   launches?: Launch[]
 }
 
-// ─── Default data ─────────────────────────────────────────────────────────────
-
-const defaultLaunches: Launch[] = [
-  {
-    id: '1',
-    name: 'Residencial Aurora Vista',
-    developer: 'Morejá Empreendimentos',
-    location: 'Boa Viagem, Recife — PE',
-    status: 'Lançamento',
-    delivery: 'Entrega 2027',
-    priceFrom: 'A partir de R$ 580 mil',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '2',
-    name: 'Edifício Horizonte',
-    developer: 'Morejá Empreendimentos',
-    location: 'Graças, Recife — PE',
-    status: 'Em obras',
-    delivery: 'Entrega 2026',
-    priceFrom: 'A partir de R$ 920 mil',
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80',
-    progress: 68,
-  },
-  {
-    id: '3',
-    name: 'Park Residence Club',
-    developer: 'Morejá Empreendimentos',
-    location: 'Casa Forte, Recife — PE',
-    status: 'Pré-lançamento',
-    delivery: 'Previsão 2028',
-    priceFrom: 'Sob consulta',
-    image: 'https://images.unsplash.com/photo-1460472178825-e5240623afd5?auto=format&fit=crop&w=800&q=80',
-  },
-]
-
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
@@ -271,8 +235,10 @@ export function LaunchesPreview({
   title = 'Lançamentos exclusivos',
   subtitle = 'Empreendimentos com condições especiais direto da construtora',
   hrefAll = '/empreendimentos',
-  launches = defaultLaunches,
+  launches = [],
 }: LaunchesPreviewProps) {
+  if (launches.length === 0) return null
+
   return (
     <section className="section relative overflow-hidden bg-[#010744] text-white">
       {/* Decorative dotted pattern */}
