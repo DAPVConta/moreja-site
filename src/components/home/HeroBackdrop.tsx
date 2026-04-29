@@ -26,11 +26,11 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Default 40% navy uniform overlay. Imagem segue a 100% (sem dimming
-  // próprio), o overlay sozinho dá o contraste necessário para o título
-  // branco e os links do header transparente. Configurável via
-  // home_sections.config.hero_search.overlay_opacity (slider no admin).
-  overlayOpacity = 0.4,
+  // Default 70% navy uniform overlay (camada navy a 70% de opacidade,
+  // 30% de transparência). Imagem segue em 100% mas é fortemente coberta
+  // pelo navy, deixando o título e busca dominantes. Pedido explícito
+  // do cliente: "imagem fixa azul cor do sistema com transparência 70%".
+  overlayOpacity = 0.7,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (
@@ -82,13 +82,11 @@ export function HeroBackdrop({
         />
       </div>
 
-      {/* Overlay UNIFORME — 40% navy (config via overlayOpacity prop, default
-          0.4). Antes era um gradient 135deg de 0.6 → 0.35, mas o cliente pediu
-          "overlay de 40%" que se interpreta como uma camada navy uniforme em
-          40%, não um gradient variável.
-          Defensive fallback: se o banco vier com valor inválido/0/undefined,
-          usa 0.4. Antes admin podia inadvertidamente zerar o overlay e deixar
-          o texto branco ilegível sobre foto clara. */}
+      {/* Overlay UNIFORME — 70% navy (cor do sistema #010744, alpha 0.7).
+          Camada fixa navy em 70% de opacidade (= 30% de transparência) sobre
+          a imagem. Pedido explícito do cliente para garantir visibilidade do
+          overlay e domínio do texto branco/amarelo sobre a foto.
+          Defensive fallback: valor inválido/<=0 do banco vira 0.7. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -96,7 +94,7 @@ export function HeroBackdrop({
           backgroundColor: `rgba(1, 7, 68, ${
             typeof overlayOpacity === 'number' && overlayOpacity > 0
               ? overlayOpacity
-              : 0.4
+              : 0.7
           })`,
         }}
       />

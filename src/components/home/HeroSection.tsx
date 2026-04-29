@@ -17,10 +17,10 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.6 — necessário
-   *  para garantir legibilidade do título branco e dos links de nav (header
-   *  transparente sobre o hero). A imagem em si já é renderizada a 35%
-   *  de opacity pelo HeroBackdrop. */
+  /** Opacidade do overlay navy (cor do sistema #010744) sobre a imagem.
+   *  Default 0.7 — camada navy a 70% de opacidade (30% de transparência),
+   *  pedido do cliente para garantir contraste do título branco e dos
+   *  links do header transparente independente da foto escolhida. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
@@ -45,10 +45,10 @@ export function HeroSection({
   bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Default 0.4 — pedido do cliente (era 0.6). Combinado com a imagem
-  // já a 35% de opacity, dá um equilíbrio onde o empreendimento aparece
-  // mas o texto branco mantém legibilidade.
-  overlayOpacity = 0.4,
+  // Default 0.7 — camada navy fixa em 70% de opacidade (30% de
+  // transparência). Pedido do cliente para garantir overlay sempre
+  // visível e texto branco/amarelo dominante.
+  overlayOpacity = 0.7,
   suggestions,
 }: HeroSectionProps = {}) {
   return (
