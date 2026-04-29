@@ -17,21 +17,26 @@ interface HeroSectionProps {
   bgFocalX?: number
   /** Focal Y (0–100, % from top). Default 50 */
   bgFocalY?: number
-  /** Darkness of the overlay over the image (0–1). Default 0.6 — necessário
-   *  para garantir legibilidade do título branco e dos links de nav (header
-   *  transparente sobre o hero). A imagem em si já é renderizada a 35%
-   *  de opacity pelo HeroBackdrop. */
+  /** Opacidade do overlay navy (cor do sistema #010744) sobre a imagem.
+   *  Default 0.7 — camada navy a 70% de opacidade (30% de transparência),
+   *  pedido do cliente para garantir contraste do título branco e dos
+   *  links do header transparente independente da foto escolhida. */
   overlayOpacity?: number
   /** Optional prop for future API-driven suggestions passthrough to HeroSearch */
   suggestions?: Parameters<typeof HeroSearch>[0]['suggestions']
 }
 
 // Imagem default do hero — quando home_sections.config.hero_search.bg_image
-// está vazio. Foto de prédio em tom navy/dramático (sem céu claro) que
-// combina com o overlay forte sem competir com o texto branco.
-// Renderizada a 35% de opacity pelo HeroBackdrop.
+// está vazio. Foto cadastrada no bucket Supabase do projeto: família
+// feliz entrando em casa nova com mala e cachorro. Tom emotivo +
+// aspirational, exatamente o sentimento de "imóvel dos sonhos".
+// O admin pode trocar via:
+//   /admin/layout-home → seção hero_search → campo bg_image (URL/upload)
+//   /admin/layout-home → seção hero_search → campo overlay_opacity (0–1)
+// Renderizada a 35% de opacity pelo HeroBackdrop, com overlay navy 40%
+// por cima — equilibra visibilidade da foto com legibilidade do título.
 const DEFAULT_HERO_BG =
-  'https://images.unsplash.com/photo-1518883529677-4dcae62cf45e?auto=format&fit=crop&w=1920&q=80'
+  'https://yxlepgmlhcnqhwshymup.supabase.co/storage/v1/object/public/site/home/hero/medium-shot-couple-buying-new-home_1776376279500.webp'
 
 export function HeroSection({
   title = 'Encontre o imóvel',
@@ -40,7 +45,10 @@ export function HeroSection({
   bgImage = DEFAULT_HERO_BG,
   bgFocalX = 50,
   bgFocalY = 50,
-  overlayOpacity = 0.6,
+  // Default 0.7 — camada navy fixa em 70% de opacidade (30% de
+  // transparência). Pedido do cliente para garantir overlay sempre
+  // visível e texto branco/amarelo dominante.
+  overlayOpacity = 0.7,
   suggestions,
 }: HeroSectionProps = {}) {
   return (

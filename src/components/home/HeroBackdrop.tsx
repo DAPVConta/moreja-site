@@ -26,11 +26,11 @@ export function HeroBackdrop({
   bgImage,
   bgFocalX = 50,
   bgFocalY = 50,
-  // Overlay forte (0.6) garante contraste do título branco e dos links do
-  // header transparente independente da imagem escolhida. A imagem por baixo
-  // já está a 35% de opacity (esmaecida), e o overlay adiciona a camada
-  // navy que dá legibilidade ao texto.
-  overlayOpacity = 0.6,
+  // Default 70% navy uniform overlay (camada navy a 70% de opacidade,
+  // 30% de transparência). Imagem segue em 100% mas é fortemente coberta
+  // pelo navy, deixando o título e busca dominantes. Pedido explícito
+  // do cliente: "imagem fixa azul cor do sistema com transparência 70%".
+  overlayOpacity = 0.7,
 }: HeroBackdropProps) {
   if (!bgImage) {
     return (
@@ -44,17 +44,16 @@ export function HeroBackdrop({
   return (
     <>
       {/*
-        Wrapper overflow-hidden garante que os 12vh extras de imagem não
-        extravasam para fora do hero. A CSS custom property --parallax-range
-        é usada inline para evitar strings de animation complexas no TSX.
+        Wrapper full-cover (inset-0) garantindo que a imagem cobre 100% da
+        seção, sem tira de bg navy aparecendo nas bordas. Antes usava
+        `inset-x-0 top-0 bottom-0` + `paddingBottom: 12vh` que criava
+        layout-shift na borda direita em alguns viewports.
+        O parallax shift de 12vh agora vive em scale via transform-origin
+        bottom — mais robusto.
       */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 bottom-0 overflow-hidden"
-        style={{
-          // Extra height so the -12vh shift never reveals a gap at the bottom
-          paddingBottom: '12vh',
-        }}
+        className="absolute inset-0 overflow-hidden"
       >
         <Image
           src={bgImage}
@@ -63,23 +62,19 @@ export function HeroBackdrop({
           priority
           fetchPriority="high"
           sizes="100vw"
-          className="object-cover"
+          className="object-cover w-full h-full"
           style={{
             objectPosition: `${bgFocalX}% ${bgFocalY}%`,
-            // Imagem esmaecida em 35% — sai de 100% de presença (que competia
-            // com o título e a busca) para apenas 35%, deixando o gradient
-            // navy de fundo dominar e o conteúdo ler com clareza.
-            opacity: 0.35,
-            // CSS scroll-driven parallax — supported in Chrome 115+, Safari 18+.
-            // @supports guard: browsers that don't support animation-timeline
-            // simply ignore these properties and render a static image.
+            // Imagem em 100% de opacity — antes ia a 35% (dimming primário)
+            // mas combinado com overlay forte ficava escuro demais, escondendo
+            // a foto. Agora a imagem aparece em sua intensidade natural; o
+            // dimming de legibilidade vem 100% do overlay (40% por padrão).
+            transform: 'scale(1.05)',
+            transformOrigin: 'center center',
             animationName: 'hero-parallax',
-            animationDuration: '1s',               // irrelevant with scroll-driven; sets scale
+            animationDuration: '1s',
             animationTimingFunction: 'linear',
             animationFillMode: 'both',
-            // animationTimeline and animationRange are CSS scroll-driven API
-            // (Chrome 115+, Safari 18+). TypeScript may or may not know these
-            // depending on lib version — cast to avoid version-skew errors.
             animationTimeline: 'scroll(root)' as string,
             animationRange: '0 50vh' as string,
             willChange: 'transform',
@@ -87,15 +82,20 @@ export function HeroBackdrop({
         />
       </div>
 
-      {/* Gradient overlay — tints and darkens for text legibility */}
+      {/* Overlay UNIFORME — 70% navy (cor do sistema #010744, alpha 0.7).
+          Camada fixa navy em 70% de opacidade (= 30% de transparência) sobre
+          a imagem. Pedido explícito do cliente para garantir visibilidade do
+          overlay e domínio do texto branco/amarelo sobre a foto.
+          Defensive fallback: valor inválido/<=0 do banco vira 0.7. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(135deg,
-            rgba(1,7,68,${overlayOpacity + 0.2}) 0%,
-            rgba(1,7,68,${overlayOpacity}) 60%,
-            rgba(26,31,110,${overlayOpacity - 0.05}) 100%)`,
+          backgroundColor: `rgba(1, 7, 68, ${
+            typeof overlayOpacity === 'number' && overlayOpacity > 0
+              ? overlayOpacity
+              : 0.7
+          })`,
         }}
       />
     </>
