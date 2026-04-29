@@ -203,7 +203,10 @@ export function PropertyCard({
   aspect = 'card',
   premiumThreshold = 1_000_000,
 }: PropertyCardProps) {
-  const photos = (property.fotos.length > 0 ? property.fotos : [PLACEHOLDER]).slice(0, 5)
+  const photos = (Array.isArray(property.fotos) && property.fotos.length > 0
+    ? property.fotos
+    : [PLACEHOLDER]
+  ).slice(0, 5)
   const [photoIdx, setPhotoIdx] = useState(0)
   const [imgErr, setImgErr] = useState<Record<number, boolean>>({})
   const hasMultiple = photos.length > 1

@@ -59,7 +59,9 @@ function formatPriceFrom(preco: number): string {
   return `A partir de R$ ${mil} mil`
 }
 
-function empreendimentoToLaunch(p: Property): Launch {
+function empreendimentoToLaunch(p: Property): Launch | null {
+  const image = Array.isArray(p?.fotos) ? p.fotos[0] : undefined
+  if (!image || !p.id || !p.titulo) return null
   const location = [p.bairro, p.cidade, p.estado].filter(Boolean).join(', ')
   return {
     id: p.id,
@@ -69,7 +71,7 @@ function empreendimentoToLaunch(p: Property): Launch {
     status: inferLaunchStatus(p),
     delivery: formatDelivery(p),
     priceFrom: formatPriceFrom(p.preco),
-    image: p.fotos[0] ?? '',
+    image,
     href: `/empreendimentos/${p.id}`,
   }
 }
@@ -95,9 +97,16 @@ export default async function HomePage() {
     getRecentPosts(3),
   ])
 
-  const supremoLaunches: Launch[] = featuredEmpreendimentos
-    .filter((p) => p.fotos[0])
-    .map(empreendimentoToLaunch)
+  const supremoLaunches: Launch[] = (() => {
+    try {
+      return featuredEmpreendimentos
+        .map(empreendimentoToLaunch)
+        .filter((l): l is Launch => l !== null)
+    } catch (err) {
+      console.error('[HomePage] erro montando supremoLaunches:', err)
+      return []
+    }
+  })()
 
   // Helper: extrai config jsonb de cada seção (caso cadastrada no admin)
   const cfg = (type: string) =>
