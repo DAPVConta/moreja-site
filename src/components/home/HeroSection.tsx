@@ -44,8 +44,16 @@ export function HeroSection({
   suggestions,
 }: HeroSectionProps = {}) {
   return (
+    // mt-[-5rem] (mobile) / mt-[-5rem] sm: / mt-[-9rem] lg: puxam o hero
+    // para baixo do header sticky (que ocupa h-16 mobile / h-20 desktop +
+    // h-9 top-bar lg). pt-* compensa para manter o conteúdo centralizado
+    // visualmente. Resultado: header transparente fica SOBRE o hero navy
+    // (logo/menu brancos sobre fundo escuro = legíveis), em vez de ficar
+    // numa faixa branca acima.
     <section
       className="relative bg-[#010744] text-white overflow-hidden
+                 -mt-16 sm:-mt-20 lg:-mt-[7.25rem]
+                 pt-16 sm:pt-20 lg:pt-[7.25rem]
                  min-h-[560px] sm:min-h-[640px] lg:min-h-[720px] flex items-center"
     >
       {/* ── Background image / gradient ───────────────────────────────── */}
