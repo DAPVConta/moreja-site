@@ -387,10 +387,12 @@ export function PropertyCard({
           )}
         </div>
 
-        {/* Content — padding reduzido para liberar espaço horizontal pro
-            preço e título não estourarem em cards estreitos. */}
-        <div className="p-4 sm:p-5">
-          {/* Eyebrow editorial: bairro · cidade */}
+        {/* Content — eyebrow + título + preço (DENTRO do Link, navegação
+            disparada por click em qualquer parte). px-4 sm:px-5 + pt-4
+            sm:pt-5 + pb-3 (sem padding-bottom forte para colar com o
+            footer de stats). */}
+        <div className="px-4 pt-4 pb-3 sm:px-5 sm:pt-5">
+          {/* Eyebrow: bairro · cidade */}
           <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#010744]/65">
             <span className="truncate block">
               {property.bairro}
@@ -400,21 +402,23 @@ export function PropertyCard({
             </span>
           </div>
 
-          {/* Título — text-sm (14px) com leading-tight (1.25 ≈ 17.5px).
-              min-h-[2.25rem] = 36px ≈ 2 × 17.5px (folga de 1px).
-              text-balance evita órfã/viúva. */}
+          {/* Título — line-clamp-2 com `min-h` calculado em REM batendo
+              EXATAMENTE 2 × line-height. text-sm (0.875rem) × 1.4 leading
+              = 1.225rem por linha; 2 linhas = 2.45rem. Usar `leading-[1.4]`
+              explícito (não `leading-tight` que é 1.25 e dá margem de erro).
+              `overflow-hidden` impede que descender da 3ª linha vaze. */}
           <h3
-            className="mb-2 line-clamp-2 min-h-[2.25rem] text-sm font-semibold leading-tight text-[#010744]
+            className="mb-2.5 overflow-hidden line-clamp-2 text-sm font-semibold text-[#010744]
                        text-balance
                        transition-colors group-hover:underline group-hover:underline-offset-[5px]
                        group-hover:decoration-[#010744] group-hover:decoration-2"
+            style={{ lineHeight: 1.4, minHeight: '2.45rem' }}
           >
             {property.titulo}
           </h3>
 
-          {/* Price + microtag de qualidade. text-lg mobile / text-xl desktop —
-              ainda dominante na hierarquia mas sem estourar o card. */}
-          <div className="mb-3 flex items-baseline gap-1.5 flex-wrap">
+          {/* Price + microtag inline (Premium/Destaque) */}
+          <div className="flex items-baseline gap-1.5 flex-wrap">
             <p className="text-lg sm:text-xl font-bold tracking-tight tabular-nums text-[#010744]">
               {formatPrice(property.preco)}
               {property.finalidade === 'Locação' && (
@@ -443,44 +447,41 @@ export function PropertyCard({
               </span>
             )}
           </div>
-
-          {/* Features — pr-14 reserva 56px (44px do botão Compare + folga)
-              para o CompareIconButton absolute (bottom-3 right-3) NÃO
-              cobrir o número da área em cards estreitos. */}
-          <div className="flex items-center gap-2.5 border-t border-gray-100 pt-2.5 pr-14 text-[13px] text-gray-600">
-            {property.quartos > 0 && (
-              <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Bed size={14} className="text-[#010744]" aria-label="Quartos" />
-                {property.quartos}
-              </span>
-            )}
-            {property.banheiros > 0 && (
-              <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Bath size={14} className="text-[#010744]" aria-label="Banheiros" />
-                {property.banheiros}
-              </span>
-            )}
-            {property.vagas != null && property.vagas > 0 && (
-              <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Car size={14} className="text-[#010744]" aria-label="Vagas" />
-                {property.vagas}
-              </span>
-            )}
-            {property.area_total > 0 && (
-              <span className="ml-auto flex items-center gap-1 whitespace-nowrap tabular-nums">
-                <Maximize2 size={13} className="text-[#010744]" aria-label="Área" />
-                {formatArea(property.area_total)}
-              </span>
-            )}
-          </div>
         </div>
       </Link>
 
-      {/* Compare — fora do <Link> (HTML5 não permite <button> dentro de <a>),
-          posicionado absolute. pr-10 da stats row reserva o espaço para
-          ele NÃO cobrir o número da área. */}
-      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10">
-        <CompareIconButton property={property} />
+      {/* Footer com stats + Compare button — FORA do <Link> (válido HTML5,
+          button não pode aninhar dentro de a). Stats à esquerda, Compare
+          à direita via ml-auto. Como vivem na mesma flex row, sem
+          posicionamento absoluto, NÃO sobrepõem. */}
+      <div className="flex items-center gap-2.5 border-t border-gray-100 px-4 py-2.5 sm:px-5 text-[13px] text-gray-600">
+        {property.quartos > 0 && (
+          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+            <Bed size={14} className="text-[#010744]" aria-label="Quartos" />
+            {property.quartos}
+          </span>
+        )}
+        {property.banheiros > 0 && (
+          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+            <Bath size={14} className="text-[#010744]" aria-label="Banheiros" />
+            {property.banheiros}
+          </span>
+        )}
+        {property.vagas != null && property.vagas > 0 && (
+          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+            <Car size={14} className="text-[#010744]" aria-label="Vagas" />
+            {property.vagas}
+          </span>
+        )}
+        {property.area_total > 0 && (
+          <span className="flex items-center gap-1 whitespace-nowrap tabular-nums">
+            <Maximize2 size={13} className="text-[#010744]" aria-label="Área" />
+            {formatArea(property.area_total)}
+          </span>
+        )}
+        <span className="ml-auto -my-1.5">
+          <CompareIconButton property={property} />
+        </span>
       </div>
     </article>
   )
