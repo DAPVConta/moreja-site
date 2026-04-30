@@ -40,9 +40,11 @@ export function middleware(request: NextRequest) {
     // O style inline do brandCss em layout.tsx ainda funciona via unsafe-inline.
     // Trade-off aceito: scripts (vetor crítico de XSS) seguem com nonce
     // strict-dynamic; estilos relaxados.
-    `style-src 'self' 'unsafe-inline'`,
-    // images: self + Supremo CDN + Supabase storage + brand img CDNs
-    `img-src 'self' data: blob: https://*.supremocrm.com.br https://*.sistemasupremo.com.br https://yxlepgmlhcnqhwshymup.supabase.co https://*.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com`,
+    // unpkg.com: necessário p/ Leaflet CSS carregado pela seção `locations_map`.
+    `style-src 'self' 'unsafe-inline' https://unpkg.com`,
+    // images: self + Supremo CDN + Supabase storage + brand img CDNs.
+    // *.tile.openstreetmap.org + unpkg.com p/ tiles + sprites do Leaflet.
+    `img-src 'self' data: blob: https://*.supremocrm.com.br https://*.sistemasupremo.com.br https://yxlepgmlhcnqhwshymup.supabase.co https://*.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://*.tile.openstreetmap.org https://unpkg.com`,
     // fonts: Google Fonts + self (next/font baixa para self)
     `font-src 'self' https://fonts.gstatic.com data:`,
     // network: Supremo + Supabase + analytics + Meta CAPI

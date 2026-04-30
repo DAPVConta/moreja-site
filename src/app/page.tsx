@@ -30,6 +30,7 @@ import { TeamSection } from '@/components/home/TeamSection'
 import { PropertyValuationCTA } from '@/components/home/PropertyValuationCTA'
 import { BlogPreview } from '@/components/home/BlogPreview'
 import { CoverageMap } from '@/components/home/CoverageMap'
+import { LocationsMap } from '@/components/home/LocationsMap'
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
 import { FaqAccordion } from '@/components/home/FaqAccordion'
 import { CtaAnunciar } from '@/components/home/CtaAnunciar'
@@ -289,6 +290,21 @@ export default async function HomePage() {
           cityLabel={c.city_label}
           ctaHref={c.cta_href}
           regions={c.regions ?? []}
+        />
+      )
+    },
+    locations_map: () => {
+      const c = cfg('locations_map') as {
+        title?: string; subtitle?: string; city_label?: string; cta_href?: string
+        max_points_each_side?: number
+      }
+      return (
+        <LocationsMap
+          title={c.title}
+          subtitle={c.subtitle}
+          cityLabel={c.city_label}
+          ctaHref={c.cta_href}
+          maxPointsEachSide={c.max_points_each_side}
         />
       )
     },
