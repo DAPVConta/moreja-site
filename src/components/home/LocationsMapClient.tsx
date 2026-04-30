@@ -35,13 +35,68 @@ const LEAFLET_VERSION = '1.9.4'
 const LEAFLET_JS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.js`
 const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.css`
 
+// Tipos mínimos do Leaflet que usamos. Carregamos a lib via CDN (sem
+// `npm i leaflet`), por isso não importamos `@types/leaflet` — a tipagem
+// abaixo cobre só a API que tocamos. Se um dia adicionarmos como dep,
+// trocamos por `typeof import('leaflet')`.
+interface LeafletLatLng {
+  lat: number
+  lng: number
+}
+interface LeafletLatLngBounds {
+  contains(latlng: [number, number] | LeafletLatLng): boolean
+}
+interface LeafletMap {
+  remove(): void
+}
+interface LeafletDivIcon {
+  options: { html?: string }
+}
+interface LeafletMarker {
+  addTo(map: LeafletMap): LeafletMarker
+  bindPopup(html: string, options?: { maxWidth?: number }): LeafletMarker
+}
+interface LeafletTileLayer {
+  addTo(map: LeafletMap): LeafletTileLayer
+}
+interface LeafletStatic {
+  map(
+    el: HTMLElement,
+    opts: {
+      center: [number, number]
+      zoom: number
+      minZoom?: number
+      maxZoom?: number
+      maxBounds?: LeafletLatLngBounds
+      maxBoundsViscosity?: number
+      scrollWheelZoom?: boolean
+      zoomControl?: boolean
+      attributionControl?: boolean
+    },
+  ): LeafletMap
+  tileLayer(
+    url: string,
+    opts: { attribution?: string; maxZoom?: number; minZoom?: number },
+  ): LeafletTileLayer
+  marker(latlng: [number, number], opts: { icon: LeafletDivIcon }): LeafletMarker
+  divIcon(opts: {
+    className?: string
+    html?: string
+    iconSize?: [number, number]
+    iconAnchor?: [number, number]
+    popupAnchor?: [number, number]
+  }): LeafletDivIcon
+  latLng(lat: number, lng: number): LeafletLatLng
+  latLngBounds(sw: LeafletLatLng, ne: LeafletLatLng): LeafletLatLngBounds
+}
+
 declare global {
   interface Window {
-    L?: typeof import('leaflet')
+    L?: LeafletStatic
   }
 }
 
-function ensureLeafletLoaded(): Promise<typeof import('leaflet')> {
+function ensureLeafletLoaded(): Promise<LeafletStatic> {
   return new Promise((resolve, reject) => {
     if (typeof window === 'undefined') {
       reject(new Error('window unavailable'))
@@ -159,13 +214,13 @@ export function LocationsMapClient({
   maxZoom,
 }: LocationsMapClientProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<import('leaflet').Map | null>(null)
+  const mapRef = useRef<LeafletMap | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'imovel' | 'empreendimento'>('all')
 
   useEffect(() => {
     let cancelled = false
-    let map: import('leaflet').Map | null = null
+    let map: LeafletMap | null = null
 
     ensureLeafletLoaded()
       .then((L) => {
