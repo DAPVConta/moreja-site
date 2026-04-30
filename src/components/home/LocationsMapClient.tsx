@@ -331,6 +331,29 @@ export function LocationsMapClient({
         role="application"
       />
 
+      {/* Legenda no canto inferior direito — usa os mesmos SVGs dos pins
+           reais do mapa, p/ não haver ambiguidade entre o que o usuário vê
+           plotado e o que o card descreve. */}
+      <div
+        className="absolute bottom-4 right-4 z-[400] rounded-lg bg-white/95 backdrop-blur-sm
+                   shadow-md border border-[#010744]/10 px-3 py-2.5"
+        aria-label="Legenda do mapa"
+      >
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#010744]/70 mb-1.5">
+          Legenda
+        </p>
+        <ul className="flex flex-col gap-1.5">
+          <li className="flex items-center gap-2 text-xs text-[#010744]">
+            <LegendPin kind="imovel" />
+            <span className="font-semibold">Imóvel</span>
+          </li>
+          <li className="flex items-center gap-2 text-xs text-[#010744]">
+            <LegendPin kind="empreendimento" />
+            <span className="font-semibold">Empreendimento</span>
+          </li>
+        </ul>
+      </div>
+
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#f3f3eb]/90 text-center p-6 rounded-2xl">
           <div>
@@ -348,6 +371,62 @@ export function LocationsMapClient({
         </div>
       )}
     </div>
+  )
+}
+
+function LegendPin({ kind }: { kind: MapPoint['kind'] }) {
+  // Espelha as cores/ícones de buildPinHtml — mantemos a fonte da verdade
+  // ali (Leaflet renderiza o SVG por innerHTML) e replicamos aqui em React
+  // só para a legenda. Se mudar um, mude o outro.
+  const isEmp = kind === 'empreendimento'
+  const fill = isEmp ? '#010744' : '#f2d22e'
+  const stroke = isEmp ? '#f2d22e' : '#010744'
+  const iconColor = isEmp ? '#f2d22e' : '#010744'
+
+  return (
+    <svg
+      width="20"
+      height="26"
+      viewBox="0 0 36 46"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className="shrink-0 drop-shadow-sm"
+    >
+      <path
+        d="M18 0C8.1 0 0 8 0 17.8c0 13.2 16.2 27 16.9 27.6a1.7 1.7 0 0 0 2.2 0C19.8 44.8 36 31 36 17.8 36 8 27.9 0 18 0Z"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={2}
+      />
+      <circle cx="18" cy="17.5" r="9.5" fill={stroke} />
+      <g
+        transform="translate(10 9.5) scale(0.67)"
+        fill="none"
+        stroke={iconColor}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {isEmp ? (
+          // Building2 (lucide)
+          <>
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+            <path d="M6 12H4a2 2 0 0 0-2 2v8h4" />
+            <path d="M18 9h2a2 2 0 0 1 2 2v11h-4" />
+            <path d="M10 6h4" />
+            <path d="M10 10h4" />
+            <path d="M10 14h4" />
+            <path d="M10 18h4" />
+          </>
+        ) : (
+          // Home (lucide)
+          <>
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </>
+        )}
+      </g>
+    </svg>
   )
 }
 
