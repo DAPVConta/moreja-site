@@ -46,6 +46,10 @@ const MIGRATIONS = [
   '022_blog_posts.sql',
   '023_rate_limit_buckets.sql',
   '024_turnstile_keys.sql',
+  '025_home_sections_complete.sql',
+  '026_home_sections_locations_map.sql',
+  '027_drop_coverage_map_section.sql',
+  '028_home_layout_versions.sql',
 ]
 
 const client = new Client({
