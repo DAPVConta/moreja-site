@@ -4,13 +4,6 @@ const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
   },
-  // isomorphic-dompurify carrega jsdom em server runtime; jsdom é gigante
-  // e tem deps nativas (canvas) que o Turbopack tenta empacotar, falhando
-  // em runtime no Vercel ("Error: Failed to load external module …").
-  // Mantemos como CommonJS externo p/ que o Vercel resolva em node_modules.
-  // Sintoma sem essa config: /imovel/[id] e /empreendimentos/[id] retornam
-  // 500 com a mensagem acima — afeta qualquer rota que use sanitizeHtml.
-  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
   images: {
     // SVGs locais em /public/fallbacks/ são gerados por nós (sem JS hostil).
     // contentSecurityPolicy força sandbox no <img> servido pelo otimizador,
