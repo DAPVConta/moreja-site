@@ -77,12 +77,31 @@ export interface HomeSection {
   config: Record<string, unknown>
 }
 
-// Visitantes anônimos: RLS `public_read_active_home_sections` (migration 006)
-// já filtra `active = true` no banco, então a query só retorna seções ativas.
-// Não precisamos repetir o filtro aqui nem no consumer.
+// Migration 028: lê o snapshot da versão mais recente em `home_layout_versions`,
+// nunca direto de `home_sections`. Garante que edições em andamento no admin
+// não vazem para o site antes de salvar. Filtramos `active=true` no app (em
+// vez de RLS), porque a versão é um jsonb opaco.
+//
+// Fallback para `home_sections` se ainda não existir nenhuma versão (ex.: env
+// onde a migration 028 não rodou ainda). Mantém compatibilidade.
 export const getHomeSections = cache(async (): Promise<HomeSection[]> => {
   try {
     const supabase = await createSupabaseServerClient()
+
+    const { data: versionRow } = await supabase
+      .from('home_layout_versions')
+      .select('sections')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (versionRow?.sections && Array.isArray(versionRow.sections)) {
+      const sections = versionRow.sections as HomeSection[]
+      return sections
+        .filter((s) => s.active)
+        .sort((a, b) => a.position - b.position)
+    }
+
     const { data } = await supabase
       .from('home_sections')
       .select('*')

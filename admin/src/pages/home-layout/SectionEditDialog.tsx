@@ -56,6 +56,12 @@ export function SectionEditDialog({ section, open, onClose }: SectionEditDialogP
         .update({ config })
         .eq('id', section.id)
       if (error) throw error
+
+      // Migration 028: snapshot atômico do estado atual em home_layout_versions.
+      // É o que o site público lê — sem isso a mudança não vai pro ar.
+      const { error: bumpError } = await supabase.rpc('bump_home_layout_version')
+      if (bumpError) throw bumpError
+
       await revalidatePublicPaths(['/'])
     },
     onSuccess: () => {

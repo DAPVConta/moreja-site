@@ -660,6 +660,12 @@ export default function HomeLayoutPage() {
       const results = await Promise.all(updates)
       const failed = results.find((r) => r.error)
       if (failed?.error) throw failed.error
+
+      // Migration 028: snapshot atômico do estado atual em home_layout_versions.
+      // É o que o site público lê — sem isso a mudança não vai pro ar.
+      const { error: bumpError } = await supabase.rpc('bump_home_layout_version')
+      if (bumpError) throw bumpError
+
       await revalidatePublicPaths(['/'])
     },
     onSuccess: () => {
