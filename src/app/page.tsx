@@ -35,11 +35,15 @@ import { FaqAccordion } from '@/components/home/FaqAccordion'
 import { CtaAnunciar } from '@/components/home/CtaAnunciar'
 
 function inferLaunchStatus(p: Property): string {
-  const stage = (p.estagio_obra ?? '').toLowerCase()
+  // Supremo às vezes manda estagio_obra como número — coerce p/ string
+  // antes de qualquer .toLowerCase()/includes (vide build log #28:
+  // "(a.estagio_obra ?? '').toLowerCase is not a function").
+  const raw = typeof p.estagio_obra === 'string' ? p.estagio_obra : ''
+  const stage = raw.toLowerCase()
   if (stage.includes('pré') || stage.includes('pre')) return 'Pré-lançamento'
   if (stage.includes('obra')) return 'Em obras'
   if (stage.includes('lançamento') || stage.includes('lancamento')) return 'Lançamento'
-  return stage ? p.estagio_obra! : 'Lançamento'
+  return raw || 'Lançamento'
 }
 
 function formatDelivery(p: Property): string | undefined {

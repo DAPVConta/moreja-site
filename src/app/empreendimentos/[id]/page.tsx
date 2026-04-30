@@ -96,12 +96,15 @@ function deliveryLabel(publishedAt: string | undefined): string | null {
   return year
 }
 
-function inferStageStatus(stage: string | undefined): {
+function inferStageStatus(stage: unknown): {
   label: string
   bg: string
   fg: string
 } {
-  const s = (stage ?? '').toLowerCase()
+  // Supremo às vezes manda estagio_obra como número (ex: 2) em vez de
+  // string — coerce p/ não crashar no .toLowerCase().
+  const stageStr = typeof stage === 'string' ? stage : ''
+  const s = stageStr.toLowerCase()
   if (s.includes('pré') || s.includes('pre')) {
     return { label: 'Pré-lançamento', bg: '#f2d22e', fg: '#010744' }
   }
@@ -109,12 +112,12 @@ function inferStageStatus(stage: string | undefined): {
     return { label: 'Lançamento', bg: '#f2d22e', fg: '#010744' }
   }
   if (s.includes('obra') || s.includes('construção') || s.includes('construcao')) {
-    return { label: stage ?? 'Em obras', bg: '#010744', fg: '#f2d22e' }
+    return { label: stageStr || 'Em obras', bg: '#010744', fg: '#f2d22e' }
   }
   if (s.includes('pronto') || s.includes('entregue')) {
-    return { label: stage ?? 'Pronto pra morar', bg: '#16a34a', fg: '#fff' }
+    return { label: stageStr || 'Pronto pra morar', bg: '#16a34a', fg: '#fff' }
   }
-  return { label: stage || 'Lançamento', bg: '#f2d22e', fg: '#010744' }
+  return { label: stageStr || 'Lançamento', bg: '#f2d22e', fg: '#010744' }
 }
 
 export default async function EmpreendimentoPage({ params }: PageProps) {
