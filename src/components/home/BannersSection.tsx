@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pause, Play, ArrowRight } from 'lucide-react'
 import type { Banner } from '@/types/site'
 
 interface BannersSectionProps {
@@ -129,42 +129,65 @@ export function BannersSection({
                   />
                 )}
 
-                {/* Gradient overlay — content alinhado à esquerda quando há texto */}
+                {/*
+                 * Card compacto no canto inferior esquerdo. Antes era um <h2>
+                 * gigante "drop-shadow" sobre gradient preto cobrindo metade
+                 * da imagem — quando o banner já tem texto baked-in (caso
+                 * comum: arte do "Minha Casa Minha Vida"), os dois conflitavam
+                 * visualmente. Agora o overlay é só uma pílula contida com
+                 * título compacto + CTA, e admin pode deixar tudo vazio se
+                 * a imagem já comunica sozinha.
+                 */}
                 {(b.title || b.subtitle || b.cta_text) && (
-                  <div
-                    className="absolute inset-0 flex items-center
-                               bg-gradient-to-r from-black/70 via-black/40 to-transparent
-                               px-6 sm:px-10 lg:px-14"
-                  >
-                    <div className="text-white max-w-2xl lg:max-w-3xl">
-                      {b.title && (
-                        <h2
-                          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold
-                                     drop-shadow-lg mb-3 leading-tight tracking-tight"
-                        >
-                          {b.title}
-                        </h2>
-                      )}
-                      {b.subtitle && (
-                        <p className="text-sm sm:text-base md:text-lg text-gray-100 drop-shadow mb-6 max-w-xl">
-                          {b.subtitle}
-                        </p>
-                      )}
-                      {b.cta_text && b.cta_link && (
-                        <Link
-                          href={b.cta_link}
-                          className="inline-flex items-center gap-2 min-h-[48px] rounded-xl bg-[#f2d22e] px-6
-                                     font-bold text-[#010744] text-sm sm:text-base shadow-lg
-                                     transition-all hover:brightness-105 hover:shadow-xl active:scale-[0.98]
-                                     focus-visible:outline-none focus-visible:ring-2
-                                     focus-visible:ring-[#f2d22e] focus-visible:ring-offset-2
-                                     focus-visible:ring-offset-black"
-                        >
-                          {b.cta_text}
-                        </Link>
-                      )}
+                  <>
+                    {/* Sutil gradiente só na faixa inferior, p/ o card "respirar" */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2
+                                 bg-gradient-to-t from-black/45 to-transparent"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 lg:p-6">
+                      <div
+                        className="max-w-md sm:max-w-lg lg:max-w-xl flex items-stretch gap-3
+                                   rounded-xl bg-white/95 backdrop-blur-sm shadow-xl
+                                   p-3 sm:p-4"
+                      >
+                        {(b.title || b.subtitle) && (
+                          <div className="flex-1 min-w-0 self-center">
+                            {b.title && (
+                              <h3
+                                className="text-sm sm:text-base font-bold text-[#010744]
+                                           leading-snug line-clamp-2"
+                              >
+                                {b.title}
+                              </h3>
+                            )}
+                            {b.subtitle && (
+                              <p className="text-xs sm:text-[13px] text-gray-600 leading-snug
+                                            line-clamp-2 mt-0.5">
+                                {b.subtitle}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {b.cta_text && b.cta_link && (
+                          <Link
+                            href={b.cta_link}
+                            className="shrink-0 self-center inline-flex items-center gap-1.5
+                                       rounded-lg bg-[#f2d22e] px-3 sm:px-4 py-2 sm:py-2.5
+                                       font-bold text-[#010744] text-xs sm:text-sm shadow-md
+                                       transition-all hover:brightness-105 hover:shadow-lg
+                                       active:scale-[0.98]
+                                       focus-visible:outline-none focus-visible:ring-2
+                                       focus-visible:ring-[#010744] focus-visible:ring-offset-2"
+                          >
+                            {b.cta_text}
+                            <ArrowRight size={14} aria-hidden="true" />
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             )

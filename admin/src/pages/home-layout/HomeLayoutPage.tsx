@@ -57,7 +57,7 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
   launches_waitlist: 'Formulário de lista de espera para um lançamento específico.',
   team: 'Equipe / corretores em destaque com foto, nome e CTA para perfil.',
   valuation_cta: 'Chamada para avaliação gratuita de imóvel (com benefícios).',
-  coverage_map: 'Mapa/lista de regiões e bairros atendidos com contagem de imóveis.',
+  locations_map: 'Mapa interativo (Leaflet) travado no Recife com pins distintos para imóveis e empreendimentos.',
   recently_viewed: 'Carrossel dos últimos imóveis que o visitante visualizou (vazio se primeira visita).',
   blog_preview: 'Cards dos posts mais recentes do blog.',
   faq: 'Perguntas frequentes em accordion.',
@@ -452,24 +452,58 @@ function PreviewValuationCta() {
   )
 }
 
-function PreviewCoverageMap() {
+function PreviewLocationsMap() {
   return (
-    <div className="bg-[#fafbff] p-3">
-      <div className="h-1.5 w-28 bg-[#010744] rounded mx-auto mb-2" />
-      <div className="bg-gradient-to-br from-blue-100 to-green-50 rounded h-12 relative border border-gray-200">
-        <Map className="w-4 h-4 text-[#010744] absolute top-1 left-1" />
+    <div className="bg-white p-3">
+      <div className="flex items-center gap-1 mb-2">
+        <Map className="w-3 h-3 text-[#010744]" />
+        <div className="h-1.5 w-24 bg-[#010744] rounded" />
+      </div>
+      <div className="bg-gradient-to-br from-blue-50 via-emerald-50 to-amber-50 rounded h-16 relative border border-gray-200 overflow-hidden">
+        {/* Pseudo street grid */}
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              'linear-gradient(0deg, #cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)',
+            backgroundSize: '14px 10px',
+          }}
+        />
+        {/* Imóvel pins (amarelo) */}
         {[
-          { x: '20%', y: '40%' },
-          { x: '55%', y: '25%' },
-          { x: '70%', y: '60%' },
-          { x: '40%', y: '70%' },
+          { x: '18%', y: '30%' },
+          { x: '52%', y: '20%' },
+          { x: '38%', y: '70%' },
+          { x: '78%', y: '55%' },
         ].map((p, i) => (
           <div
-            key={i}
-            className="absolute w-1.5 h-1.5 bg-[#f2d22e] border border-[#010744] rounded-full"
-            style={{ left: p.x, top: p.y }}
+            key={`im-${i}`}
+            className="absolute w-2 h-2 rounded-full bg-[#f2d22e] border border-[#010744] shadow-sm"
+            style={{ left: p.x, top: p.y, transform: 'translate(-50%, -50%)' }}
           />
         ))}
+        {/* Empreendimento pins (navy) */}
+        {[
+          { x: '30%', y: '50%' },
+          { x: '65%', y: '40%' },
+          { x: '85%', y: '75%' },
+        ].map((p, i) => (
+          <div
+            key={`emp-${i}`}
+            className="absolute w-2 h-2 rounded-full bg-[#010744] border border-[#f2d22e] shadow-sm"
+            style={{ left: p.x, top: p.y, transform: 'translate(-50%, -50%)' }}
+          />
+        ))}
+      </div>
+      <div className="flex items-center gap-2 mt-1.5 text-[8px] text-gray-500">
+        <span className="inline-flex items-center gap-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#f2d22e] border border-[#010744]" />
+          Imóveis
+        </span>
+        <span className="inline-flex items-center gap-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#010744] border border-[#f2d22e]" />
+          Empreendimentos
+        </span>
       </div>
     </div>
   )
@@ -553,7 +587,7 @@ const PREVIEW_MAP: Record<string, () => React.ReactNode> = {
   launches_preview: () => <PreviewLaunches />,
   team: () => <PreviewTeam />,
   valuation_cta: () => <PreviewValuationCta />,
-  coverage_map: () => <PreviewCoverageMap />,
+  locations_map: () => <PreviewLocationsMap />,
   recently_viewed: () => <PreviewRecentlyViewed />,
   blog_preview: () => <PreviewBlog />,
   faq: () => <PreviewFaq />,

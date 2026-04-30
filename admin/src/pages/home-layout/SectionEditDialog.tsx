@@ -345,6 +345,74 @@ function HeroSearchEditor({ config, setConfig }: EditorProps) {
   )
 }
 
+// ── Locations map editor ─────────────────────────────────────────────
+
+function LocationsMapEditor({ config, setConfig }: EditorProps) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <Label>Título da seção</Label>
+        <Input
+          value={(config.title as string) ?? ''}
+          onChange={(e) => setConfig({ ...config, title: e.target.value })}
+          placeholder="Onde estamos no Recife"
+        />
+      </div>
+      <div>
+        <Label>Subtítulo</Label>
+        <Input
+          value={(config.subtitle as string) ?? ''}
+          onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
+          placeholder="Explore o mapa para descobrir imóveis e empreendimentos próximos a você."
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Etiqueta da cidade</Label>
+          <Input
+            value={(config.city_label as string) ?? ''}
+            onChange={(e) => setConfig({ ...config, city_label: e.target.value })}
+            placeholder="Recife e Região Metropolitana"
+          />
+        </div>
+        <div>
+          <Label>Link "Ver lista completa"</Label>
+          <Input
+            value={(config.cta_href as string) ?? ''}
+            onChange={(e) => setConfig({ ...config, cta_href: e.target.value })}
+            placeholder="/comprar?cidade=Recife"
+          />
+        </div>
+      </div>
+      <div>
+        <Label>
+          Pontos máximos por categoria ({(config.max_points_each_side as number) ?? 60})
+        </Label>
+        <input
+          type="range"
+          min={10}
+          max={200}
+          step={5}
+          value={(config.max_points_each_side as number) ?? 60}
+          onChange={(e) =>
+            setConfig({ ...config, max_points_each_side: parseInt(e.target.value, 10) })
+          }
+          className="w-full mt-2 accent-[#010744]"
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Quantos imóveis e empreendimentos buscar para o mapa, no máximo. Pontos sem
+          latitude/longitude no Supremo são descartados.
+        </p>
+      </div>
+      <div className="rounded-md bg-[#fafbff] border border-[#010744]/10 p-3 text-xs text-[#010744]/80">
+        O mapa fica travado na área metropolitana do Recife (Recife, Olinda, Jaboatão,
+        Camaragibe, Paulista). Para alterar a área, edite <code>RECIFE_BOUNDS</code> em{' '}
+        <code>src/components/home/LocationsMap.tsx</code>.
+      </div>
+    </div>
+  )
+}
+
 // ── Defaults per section type — used on dialog open to avoid wiping fields
 const DEFAULT_CONFIG: Record<string, Record<string, unknown>> = {
   category_cards: {
@@ -362,12 +430,21 @@ const DEFAULT_CONFIG: Record<string, Record<string, unknown>> = {
     bg_focal_y: 50,
     overlay_opacity: 0.55,
   },
+  locations_map: {
+    title: 'Onde estamos no Recife',
+    subtitle:
+      'Explore o mapa para descobrir imóveis e empreendimentos próximos a você. Cada pin é um endereço real do nosso portfólio.',
+    city_label: 'Recife e Região Metropolitana',
+    cta_href: '/comprar?cidade=Recife',
+    max_points_each_side: 60,
+  },
 }
 
 // Registry: section_type → editor component
 const EDITORS: Record<string, (p: EditorProps) => React.ReactNode> = {
   category_cards: (p) => <CategoryCardsEditor {...p} />,
   hero_search: (p) => <HeroSearchEditor {...p} />,
+  locations_map: (p) => <LocationsMapEditor {...p} />,
 }
 
 export const EDITABLE_SECTION_TYPES = Object.keys(EDITORS)

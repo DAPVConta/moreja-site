@@ -146,13 +146,16 @@ async function fetchLocalProperties(filters: PropertyFilters): Promise<PropertyL
         (p) => p.subtipo === filters.tipo || p.tipo === filters.tipo,
       )
     }
+    // `?? ''` em todo `.toLowerCase()`: Supremo às vezes retorna campos
+    // nulos (descricao, bairro, cidade) e o filter crashava o Server
+    // Component, levando o /comprar pra error.tsx ("Algo deu errado").
     if (filters.bairro) {
       const b = filters.bairro.toLowerCase()
-      props = props.filter((p) => p.bairro.toLowerCase().includes(b))
+      props = props.filter((p) => (p.bairro ?? '').toLowerCase().includes(b))
     }
     if (filters.cidade) {
       const c = filters.cidade.toLowerCase()
-      props = props.filter((p) => p.cidade.toLowerCase().includes(c))
+      props = props.filter((p) => (p.cidade ?? '').toLowerCase().includes(c))
     }
     if (filters.preco_min) props = props.filter((p) => p.preco >= filters.preco_min!)
     if (filters.preco_max) props = props.filter((p) => p.preco <= filters.preco_max!)
@@ -161,10 +164,10 @@ async function fetchLocalProperties(filters: PropertyFilters): Promise<PropertyL
       const q = filters.q.toLowerCase()
       props = props.filter(
         (p) =>
-          p.titulo.toLowerCase().includes(q) ||
-          p.descricao.toLowerCase().includes(q) ||
-          p.bairro.toLowerCase().includes(q) ||
-          p.cidade.toLowerCase().includes(q),
+          (p.titulo ?? '').toLowerCase().includes(q) ||
+          (p.descricao ?? '').toLowerCase().includes(q) ||
+          (p.bairro ?? '').toLowerCase().includes(q) ||
+          (p.cidade ?? '').toLowerCase().includes(q),
       )
     }
 

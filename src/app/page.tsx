@@ -29,17 +29,21 @@ import { BannersSection } from '@/components/home/BannersSection'
 import { TeamSection } from '@/components/home/TeamSection'
 import { PropertyValuationCTA } from '@/components/home/PropertyValuationCTA'
 import { BlogPreview } from '@/components/home/BlogPreview'
-import { CoverageMap } from '@/components/home/CoverageMap'
+import { LocationsMap } from '@/components/home/LocationsMap'
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection'
 import { FaqAccordion } from '@/components/home/FaqAccordion'
 import { CtaAnunciar } from '@/components/home/CtaAnunciar'
 
 function inferLaunchStatus(p: Property): string {
-  const stage = (p.estagio_obra ?? '').toLowerCase()
+  // Supremo às vezes manda estagio_obra como número — coerce p/ string
+  // antes de qualquer .toLowerCase()/includes (vide build log #28:
+  // "(a.estagio_obra ?? '').toLowerCase is not a function").
+  const raw = typeof p.estagio_obra === 'string' ? p.estagio_obra : ''
+  const stage = raw.toLowerCase()
   if (stage.includes('pré') || stage.includes('pre')) return 'Pré-lançamento'
   if (stage.includes('obra')) return 'Em obras'
   if (stage.includes('lançamento') || stage.includes('lancamento')) return 'Lançamento'
-  return stage ? p.estagio_obra! : 'Lançamento'
+  return raw || 'Lançamento'
 }
 
 function formatDelivery(p: Property): string | undefined {
@@ -277,18 +281,18 @@ export default async function HomePage() {
         />
       )
     },
-    coverage_map: () => {
-      const c = cfg('coverage_map') as {
+    locations_map: () => {
+      const c = cfg('locations_map') as {
         title?: string; subtitle?: string; city_label?: string; cta_href?: string
-        regions?: { name: string; slug: string; count?: number; highlight?: boolean }[]
+        max_points_each_side?: number
       }
       return (
-        <CoverageMap
+        <LocationsMap
           title={c.title}
           subtitle={c.subtitle}
           cityLabel={c.city_label}
           ctaHref={c.cta_href}
-          regions={c.regions ?? []}
+          maxPointsEachSide={c.max_points_each_side}
         />
       )
     },

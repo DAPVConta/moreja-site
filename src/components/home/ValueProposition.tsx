@@ -24,8 +24,6 @@ import {
   MapPin,
   FileCheck,
   Award,
-  Star,
-  BadgeCheck,
   type LucideIcon,
 } from 'lucide-react'
 import { Reveal } from '@/components/ui/Reveal'
@@ -72,60 +70,22 @@ const perks: Perk[] = [
   },
 ]
 
-// ─── Stacked trust badges ─────────────────────────────────────────────────────
+// ─── Trust badge ──────────────────────────────────────────────────────────────
 
-function StackedBadges() {
+function TrustBadge() {
   return (
     <div
-      className="absolute bottom-6 left-6 flex items-end"
-      aria-label="Selos de confiança"
+      className="absolute bottom-6 left-6 w-[120px] bg-white rounded-xl shadow-xl p-2.5
+                 flex flex-col items-center gap-0.5"
+      aria-label="Selo Reclame Aqui RA1000"
     >
-      {/* Badge 3 — deepest, most rotated */}
-      <div
-        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-md p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(-5deg) translateX(-4px)', zIndex: 1 }}
-        aria-hidden="true"
-      >
-        <Star size={14} className="text-[#f2d22e]" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          Google
-          <br />
-          Reviews
-        </span>
-        <span className="text-[10px] font-extrabold text-[#010744]">4.9★</span>
-      </div>
-
-      {/* Badge 2 — middle */}
-      <div
-        className="absolute bottom-0 left-0 w-[110px] bg-white rounded-xl shadow-lg p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(3deg) translateX(8px)', zIndex: 2 }}
-        aria-hidden="true"
-      >
-        <BadgeCheck size={14} className="text-green-600" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          CRECI
-          <br />
-          Verificado
-        </span>
-        <span className="text-[10px] font-extrabold text-green-600">Ativo</span>
-      </div>
-
-      {/* Badge 1 — front, least rotated */}
-      <div
-        className="relative w-[110px] bg-white rounded-xl shadow-xl p-2.5
-                   flex flex-col items-center gap-0.5 origin-bottom-left"
-        style={{ transform: 'rotate(-1deg) translateX(20px)', zIndex: 3 }}
-      >
-        <Award size={14} className="text-[#f2d22e]" aria-hidden="true" />
-        <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
-          Reclame Aqui
-          <br />
-          RA1000
-        </span>
-        <span className="text-[10px] font-extrabold text-[#010744]">Ótimo</span>
-      </div>
+      <Award size={14} className="text-[#f2d22e]" aria-hidden="true" />
+      <span className="text-[9px] font-bold text-[#010744] text-center leading-tight">
+        Reclame Aqui
+        <br />
+        RA1000
+      </span>
+      <span className="text-[10px] font-extrabold text-[#010744]">Ótimo</span>
     </div>
   )
 }
@@ -195,22 +155,17 @@ export function ValueProposition({
       <div className="container-page">
         {/*
          * Desktop layout: 2 columns.
-         *   Left  — sticky image column (self-start enables sticky scroll behaviour).
-         *   Right — scrollable narrative column (min-height drives the sticky travel).
+         *   Left  — imagem com selo + grid 2×2 de perks logo abaixo (juntos
+         *           sticky, p/ acompanhar a leitura dos 3 blocos da direita).
+         *   Right — eyebrow + heading principal + 2 blocos secundários + CTA.
          *
-         * Mobile (<lg): single column, image on top, content below. Sticky is
-         * removed entirely so it doesn't eat vertical space on small screens.
-         *
-         * The outer grid grows tall enough on desktop for the sticky image to
-         * have meaningful travel distance. lg:min-h-[140vh] is not set on the
-         * grid itself (that would force a fixed viewport height) — instead the
-         * right column's natural height (3 narrative blocks + perks + CTA) drives
-         * the grid tall enough. No artificial padding needed.
+         * Mobile (<lg): single column. Imagem no topo, perks abaixo dela,
+         * depois a narrativa. Sticky desligado.
          */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 lg:items-start">
 
-          {/* ── Left: sticky image ─────────────────────────────────────────── */}
-          <Reveal className="lg:sticky lg:top-24 lg:self-start">
+          {/* ── Left: image + perks ────────────────────────────────────────── */}
+          <Reveal className="lg:sticky lg:top-24 lg:self-start space-y-6">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
               <Image
                 src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800&q=80"
@@ -219,20 +174,24 @@ export function ValueProposition({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              {/* Gradient overlay for text legibility */}
               <div
                 aria-hidden="true"
                 className="absolute inset-0 bg-gradient-to-tr from-[#010744]/60 via-transparent to-transparent"
               />
-              {/* Stacked trust badges */}
-              <StackedBadges />
+              <TrustBadge />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {perks.map((perk) => (
+                <PerkCard key={perk.title} perk={perk} />
+              ))}
             </div>
           </Reveal>
 
-          {/* ── Right: narrative blocks + perks + CTA ─────────────────────── */}
-          <div className="flex flex-col gap-14">
+          {/* ── Right: narrative blocks + CTA ─────────────────────────────── */}
+          <div className="flex flex-col gap-10">
 
-            {/* Narrative block 1 — includes eyebrow + main heading */}
+            {/* Bloco 1 — eyebrow chip + heading principal + corpo */}
             <Reveal delay={80}>
               <AnimatedChip
                 icon={Award}
@@ -249,7 +208,7 @@ export function ValueProposition({
               </p>
             </Reveal>
 
-            {/* Narrative block 2 */}
+            {/* Bloco 2 — eyebrow + sub-heading + corpo */}
             <Reveal delay={120}>
               <span className="eyebrow">{narrativeBlocks[1].label}</span>
               <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
@@ -260,17 +219,8 @@ export function ValueProposition({
               </p>
             </Reveal>
 
-            {/* Perks 2×2 micro-cards */}
+            {/* Bloco 3 — eyebrow + sub-heading + corpo */}
             <Reveal delay={160}>
-              <div className="grid grid-cols-2 gap-3">
-                {perks.map((perk) => (
-                  <PerkCard key={perk.title} perk={perk} />
-                ))}
-              </div>
-            </Reveal>
-
-            {/* Narrative block 3 */}
-            <Reveal delay={200}>
               <span className="eyebrow">{narrativeBlocks[2].label}</span>
               <h3 className="text-xl md:text-2xl font-bold text-[#010744] leading-snug mb-3">
                 {narrativeBlocks[2].heading}
@@ -282,7 +232,7 @@ export function ValueProposition({
 
             {/* CTA */}
             {ctaLabel && ctaHref && (
-              <Reveal delay={240}>
+              <Reveal delay={200}>
                 <Link href={ctaHref} className="btn-primary text-base self-start">
                   {ctaLabel}
                   <ArrowRight size={18} aria-hidden="true" />
