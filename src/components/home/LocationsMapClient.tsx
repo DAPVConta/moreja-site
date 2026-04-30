@@ -16,6 +16,8 @@ export interface MapPoint {
   /** Preço formatado (já em string pronta), apenas exibição. */
   priceLabel?: string
   thumb?: string
+  /** True quando coords vêm de geocoding por bairro (Supremo não tinha). */
+  approximate?: boolean
 }
 
 interface LocationsMapClientProps {
@@ -183,6 +185,9 @@ function buildPopupHtml(p: MapPoint): string {
   const tagBg = p.kind === 'empreendimento' ? '#010744' : '#f2d22e'
   const tagFg = p.kind === 'empreendimento' ? '#f2d22e' : '#010744'
   const local = [p.bairro, p.cidade].filter(Boolean).join(', ')
+  const approxNote = p.approximate
+    ? `<div style="font-size:10px;color:#777;margin-top:2px;font-style:italic">Localização aproximada (centro do bairro)</div>`
+    : ''
   const thumb = p.thumb
     ? `<img src="${escapeHtml(p.thumb)}" alt="" width="180" height="100"
         style="display:block;width:180px;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>`
@@ -196,6 +201,7 @@ function buildPopupHtml(p: MapPoint): string {
       <span style="display:inline-block;background:${tagBg};color:${tagFg};font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px">${tag}</span>
       <div style="font-weight:700;color:#010744;margin-top:6px;line-height:1.25">${escapeHtml(p.title)}</div>
       ${local ? `<div style="font-size:12px;color:#555;margin-top:2px">${escapeHtml(local)}</div>` : ''}
+      ${approxNote}
       ${price}
       <a href="${escapeHtml(p.href)}"
          style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:#010744;text-decoration:underline">

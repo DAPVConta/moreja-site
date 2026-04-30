@@ -3,6 +3,7 @@ import { MapPin, ArrowRight } from 'lucide-react'
 import type { Property } from '@/types/property'
 import { fetchProperties, fetchEmpreendimentos } from '@/lib/properties'
 import { formatPrice } from '@/lib/format'
+import { lookupBairroCoords, jitterCoords } from '@/lib/recife-geo'
 import { LocationsMapClient, type MapPoint } from './LocationsMapClient'
 
 interface LocationsMapProps {
@@ -44,19 +45,41 @@ function toMapPoint(
   p: Property,
   kind: MapPoint['kind'],
 ): MapPoint | null {
-  if (typeof p.latitude !== 'number' || typeof p.longitude !== 'number') return null
-  if (!withinRecife(p.latitude, p.longitude)) return null
+  let lat: number | undefined
+  let lng: number | undefined
+  let approximate = false
+
+  if (typeof p.latitude === 'number' && typeof p.longitude === 'number') {
+    lat = p.latitude
+    lng = p.longitude
+  } else {
+    // Fallback: Supremo CRM frequentemente não retorna coords (especialmente
+    // p/ empreendimentos). Geocodificamos por bairro com tabela offline +
+    // jitter determinístico p/ não empilhar pins do mesmo bairro.
+    const fromBairro = lookupBairroCoords(p.bairro, p.cidade)
+    if (fromBairro) {
+      const [jLat, jLng] = jitterCoords(fromBairro, p.id || `${p.bairro}-${p.titulo}`)
+      lat = jLat
+      lng = jLng
+      approximate = true
+    }
+  }
+
+  if (typeof lat !== 'number' || typeof lng !== 'number') return null
+  if (!withinRecife(lat, lng)) return null
+
   return {
     id: p.id,
     kind,
     title: p.titulo,
     bairro: p.bairro,
     cidade: p.cidade,
-    lat: p.latitude,
-    lng: p.longitude,
+    lat,
+    lng,
     href: kind === 'empreendimento' ? `/empreendimentos/${p.id}` : `/imovel/${p.id}`,
     priceLabel: priceLabel(p),
     thumb: Array.isArray(p.fotos) ? p.fotos[0] : undefined,
+    approximate,
   }
 }
 
@@ -77,14 +100,16 @@ export async function LocationsMap({
   ctaHref = '/comprar?cidade=Recife',
   maxPointsEachSide = 60,
 }: LocationsMapProps) {
+  // Não filtramos por cidade no fetch — o bbox da RMR já corta tudo fora,
+  // e empreendimentos costumam vir cadastrados em Paulista, Olinda ou
+  // Jaboatão dos Guararapes (todos dentro do bbox). O filtro por cidade
+  // estaria descartando pontos válidos da região.
   const [imoveisRes, empreendsRes] = await Promise.all([
     fetchProperties({
-      cidade: 'Recife',
       limit: maxPointsEachSide,
       order: 'data_desc',
     }).catch(() => ({ data: [] as Property[] })),
     fetchEmpreendimentos({
-      cidade: 'Recife',
       limit: maxPointsEachSide,
       order: 'data_desc',
     }).catch(() => ({ data: [] as Property[] })),
