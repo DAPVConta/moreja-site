@@ -57,7 +57,6 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
   launches_waitlist: 'Formulário de lista de espera para um lançamento específico.',
   team: 'Equipe / corretores em destaque com foto, nome e CTA para perfil.',
   valuation_cta: 'Chamada para avaliação gratuita de imóvel (com benefícios).',
-  coverage_map: 'Mapa/lista de regiões e bairros atendidos com contagem de imóveis.',
   locations_map: 'Mapa interativo (Leaflet) travado no Recife com pins distintos para imóveis e empreendimentos.',
   recently_viewed: 'Carrossel dos últimos imóveis que o visitante visualizou (vazio se primeira visita).',
   blog_preview: 'Cards dos posts mais recentes do blog.',
@@ -453,29 +452,6 @@ function PreviewValuationCta() {
   )
 }
 
-function PreviewCoverageMap() {
-  return (
-    <div className="bg-[#fafbff] p-3">
-      <div className="h-1.5 w-28 bg-[#010744] rounded mx-auto mb-2" />
-      <div className="bg-gradient-to-br from-blue-100 to-green-50 rounded h-12 relative border border-gray-200">
-        <Map className="w-4 h-4 text-[#010744] absolute top-1 left-1" />
-        {[
-          { x: '20%', y: '40%' },
-          { x: '55%', y: '25%' },
-          { x: '70%', y: '60%' },
-          { x: '40%', y: '70%' },
-        ].map((p, i) => (
-          <div
-            key={i}
-            className="absolute w-1.5 h-1.5 bg-[#f2d22e] border border-[#010744] rounded-full"
-            style={{ left: p.x, top: p.y }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function PreviewLocationsMap() {
   return (
     <div className="bg-white p-3">
@@ -611,7 +587,6 @@ const PREVIEW_MAP: Record<string, () => React.ReactNode> = {
   launches_preview: () => <PreviewLaunches />,
   team: () => <PreviewTeam />,
   valuation_cta: () => <PreviewValuationCta />,
-  coverage_map: () => <PreviewCoverageMap />,
   locations_map: () => <PreviewLocationsMap />,
   recently_viewed: () => <PreviewRecentlyViewed />,
   blog_preview: () => <PreviewBlog />,
