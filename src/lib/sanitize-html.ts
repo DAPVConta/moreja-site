@@ -1,59 +1,54 @@
 /**
- * Sanitizador robusto de HTML para descrições vindas do CRM (SupremoCRM).
- * Usa isomorphic-dompurify (DOMPurify + jsdom no server, DOMPurify no client).
+ * Sanitizador minimalista de HTML para descrições vindas do CRM (SupremoCRM).
  *
- * Substitui o sanitizer regex anterior. Motivo: regex parsing de HTML é
- * inerentemente bypassable (ex: `<svg/onload=...>`, namespaced tags,
- * atributos malformados). DOMPurify usa um parser real e é o padrão
- * da indústria para defesa contra XSS.
+ * NOTA: já tentamos usar isomorphic-dompurify aqui, mas ele puxa jsdom
+ * (Node-native) no server e o Turbopack do Next.js 16 não consegue
+ * empacotá-lo — runtime explodia com "Failed to load external module"
+ * em /imovel/[id] e /empreendimentos/[id]. Voltamos para o regex
+ * sanitizer porque o conteúdo é admin-controlled (vem do CRM Supremo,
+ * não de usuário final), então o trade-off de segurança é aceitável.
+ *
+ * Estratégia:
+ * 1. Remove tags perigosas + conteúdo (script/style/iframe/etc).
+ * 2. Mantém apenas tags da allowlist de formatação.
+ * 3. Remove TODOS os atributos das tags permitidas (incl. style/class/on*).
+ * 4. Decodifica algumas entidades comuns.
+ * 5. Colapsa parágrafos vazios.
  */
 
-import DOMPurify from 'isomorphic-dompurify'
+const ALLOWED_TAGS = new Set([
+  'p',
+  'br',
+  'strong',
+  'b',
+  'em',
+  'i',
+  'u',
+  'ul',
+  'ol',
+  'li',
+  'h2',
+  'h3',
+  'h4',
+  'span',
+  'div',
+])
 
-type PurifyConfig = Parameters<typeof DOMPurify.sanitize>[1]
-
-const ALLOWED_TAGS = [
-  'p', 'br', 'strong', 'b', 'em', 'i', 'u',
-  'ul', 'ol', 'li',
-  'h2', 'h3', 'h4',
-  'span', 'div',
-]
-
-// Sem `style`/`class`/`on*`/`href` — descrições do CRM nunca devem carregar links/scripts.
-const ALLOWED_ATTR: string[] = []
-
-const FORBID_TAGS = [
-  'script', 'style', 'iframe', 'noscript', 'object', 'embed',
-  'link', 'meta', 'svg', 'math', 'form', 'input', 'button',
-]
-
-const FORBID_ATTR = [
-  'style', 'class', 'id', 'href', 'src', 'srcset', 'formaction',
-  'xlink:href', 'data',
-]
-
-const PURIFY_CONFIG: PurifyConfig = {
-  ALLOWED_TAGS,
-  ALLOWED_ATTR,
-  FORBID_TAGS,
-  FORBID_ATTR,
-  ALLOW_DATA_ATTR: false,
-  ALLOW_UNKNOWN_PROTOCOLS: false,
-  KEEP_CONTENT: true,
-  RETURN_DOM: false,
-  RETURN_DOM_FRAGMENT: false,
-  USE_PROFILES: { html: true },
-}
+const DANGEROUS_BLOCKS = /<(script|style|iframe|noscript|object|embed|link|meta|svg|math|form|input|button)\b[^>]*>[\s\S]*?<\/\1>/gi
+const STANDALONE_DANGEROUS = /<(script|style|iframe|noscript|object|embed|link|meta|svg|math|form|input|button)\b[^>]*\/?>/gi
 
 export function sanitizeHtml(input: string | null | undefined): string {
   if (!input) return ''
 
-  const cleaned = DOMPurify.sanitize(input, PURIFY_CONFIG) as unknown as string
-
-  // Cleanup pós-DOMPurify específico do CRM:
-  //  - colapsa parágrafos vazios produzidos por <p style="...">&nbsp;</p>
-  //  - colapsa <br><br> excessivo (tratamento visual fica em prose-property css)
-  return cleaned
+  return input
+    .replace(DANGEROUS_BLOCKS, '')
+    .replace(STANDALONE_DANGEROUS, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(\/?)([a-z][a-z0-9]*)\b[^>]*>/gi, (_match, slash: string, tagName: string) => {
+      const tag = tagName.toLowerCase()
+      if (!ALLOWED_TAGS.has(tag)) return ''
+      return `<${slash}${tag}>`
+    })
     .replace(/&nbsp;/g, ' ')
     .replace(/<p>\s*<\/p>/g, '')
     .replace(/<span>\s*<\/span>/g, '')

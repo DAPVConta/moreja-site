@@ -24,7 +24,6 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.38.0",
-    "isomorphic-dompurify": "^3.10.0",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
     "next-sitemap": "^4.2.3",
