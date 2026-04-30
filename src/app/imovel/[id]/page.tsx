@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, Share2, ChevronLeft } from 'lucide-react'
+import { MapPin, Bed, Bath, Car, Maximize2, Phone, MessageCircle, ChevronLeft } from 'lucide-react'
 import { fetchProperty, fetchProperties, formatPrice, formatArea } from '@/lib/properties'
 import { getSiteConfig } from '@/lib/site-config'
 import { sanitizeHtml, looksLikeHtml } from '@/lib/sanitize-html'
@@ -15,6 +15,7 @@ import { SaveButton } from '@/components/properties/SaveButton'
 import { IdleCallbackPrompt } from '@/components/properties/IdleCallbackPrompt'
 import { MortgageSimulatorCTA } from '@/components/properties/MortgageSimulatorCTA'
 import { RecentlyViewedTracker } from '@/components/properties/RecentlyViewedTracker'
+import { ShareButtonClient } from '@/components/properties/ShareButtonClient'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
 
@@ -32,8 +33,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${property.titulo} - ${property.bairro}, ${property.cidade} | Morejá`
   // Strip HTML para meta description (texto puro)
-  const description = property.descricao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
-  const image = property.fotos[0]
+  const description = (property.descricao ?? '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
+  const image = property.fotos?.[0]
   const url = `${SITE_URL}/imovel/${id}`
 
   return {
@@ -70,6 +75,11 @@ export default async function ImovelPage({ params }: PageProps) {
   const turnstileSiteKey = siteConfig.turnstile_site_key?.trim() || undefined
 
   if (!property) notFound()
+
+  // Defensive: Property pode vir do Supremo sem fotos[]/descricao — RSC quebra
+  // sem essas guardas (ver hotfix #23 da home).
+  const fotos = property.fotos ?? []
+  const descricao = property.descricao ?? ''
 
   const finalidadeLabel =
     property.finalidade === 'Venda' ? 'Comprar' : 'Alugar'
@@ -124,7 +134,7 @@ export default async function ImovelPage({ params }: PageProps) {
             {/* Left: Gallery + Details */}
             <div className="lg:col-span-2 space-y-5 sm:space-y-6">
               {/* Gallery */}
-              <PropertyGallery fotos={property.fotos} titulo={property.titulo} />
+              <PropertyGallery fotos={fotos} titulo={property.titulo} />
 
               {/* Title & Price */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6">
@@ -214,19 +224,21 @@ export default async function ImovelPage({ params }: PageProps) {
               </div>
 
               {/* Description */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Descrição</h2>
-                {looksLikeHtml(property.descricao) ? (
-                  <div
-                    className="prose-property text-gray-700 leading-relaxed text-sm"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.descricao) }}
-                  />
-                ) : (
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
-                    {property.descricao}
-                  </div>
-                )}
-              </div>
+              {descricao && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Descrição</h2>
+                  {looksLikeHtml(descricao) ? (
+                    <div
+                      className="prose-property text-gray-700 leading-relaxed text-sm"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(descricao) }}
+                    />
+                  ) : (
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line text-sm">
+                      {descricao}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Location */}
               {(property.endereco || (property.latitude && property.longitude)) && (
@@ -276,7 +288,7 @@ export default async function ImovelPage({ params }: PageProps) {
               {/* Sticky on desktop only */}
               <div className="lg:sticky lg:top-24">
                 {/* Share */}
-                <ShareButton titulo={property.titulo} />
+                <ShareButtonClient titulo={property.titulo} />
 
                 {/* Broker card */}
                 {property.corretor_nome && (
@@ -386,11 +398,4 @@ export default async function ImovelPage({ params }: PageProps) {
       </div>
     </>
   )
-}
-
-// Client component for share button
-import { ShareButtonClient } from '@/components/properties/ShareButtonClient'
-
-function ShareButton({ titulo }: { titulo: string }) {
-  return <ShareButtonClient titulo={titulo} />
 }

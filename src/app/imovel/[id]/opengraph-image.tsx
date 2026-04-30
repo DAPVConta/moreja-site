@@ -43,8 +43,8 @@ export default async function OpengraphImage({ params }: { params: Promise<{ id:
     )
   }
 
-  const photo = property.fotos[0]
-  const title = property.titulo.slice(0, 90)
+  const photo = property.fotos?.[0]
+  const title = (property.titulo ?? '').slice(0, 90)
   const location = `${property.bairro ?? ''}${property.bairro && property.cidade ? ', ' : ''}${property.cidade ?? ''}`.trim()
   const isRent = property.finalidade === 'Locação'
 

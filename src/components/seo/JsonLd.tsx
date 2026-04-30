@@ -156,7 +156,7 @@ export function PropertyJsonLd({
     description: property.descricao,
     url,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    image: property.fotos.slice(0, 10), // até 10 imagens (recomendação Google)
+    image: (property.fotos ?? []).slice(0, 10), // até 10 imagens (recomendação Google)
     offers: offer,
     address: {
       '@type': 'PostalAddress',
