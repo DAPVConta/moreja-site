@@ -241,7 +241,7 @@ export default async function ImovelPage({ params }: PageProps) {
               )}
 
               {/* Location */}
-              {(property.endereco || (property.latitude && property.longitude)) && (
+              {(property.endereco || property.bairro || (property.latitude && property.longitude)) && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-3">Localização</h2>
                   {property.endereco && (
@@ -259,6 +259,8 @@ export default async function ImovelPage({ params }: PageProps) {
                   <PropertyMap
                     lat={property.latitude}
                     lng={property.longitude}
+                    bairro={property.bairro}
+                    cidade={property.cidade}
                     address={[property.endereco, property.numero, property.bairro, property.cidade, property.estado]
                       .filter(Boolean)
                       .join(', ')}
