@@ -137,6 +137,39 @@ export function lookupBairroCoords(
 }
 
 /**
+ * Último recurso quando o CRM nem `bairro` preenche: extrai o primeiro
+ * nome de bairro conhecido que aparece no texto livre (ex: título do
+ * imóvel "Casa teste em Boa Viagem"). Bairros cujo nome casa com
+ * substring de outro são checados primeiro pelo mais longo, senão "Casa
+ * Forte" sempre perderia para "Casa Amarela" via prefixo "casa ".
+ */
+export function extractBairroFromText(text: string | undefined | null): LatLng | null {
+  if (!text) return null
+  const normalized = text.toLowerCase()
+  // Conjunto único de bairros (parte antes do `|`).
+  const bairros = new Set<string>()
+  for (const k of Object.keys(BAIRRO_COORDS)) {
+    bairros.add(k.split('|')[0])
+  }
+  // Ordena por tamanho desc para preferir match mais específico.
+  const sorted = Array.from(bairros).sort((a, b) => b.length - a.length)
+  for (const bairro of sorted) {
+    // Boundary tosca: garante que estamos casando palavra inteira (não
+    // pega "ipsep" dentro de outra palavra qualquer).
+    const re = new RegExp(`(^|[^a-záéíóúâêôãõç])${escapeRegExp(bairro)}([^a-záéíóúâêôãõç]|$)`, 'i')
+    if (re.test(normalized)) {
+      const coords = lookupBairroCoords(bairro, undefined)
+      if (coords) return coords
+    }
+  }
+  return null
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
  * Hash determinístico de uma string → número [0, 1). Usado para gerar
  * jitter consistente: o mesmo empreendimento sempre cai no mesmo offset
  * dentro do bairro, evitando pins empilhados sem ficar pulando entre

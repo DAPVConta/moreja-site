@@ -3,7 +3,7 @@ import { MapPin, ArrowRight } from 'lucide-react'
 import type { Property } from '@/types/property'
 import { fetchProperties, fetchEmpreendimentos } from '@/lib/properties'
 import { formatPrice } from '@/lib/format'
-import { lookupBairroCoords, jitterCoords } from '@/lib/recife-geo'
+import { lookupBairroCoords, extractBairroFromText, jitterCoords } from '@/lib/recife-geo'
 import { LocationsMapClient, type MapPoint } from './LocationsMapClient'
 
 interface LocationsMapProps {
@@ -53,10 +53,14 @@ function toMapPoint(
     lat = p.latitude
     lng = p.longitude
   } else {
-    // Fallback: Supremo CRM frequentemente não retorna coords (especialmente
-    // p/ empreendimentos). Geocodificamos por bairro com tabela offline +
-    // jitter determinístico p/ não empilhar pins do mesmo bairro.
-    const fromBairro = lookupBairroCoords(p.bairro, p.cidade)
+    // Fallback 1: Supremo CRM frequentemente não retorna coords
+    // (especialmente p/ empreendimentos). Geocodificamos por bairro com
+    // tabela offline + jitter determinístico p/ não empilhar pins.
+    // Fallback 2: quando o CRM nem `bairro`/`cidade` preenche (ex: imóveis
+    // de teste com cadastro incompleto), tentamos extrair o nome de um
+    // bairro conhecido do próprio título do imóvel.
+    const fromBairro =
+      lookupBairroCoords(p.bairro, p.cidade) ?? extractBairroFromText(p.titulo)
     if (fromBairro) {
       const [jLat, jLng] = jitterCoords(fromBairro, p.id || `${p.bairro}-${p.titulo}`)
       lat = jLat
