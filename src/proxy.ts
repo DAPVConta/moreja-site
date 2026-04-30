@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * Middleware — Content Security Policy com nonce per-request.
+ * Proxy — Content Security Policy com nonce per-request.
+ *
+ * Migrado de `middleware.ts` p/ `proxy.ts` (Next.js 16 renomeou a convenção;
+ * o nome antigo passou a emitir warning de deprecação no build e deixou
+ * de propagar o nonce pra <script> dos chunks RSC).
  *
  * Por que nonce?
  *   • Os scripts inline (themeBootstrap em layout.tsx, brandCss style,
@@ -11,16 +15,17 @@ import { NextRequest, NextResponse } from 'next/server'
  *     standard: nonce gerado por request + adicionado nos elementos.
  *
  * Como funciona:
- *   1. Aqui (middleware): gera nonce hex aleatório, set request header
- *      'x-nonce' (lido pelo layout.tsx), set CSP response header.
- *   2. layout.tsx (server): lê header 'x-nonce' via next/headers e
- *      passa pra Script/style inline.
+ *   1. Aqui (proxy): gera nonce, set request header 'x-nonce' (lido
+ *      pelo layout.tsx via next/headers) e set 'Content-Security-Policy'
+ *      no request — Next.js 16 extrai automaticamente o `nonce-{value}`
+ *      desse header e aplica nos seus próprios <script> de chunks RSC.
+ *   2. layout.tsx (server): lê 'x-nonce' e aplica nos inline custom.
  *
- * Limitação Next 16: middleware não pode interceptar /admin (rewrite
- * faz fallback p/ index.html do SPA Vite). Os headers de admin/* ficam
- * no next.config.ts headers() (Bloco 5).
+ * Limitação Next 16: proxy não pode interceptar /admin (rewrite faz
+ * fallback p/ index.html do SPA Vite). Os headers de admin/* ficam no
+ * next.config.ts headers().
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Não aplica em /admin (SPA Vite tem CSP própria via index.html ou config)
   if (request.nextUrl.pathname.startsWith('/admin')) {
     return NextResponse.next()
@@ -61,18 +66,20 @@ export function middleware(request: NextRequest) {
 
   const csp = cspDirectives.join('; ')
 
-  // Propaga nonce p/ request (layout.tsx lê)
+  // Propaga nonce p/ request (layout.tsx lê) e CSP no request — Next.js 16
+  // detecta o `nonce-{value}` no header 'Content-Security-Policy' e aplica
+  // automaticamente nos <script> de chunks RSC. Casing do header importa
+  // p/ documentação consistente, embora o get/set seja case-insensitive.
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-nonce', nonce)
-  // Tambem set no response header pra debug/SecurityHeaders.com
-  requestHeaders.set('content-security-policy', csp)
+  requestHeaders.set('Content-Security-Policy', csp)
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   })
 
-  // CSP no response (cliente vê)
-  response.headers.set('content-security-policy', csp)
+  // CSP também no response (cliente vê e enforce no browser)
+  response.headers.set('Content-Security-Policy', csp)
 
   return response
 }

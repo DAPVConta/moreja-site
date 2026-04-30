@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
   },
+  // isomorphic-dompurify importa jsdom (Node-native) no server. O Turbopack
+  // falha em "bundlear" — runtime estoura com "Failed to load external module"
+  // em qualquer rota que importe sanitize-html (/imovel/[id], /empreendimentos/[id]).
+  // jsdom já está na auto-list do Next.js 16; precisamos opt-out apenas o wrapper.
+  serverExternalPackages: ['isomorphic-dompurify'],
   images: {
     // SVGs locais em /public/fallbacks/ são gerados por nós (sem JS hostil).
     // contentSecurityPolicy força sandbox no <img> servido pelo otimizador,
