@@ -47,8 +47,10 @@ export function middleware(request: NextRequest) {
     `font-src 'self' https://fonts.gstatic.com data:`,
     // network: Supremo + Supabase + analytics + Meta CAPI
     `connect-src 'self' https://yxlepgmlhcnqhwshymup.supabase.co https://api.supremocrm.com.br https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://snap.licdn.com https://analytics.tiktok.com https://www.clarity.ms https://*.clarity.ms https://*.hotjar.com`,
-    // frames p/ youtube/maps embed quando vier
-    `frame-src 'self' https://www.youtube.com https://www.google.com`,
+    // frames p/ youtube/maps embed (Google Maps + OpenStreetMap usado no
+    // PropertyMap dos detalhes, e tour_virtual de qualquer https quando o
+    // imóvel tem URL externa cadastrada — mantemos a allowlist conservadora).
+    `frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://www.openstreetmap.org`,
     // proibidos — defensa em profundidade
     `object-src 'none'`,
     `base-uri 'self'`,
