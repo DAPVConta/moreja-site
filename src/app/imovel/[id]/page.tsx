@@ -248,18 +248,29 @@ export default async function ImovelPage({ params }: PageProps) {
                     <div className="flex items-start gap-2 text-gray-700 text-sm mb-4">
                       <MapPin className="w-4 h-4 text-[#010744] mt-0.5 shrink-0" />
                       <span>
-                        {property.endereco}
-                        {property.numero && `, ${property.numero}`}
-                        {property.complemento && ` – ${property.complemento}`}
-                        {` – ${property.bairro}, ${property.cidade} – ${property.estado}`}
-                        {property.cep && ` – CEP ${property.cep}`}
+                        {[
+                          [property.endereco, property.numero].filter(Boolean).join(', '),
+                          property.complemento,
+                          property.bairro,
+                          [property.cidade, property.estado].filter(Boolean).join(' - '),
+                          property.cep && `CEP ${property.cep}`,
+                        ]
+                          .filter(Boolean)
+                          .join(' – ')}
                       </span>
                     </div>
                   )}
                   <PropertyMap
                     lat={property.latitude}
                     lng={property.longitude}
-                    address={[property.endereco, property.numero, property.bairro, property.cidade, property.estado]
+                    address={[
+                      property.endereco,
+                      property.numero,
+                      property.bairro,
+                      property.cidade,
+                      property.estado,
+                      property.cep,
+                    ]
                       .filter(Boolean)
                       .join(', ')}
                   />

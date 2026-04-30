@@ -39,8 +39,13 @@ export function PropertyMap({
     ? `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`
     : null
 
+  // Quando temos lat/lng usamos OSM (mais preciso, mostra o pin exato).
+  // Quando só temos endereço, caímos no Google Maps embed por busca —
+  // não precisa API key e o Google geocodifica automaticamente.
   const embedSrc = bbox
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
+    : address
+    ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`
     : null
 
   // Link "Abrir no mapa" — preferimos endereço (Google Maps lida bem
@@ -60,11 +65,10 @@ export function PropertyMap({
           referrerPolicy="no-referrer-when-downgrade"
         />
       ) : (
-        // Sem coords: mostra pin estático sobre fundo cinza com endereço
+        // Sem coords e sem endereço: pin estático
         <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 text-sm gap-2 p-6 text-center">
           <span className="text-3xl">📍</span>
           <p>Mapa indisponível para este endereço.</p>
-          {address && <p className="text-gray-400 text-xs">{address}</p>}
         </div>
       )}
 
