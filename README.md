@@ -68,8 +68,8 @@ Dois projetos separados apontando para o mesmo repositório:
 
 | Projeto | Root Directory | Framework | Domínio |
 | --- | --- | --- | --- |
-| `moreja-site` | *(raiz)* | Next.js | moreja.com.br |
-| `moreja-admin` | `admin` | Vite | admin.moreja.com.br |
+| `moreja-site` | *(raiz)* | Next.js | www.morejaimobiliaria.com.br |
+| `moreja-admin` | `admin` | Vite | admin.morejaimobiliaria.com.br |
 
 Cada projeto rebuilda automaticamente a cada push em `main`, mas apenas se
 houver mudanças dentro do seu próprio Root Directory.

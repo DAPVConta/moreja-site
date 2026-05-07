@@ -8,7 +8,7 @@ import { fetchProperties } from '@/lib/properties'
 import { PropertyCard } from '@/components/properties/PropertyCard'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 interface PageProps {
   params: Promise<{ slug: string }>

@@ -5,7 +5,7 @@ import { MapPin, Phone, Mail, Award, Users, Home, TrendingUp } from 'lucide-reac
 import { getBrokers, getTestimonials, buildRouteMetadata } from '@/lib/site-config'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 // /sobre raramente muda — revalidate 1h
 export const revalidate = 3600
@@ -286,7 +286,7 @@ export default async function SobrePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#010744]" />
-                {process.env.NEXT_PUBLIC_EMAIL ?? 'contato@moreja.com.br'}
+                {process.env.NEXT_PUBLIC_EMAIL ?? 'contato@morejaimobiliaria.com.br'}
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#010744]" />

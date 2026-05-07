@@ -35,7 +35,7 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 const SITE_NAME = 'Morejá Imobiliária'
 
 export async function generateViewport(): Promise<Viewport> {

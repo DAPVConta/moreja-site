@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://moreja.com.br,https://www.moreja.com.br')
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://morejaimobiliaria.com.br,https://www.morejaimobiliaria.com.br')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
