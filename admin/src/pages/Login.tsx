@@ -116,7 +116,7 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@moreja.com.br"
+                  placeholder="admin@morejaimobiliaria.com.br"
                   className="pl-10"
                   {...register('email')}
                 />

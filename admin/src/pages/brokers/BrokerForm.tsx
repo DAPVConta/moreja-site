@@ -159,7 +159,7 @@ export function BrokerForm({ open, onOpenChange, broker }: BrokerFormProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="joao@moreja.com.br" {...field} />
+                      <Input placeholder="joao@morejaimobiliaria.com.br" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

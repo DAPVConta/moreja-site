@@ -766,7 +766,7 @@ export default function HomeLayoutPage() {
               <div className="w-2 h-2 rounded-full bg-green-400" />
               <div className="flex-1 bg-gray-100 rounded-full px-2 py-0.5 ml-2">
                 <span className="text-[9px] text-gray-500 font-mono truncate block">
-                  moreja.com.br
+                  www.morejaimobiliaria.com.br
                 </span>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 /**
  * Sitemap split via generateSitemaps:

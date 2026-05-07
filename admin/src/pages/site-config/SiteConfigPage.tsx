@@ -358,7 +358,7 @@ export default function SiteConfigPage() {
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
                 <FormLabel>E-mail</FormLabel>
-                <FormControl><Input placeholder="contato@moreja.com.br" {...field} /></FormControl>
+                <FormControl><Input placeholder="contato@morejaimobiliaria.com.br" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

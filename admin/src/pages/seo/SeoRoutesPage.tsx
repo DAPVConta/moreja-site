@@ -246,7 +246,7 @@ export default function SeoRoutesPage() {
                   onChange={(e) =>
                     setEditing({ ...editing, canonical_url: e.target.value })
                   }
-                  placeholder="https://moreja.com.br/…"
+                  placeholder="https://www.morejaimobiliaria.com.br/…"
                   className="mt-1"
                 />
               </div>

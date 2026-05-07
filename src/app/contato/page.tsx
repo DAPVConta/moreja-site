@@ -4,7 +4,7 @@ import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { buildRouteMetadata, getSiteConfig } from '@/lib/site-config'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 export async function generateMetadata(): Promise<Metadata> {
   const meta = await buildRouteMetadata('/contato', {
@@ -35,7 +35,7 @@ export default async function ContatoPage() {
   const config = await getSiteConfig()
   const turnstileSiteKey = config.turnstile_site_key?.trim() || undefined
   const phone = process.env.NEXT_PUBLIC_PHONE ?? ''
-  const email = process.env.NEXT_PUBLIC_EMAIL ?? 'contato@moreja.com.br'
+  const email = process.env.NEXT_PUBLIC_EMAIL ?? 'contato@morejaimobiliaria.com.br'
   const address = process.env.NEXT_PUBLIC_ADDRESS ?? ''
   const whatsapp = phone.replace(/\D/g, '')
 

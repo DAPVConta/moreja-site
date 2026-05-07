@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Allowlist (defina via env ALLOWED_ORIGINS=comma-separated; fallback ao
 // domínio canonical + previews do Vercel)
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://moreja.com.br,https://www.moreja.com.br')
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? 'https://morejaimobiliaria.com.br,https://www.morejaimobiliaria.com.br')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
