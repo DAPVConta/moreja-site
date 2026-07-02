@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { MapPin, Phone, Mail, ChevronDown, MessageCircle } from 'lucide-react'
 import { MoRejaLogo } from './Header'
 import { NewsletterForm } from './NewsletterForm'
-import { TrustBadges } from './TrustBadges'
 import { ManageConsentLink } from '@/components/seo/CookieConsent'
 import { LivePresenceIndicator } from './LivePresenceIndicator'
 import type { SiteConfig } from '@/types/site'
@@ -289,10 +288,6 @@ export function Footer({
             </div>
           )}
 
-          {/* 7. Selos de confiança — mobile */}
-          <div className="mt-7 pt-6 border-t border-white/10">
-            <TrustBadges />
-          </div>
         </div>
       </div>
 
@@ -441,10 +436,6 @@ export function Footer({
             </div>
           </div>
 
-          {/* Selos de confiança — desktop */}
-          <div className="mt-12 pt-8 border-t border-white/10">
-            <TrustBadges />
-          </div>
         </div>
       </div>
 
