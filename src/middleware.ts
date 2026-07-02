@@ -20,10 +20,38 @@ import { NextRequest, NextResponse } from 'next/server'
  * faz fallback p/ index.html do SPA Vite). Os headers de admin/* ficam
  * no next.config.ts headers() (Bloco 5).
  */
+// Origem do app do simulador proxied pelo route handler
+// src/app/simulacao-financiamento/route.ts
+const SIMULATOR_ORIGIN =
+  process.env.SIMULATOR_ORIGIN ?? 'https://inspiring-yeot-ec0490.netlify.app'
+
 export function middleware(request: NextRequest) {
   // Não aplica em /admin (SPA Vite tem CSP própria via index.html ou config)
   if (request.nextUrl.pathname.startsWith('/admin')) {
     return NextResponse.next()
+  }
+
+  // /simulacao-financiamento serve HTML de app externo (Netlify) com
+  // scripts inline próprios (sem o nosso nonce) e assets cross-origin.
+  // O CSP padrão com nonce + strict-dynamic bloquearia tudo; aplicamos
+  // um CSP dedicado restrito à origem do simulador.
+  if (request.nextUrl.pathname === '/simulacao-financiamento') {
+    const simulatorCsp = [
+      `default-src 'self'`,
+      `script-src 'self' 'unsafe-inline' ${SIMULATOR_ORIGIN}`,
+      `style-src 'self' 'unsafe-inline' ${SIMULATOR_ORIGIN}`,
+      `img-src 'self' data: blob: ${SIMULATOR_ORIGIN} https://yxlepgmlhcnqhwshymup.supabase.co`,
+      `font-src 'self' data: ${SIMULATOR_ORIGIN}`,
+      `connect-src 'self' ${SIMULATOR_ORIGIN}`,
+      `object-src 'none'`,
+      `base-uri 'self'`,
+      `frame-ancestors 'self'`,
+      `upgrade-insecure-requests`,
+    ].join('; ')
+
+    const response = NextResponse.next()
+    response.headers.set('content-security-policy', simulatorCsp)
+    return response
   }
 
   // Gera nonce de 16 bytes (32 chars hex) — único por request
