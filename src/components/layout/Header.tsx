@@ -275,6 +275,12 @@ export function Header({
 }: HeaderProps = {}) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
+  // O modo transparente (logo/links brancos) pressupõe um hero navy
+  // full-bleed puxado para debaixo do header (HeroSection usa -mt-*) — isso
+  // só existe na home. Nas demais rotas o fundo sob o header é branco e os
+  // links brancos ficavam invisíveis; lá o header é sempre sólido.
+  const transparentAtTop = pathname === '/'
+  const solid = scrolled || !transparentAtTop
   // Hide-on-scroll-down (Linear/Apple pattern) — esconde ao rolar pra baixo,
   // reaparece ao rolar pra cima. Evita o efeito leitoso de header glass
   // sobrepondo seções navy (footer/lançamentos) e libera vertical real estate.
@@ -460,7 +466,7 @@ export function Header({
           // o logo aparecia "esmaecido" no primeiro carregamento.
           'transition-[transform,background-color,box-shadow,border-color] duration-300 will-change-transform',
           hidden ? '-translate-y-full' : 'translate-y-0',
-          scrolled
+          solid
             ? 'bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-100/60'
             : 'bg-transparent shadow-none border-b border-transparent',
         ].join(' ')}
@@ -477,7 +483,7 @@ export function Header({
             {/* Logo */}
             <Link href="/" aria-label={`${companyName ?? 'Morejá'} — Início`}>
               <MoRejaLogo
-                variant={scrolled ? 'navy' : 'white'}
+                variant={solid ? 'navy' : 'white'}
                 logoUrl={logoUrl}
                 companyName={companyName}
               />
@@ -490,7 +496,7 @@ export function Header({
                 href="/comprar"
                 columns={COMPRAR_COLUMNS}
                 active={pathname.startsWith('/comprar')}
-                isScrolled={scrolled}
+                isScrolled={solid}
                 highlight={{
                   title: 'Imóveis em Recife',
                   description: 'Apartamentos e casas no coração da capital pernambucana.',
@@ -503,7 +509,7 @@ export function Header({
                 href="/alugar"
                 columns={ALUGAR_COLUMNS}
                 active={pathname.startsWith('/alugar')}
-                isScrolled={scrolled}
+                isScrolled={solid}
                 highlight={{
                   title: 'Locação rápida',
                   description: 'Imóveis com aprovação ágil e sem fiador.',
@@ -519,7 +525,7 @@ export function Header({
                     href={link.href}
                     label={link.label}
                     isActive={pathname.startsWith(link.href)}
-                    isScrolled={scrolled}
+                    isScrolled={solid}
                   />
                 ))}
             </nav>
@@ -527,7 +533,7 @@ export function Header({
             {/* Right-side CTAs */}
             <div className="flex items-center gap-3">
               {/* Search trigger — desktop only, hidden on mobile (has MobileSearchButton) */}
-              <SearchTrigger isScrolled={scrolled} />
+              <SearchTrigger isScrolled={solid} />
 
               <Link
                 href="/contato"
@@ -543,7 +549,7 @@ export function Header({
                 className={[
                   'lg:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-md',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e] transition-colors',
-                  scrolled
+                  solid
                     ? 'text-gray-600 hover:text-[#010744] hover:bg-gray-100'
                     : 'text-white hover:text-white/80 hover:bg-white/10',
                 ].join(' ')}
