@@ -5,6 +5,16 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/supremo-proxy`
 
+// Fonte dos imóveis. Default: 'local' — serve exclusivamente o que foi
+// importado do feed ClaivorCRM (/api/import-feed) em properties_cache
+// (external_id claivor_*). PROPERTIES_SOURCE=supremo reativa o supremo-proxy
+// como fonte primária (comportamento antigo).
+const LOCAL_ONLY = process.env.PROPERTIES_SOURCE !== 'supremo'
+
+// Só registros importados do feed contam — mocks de seed (imovel_mock-*) e
+// resíduos de cache do Supremo (imoveis_*) ficam de fora da vitrine.
+const FEED_PREFIX = 'claivor_'
+
 /**
  * ISR strategy:
  *   • Lists (/comprar, /alugar, /empreendimentos) — 5min revalidate
@@ -46,6 +56,8 @@ async function proxyFetch(
 }
 
 export async function fetchProperties(filters: PropertyFilters = {}): Promise<PropertyListResponse> {
+  if (LOCAL_ONLY) return fetchLocalProperties(filters)
+
   let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch('imoveis', {
@@ -78,6 +90,8 @@ export async function fetchProperties(filters: PropertyFilters = {}): Promise<Pr
 }
 
 export async function fetchProperty(id: string): Promise<Property | null> {
+  if (LOCAL_ONLY) return fetchLocalProperty(id)
+
   let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch(`imoveis/${id}`, {})
@@ -96,6 +110,8 @@ export async function fetchProperty(id: string): Promise<Property | null> {
 }
 
 export async function fetchEmpreendimento(id: string): Promise<Property | null> {
+  if (LOCAL_ONLY) return fetchLocalProperty(id, 'empreendimento')
+
   let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch(`empreendimentos/${id}`, {})
@@ -106,7 +122,7 @@ export async function fetchEmpreendimento(id: string): Promise<Property | null> 
     console.error('[SUPREMO_PROXY_FALLBACK] fetchEmpreendimento falhou, indo para cache:', err)
   }
 
-  const fallback = await fetchLocalProperty(id)
+  const fallback = await fetchLocalProperty(id, 'empreendimento')
   console.warn(
     `[SUPREMO_PROXY_FALLBACK] fetchEmpreendimento(${id}) servindo cache (motivo=${reason}, encontrado=${!!fallback})`,
   )
@@ -125,13 +141,17 @@ export async function fetchFeaturedEmpreendimentos(): Promise<Property[]> {
 
 // ── Fallback local: propriedades seedadas em properties_cache ──────────
 
-async function fetchLocalProperties(filters: PropertyFilters): Promise<PropertyListResponse> {
+async function fetchLocalProperties(
+  filters: PropertyFilters,
+  type: 'imovel' | 'empreendimento' = 'imovel',
+): Promise<PropertyListResponse> {
   try {
     const supabase = await createSupabaseServerClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')
-      .eq('type', 'imovel')
+      .eq('type', type)
+      .like('external_id', `${FEED_PREFIX}%`)
 
     if (!data || data.length === 0) {
       return { data: [], total: 0, page: filters.page ?? 1, limit: filters.limit ?? 12, pages: 0 }
@@ -209,13 +229,17 @@ async function fetchLocalProperties(filters: PropertyFilters): Promise<PropertyL
   }
 }
 
-async function fetchLocalProperty(id: string): Promise<Property | null> {
+async function fetchLocalProperty(
+  id: string,
+  type: 'imovel' | 'empreendimento' = 'imovel',
+): Promise<Property | null> {
   try {
     const supabase = await createSupabaseServerClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')
-      .eq('type', 'imovel')
+      .eq('type', type)
+      .like('external_id', `${FEED_PREFIX}%`)
 
     if (!data) return null
     const match = data.find((row) => {
@@ -230,6 +254,9 @@ async function fetchLocalProperty(id: string): Promise<Property | null> {
 }
 
 export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promise<PropertyListResponse> {
+  if (LOCAL_ONLY) return fetchLocalProperties(filters, 'empreendimento')
+
+  let reason: 'error' | 'empty' | null = null
   try {
     const data = await proxyFetch('empreendimentos', {
       finalidade: filters.finalidade,
@@ -246,12 +273,20 @@ export async function fetchEmpreendimentos(filters: PropertyFilters = {}): Promi
       destaque: filters.destaque ? '1' : undefined,
       page: filters.page ?? 1,
       limit: filters.limit ?? 12,
-    })
-    return data as PropertyListResponse
+    }) as PropertyListResponse
+
+    if (data?.data?.length > 0) return data
+    reason = 'empty'
   } catch (err) {
-    console.error('fetchEmpreendimentos error:', err)
-    return { data: [], total: 0, page: 1, limit: 12, pages: 0 }
+    reason = 'error'
+    console.error('[SUPREMO_PROXY_FALLBACK] fetchEmpreendimentos falhou, indo para cache:', err)
   }
+
+  const fallback = await fetchLocalProperties(filters, 'empreendimento')
+  console.warn(
+    `[SUPREMO_PROXY_FALLBACK] fetchEmpreendimentos servindo cache (motivo=${reason}, itens=${fallback.data.length})`,
+  )
+  return fallback
 }
 
 /**
@@ -271,6 +306,9 @@ export interface EmpreendimentoUnit {
 }
 
 export async function fetchUnits(empId: string): Promise<EmpreendimentoUnit[]> {
+  // O feed Claivor não expõe unidades/tipologias — sem proxy, não há fonte.
+  if (LOCAL_ONLY) return []
+
   try {
     const data = await proxyFetch(`empreendimentos/${empId}/unidades`, {})
     if (data && Array.isArray((data as { data?: unknown[] }).data)) {
