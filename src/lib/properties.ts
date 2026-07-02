@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import type { Property, PropertyFilters, PropertyListResponse } from '@/types/property'
+import { createSupabaseAnonClient } from './supabase-server'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -15,19 +15,6 @@ const LOCAL_ONLY = process.env.PROPERTIES_SOURCE !== 'supremo'
 // resíduos de cache do Supremo (imoveis_*) ficam de fora da vitrine.
 const FEED_PREFIX = 'claivor_'
 
-// Client anon SEM cookies: properties_cache tem leitura pública via RLS e
-// estas funções rodam em páginas estáticas/ISR e em generateMetadata/
-// generateStaticParams — `cookies()` (createSupabaseServerClient) lá dispara
-// DynamicServerError e derruba a rota com DYNAMIC_SERVER_USAGE (500).
-function createAnonClient() {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (url: RequestInfo | URL, options: RequestInit = {}) =>
-        fetch(url, { ...options, cache: 'no-store' }),
-    },
-  })
-}
 
 /**
  * ISR strategy:
@@ -145,7 +132,12 @@ export async function fetchEmpreendimento(id: string): Promise<Property | null> 
 
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   const result = await fetchProperties({ destaque: true, limit: 6 })
-  return result.data
+  if (result.data.length > 0) return result.data
+  // Nenhum imóvel marcado como destaque (o feed Claivor raramente marca) —
+  // mostra os mais recentes para as seções de destaque da home não ficarem
+  // vazias.
+  const recent = await fetchProperties({ order: 'data_desc', limit: 6 })
+  return recent.data
 }
 
 export async function fetchFeaturedEmpreendimentos(): Promise<Property[]> {
@@ -160,7 +152,7 @@ async function fetchLocalProperties(
   type: 'imovel' | 'empreendimento' = 'imovel',
 ): Promise<PropertyListResponse> {
   try {
-    const supabase = createAnonClient()
+    const supabase = createSupabaseAnonClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')
@@ -248,7 +240,7 @@ async function fetchLocalProperty(
   type: 'imovel' | 'empreendimento' = 'imovel',
 ): Promise<Property | null> {
   try {
-    const supabase = createAnonClient()
+    const supabase = createSupabaseAnonClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')

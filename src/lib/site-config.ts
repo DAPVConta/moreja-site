@@ -1,14 +1,20 @@
 import { cache } from 'react'
-import { createSupabaseServerClient } from './supabase-server'
+import { createSupabaseServerClient, createSupabaseAnonClient } from './supabase-server'
 import type { SiteConfig, SiteStat, Testimonial, Broker, Banner } from '@/types/site'
 
 /**
  * getSiteConfig is wrapped with React.cache() so multiple Server Components
  * that call it in the same request share a single Supabase query.
+ *
+ * Usa client anon SEM cookies: site_config tem leitura pública e esta função
+ * roda nas rotas de detalhe (/imovel/[id], /empreendimentos/[id]) que têm
+ * generateStaticParams. Com cookies(), o render estático dessas rotas quebra
+ * com DYNAMIC_SERVER_USAGE (500). Para visitantes anônimos o resultado é o
+ * mesmo — eles não têm cookie de auth.
  */
 export const getSiteConfig = cache(async (): Promise<Partial<SiteConfig>> => {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = createSupabaseAnonClient()
     const { data } = await supabase.from('site_config').select('key, value')
 
     if (!data) return {}
