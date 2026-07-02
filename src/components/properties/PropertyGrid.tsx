@@ -3,6 +3,7 @@ import { fetchProperties } from '@/lib/properties'
 import { PROPERTY_TYPES, PRICE_RANGES_VENDA, PRICE_RANGES_LOCACAO } from '@/types/property'
 import { PropertyCard, PropertyCardSkeleton } from './PropertyCard'
 import { PropertyFiltersClient } from './PropertyFiltersClient'
+import { OrderSelectMobile } from './OrderSelectMobile'
 import { Suspense } from 'react'
 
 interface SearchParams {
@@ -221,24 +222,12 @@ function OrderSelect({
 
   return (
     <div className="w-full sm:w-auto">
-      {/* Mobile: native select for easy tap */}
-      <label className="sm:hidden flex items-center gap-2 text-sm text-gray-600">
-        <span className="whitespace-nowrap">Ordenar:</span>
-        <select
-          value={active}
-          onChange={(e) => {
-            if (typeof window !== 'undefined') {
-              window.location.href = buildUrl(e.target.value)
-            }
-          }}
-          className="flex-1 min-w-0 px-3 py-2.5 text-base bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#010744]"
-          aria-label="Ordenar imóveis"
-        >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-      </label>
+      {/* Mobile: select nativo — Client Component (onChange não pode viver
+          num Server Component; ver OrderSelectMobile). */}
+      <OrderSelectMobile
+        active={active}
+        options={options.map((opt) => ({ ...opt, href: buildUrl(opt.value) }))}
+      />
 
       {/* Desktop: pill buttons */}
       <div className="hidden sm:flex items-center gap-2">
