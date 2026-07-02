@@ -67,11 +67,15 @@ const nextConfig: NextConfig = {
       fallback: [
         { source: '/admin', destination: '/admin/index.html' },
         { source: '/admin/:path*', destination: '/admin/index.html' },
-        // Assets do simulador (Vite serve em /assets e /lovable-uploads com
-        // caminho absoluto). Como fallback, só dispara quando nenhum arquivo
-        // ou rota local atende — zero risco de colisão com o site.
-        { source: '/assets/:path*', destination: `${SIMULATOR_ORIGIN}/assets/:path*` },
-        { source: '/lovable-uploads/:path*', destination: `${SIMULATOR_ORIGIN}/lovable-uploads/:path*` },
+        // Assets do simulador — o app da Netlify também é Next.js, então os
+        // chunks/CSS/fontes dele vêm de /_next/static com hashes de OUTRO
+        // build. Fallback só dispara quando o arquivo não existe no nosso
+        // build (docs: roda após checar _next/static), então os nossos
+        // assets têm sempre prioridade e não há colisão de hash.
+        {
+          source: '/_next/static/:path*',
+          destination: `${SIMULATOR_ORIGIN}/_next/static/:path*`,
+        },
       ],
     }
   },
