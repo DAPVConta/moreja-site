@@ -3,6 +3,10 @@
 import { useMemo } from 'react'
 import { Calculator, ExternalLink } from 'lucide-react'
 
+const SIMULATOR_URL =
+  process.env.NEXT_PUBLIC_SIMULATOR_URL ??
+  'https://inspiring-yeot-ec0490.netlify.app/simulacao-financiamento'
+
 interface MortgageSimulatorCTAProps {
   /** Valor do imóvel em reais (price). */
   preco: number
@@ -14,14 +18,11 @@ interface MortgageSimulatorCTAProps {
 }
 
 /**
- * CTA que abre simulador de financiamento da Caixa Econômica Federal e
- * Banco do Brasil em nova aba, pré-preenchendo o valor do imóvel.
+ * CTA que abre o simulador de financiamento da Morejá em nova aba
+ * (link direto, sem parâmetros).
  *
- * Justificativa (research): construir calculadora própria adiciona ~50KB
- * + manutenção da fórmula SAC/Price atualizada. Linkar para os bancos
- * com pre-fill é table-stakes no mercado BR (ZAP/VivaReal fazem assim) e
- * reposiciona o usuário no funnel oficial — onde ele tem mais chance
- * de seguir adiante.
+ * A URL é configurável via NEXT_PUBLIC_SIMULATOR_URL para permitir
+ * trocar o domínio do simulador sem alterar código.
  */
 export function MortgageSimulatorCTA({
   preco,
@@ -32,18 +33,6 @@ export function MortgageSimulatorCTA({
     if (rendaSugerida) return rendaSugerida
     return Math.round(preco / 100 / 100) * 100 // arredondado a R$100
   }, [preco, rendaSugerida])
-
-  const caixaUrl = useMemo(() => {
-    // Caixa: simulador habitacional (URL pública estável com query params)
-    const u = new URL('https://www8.caixa.gov.br/siopiweb-web/simulaOperacaoInternet.do')
-    u.searchParams.set('method', 'inicializarCasoUso')
-    return u.toString()
-  }, [])
-
-  const bbUrl = useMemo(() => {
-    // BB: portal de financiamento imobiliário (URL pública)
-    return 'https://www.bb.com.br/site/financiamento-imobiliario/'
-  }, [])
 
   return (
     <div className="rounded-xl border border-gray-100 bg-[#ededd1]/40 p-5">
@@ -59,34 +48,20 @@ export function MortgageSimulatorCTA({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <a
-          href={caixaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3
-                     text-sm font-semibold text-[#010744] transition-colors
-                     hover:border-[#010744] hover:bg-gray-50"
-        >
-          <span>Simular na Caixa</span>
-          <ExternalLink size={14} aria-hidden="true" />
-        </a>
-        <a
-          href={bbUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3
-                     text-sm font-semibold text-[#010744] transition-colors
-                     hover:border-[#010744] hover:bg-gray-50"
-        >
-          <span>Simular no Banco do Brasil</span>
-          <ExternalLink size={14} aria-hidden="true" />
-        </a>
-      </div>
+      <a
+        href={SIMULATOR_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-between rounded-lg bg-[#010744] px-4 py-3
+                   text-sm font-semibold text-white transition-colors
+                   hover:bg-[#010744]/90"
+      >
+        <span>Simular financiamento</span>
+        <ExternalLink size={14} aria-hidden="true" />
+      </a>
 
       <p className="mt-3 text-[11px] text-gray-500 leading-relaxed">
-        Você é redirecionado para o site do banco. A Morejá não captura dados
-        do simulador.
+        A simulação abre em uma nova aba.
       </p>
     </div>
   )
