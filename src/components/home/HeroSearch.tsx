@@ -347,9 +347,11 @@ export function HeroSearch({ suggestions = DEFAULT_SUGGESTIONS }: HeroSearchProp
           href={SIMULATOR_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative z-10 min-h-[44px] px-4 sm:px-6 inline-flex items-center gap-1.5
+          className="simulator-glow relative z-10 min-h-[44px] px-4 sm:px-6 inline-flex items-center gap-1.5
                      text-xs sm:text-sm font-bold whitespace-nowrap rounded-full
-                     text-white hover:text-white/90 transition-colors duration-200
+                     border border-[#f2d22e]/50 bg-[#f2d22e]/10
+                     text-white hover:text-white/90 hover:bg-[#f2d22e]/20
+                     transition-colors duration-200
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]
                      focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
         >
