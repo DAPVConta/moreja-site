@@ -73,6 +73,7 @@ const navLinks = [
   { href: '/comprar', label: 'Comprar' },
   { href: '/alugar', label: 'Alugar' },
   { href: '/empreendimentos', label: 'Empreendimentos' },
+  { href: '/simulacao-financiamento', label: 'Simulação' },
   { href: '/sobre', label: 'Sobre' },
   { href: '/contato', label: 'Contato' },
 ]

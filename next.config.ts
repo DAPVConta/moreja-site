@@ -1,9 +1,5 @@
 import type { NextConfig } from 'next'
 
-// Simulador de financiamento hospedado na Netlify, servido via proxy em
-// /simulacao-financiamento para o usuário enxergar apenas o nosso domínio.
-const SIMULATOR_ORIGIN = 'https://inspiring-yeot-ec0490.netlify.app'
-
 const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
@@ -52,30 +48,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [],
-      afterFiles: [
-        // Simulador de financiamento (app externo na Netlify) proxied sob
-        // o nosso domínio — o usuário nunca vê a URL da Netlify.
-        {
-          source: '/simulacao-financiamento',
-          destination: `${SIMULATOR_ORIGIN}/simulacao-financiamento`,
-        },
-        {
-          source: '/simulacao-financiamento/:path*',
-          destination: `${SIMULATOR_ORIGIN}/simulacao-financiamento/:path*`,
-        },
-      ],
+      afterFiles: [],
       fallback: [
         { source: '/admin', destination: '/admin/index.html' },
         { source: '/admin/:path*', destination: '/admin/index.html' },
-        // Assets do simulador — o app da Netlify também é Next.js, então os
-        // chunks/CSS/fontes dele vêm de /_next/static com hashes de OUTRO
-        // build. Fallback só dispara quando o arquivo não existe no nosso
-        // build (docs: roda após checar _next/static), então os nossos
-        // assets têm sempre prioridade e não há colisão de hash.
-        {
-          source: '/_next/static/:path*',
-          destination: `${SIMULATOR_ORIGIN}/_next/static/:path*`,
-        },
       ],
     }
   },
