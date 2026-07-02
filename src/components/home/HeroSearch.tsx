@@ -8,10 +8,11 @@ import {
   type FormEvent,
 } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, SlidersHorizontal, MapPin, Clock, X } from 'lucide-react'
+import { Search, SlidersHorizontal, MapPin, Clock, X, Calculator } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Command } from 'cmdk'
 import { PROPERTY_TYPES } from '@/types/property'
+import { SIMULATOR_URL } from '@/lib/simulator'
 import { Button } from '@/components/ui/Button'
 import {
   Sheet,
@@ -338,6 +339,23 @@ export function HeroSearch({ suggestions = DEFAULT_SUGGESTIONS }: HeroSearchProp
             </button>
           )
         })}
+
+        {/* Simulação — link externo com visual de aba (abre o simulador de
+            financiamento em nova aba; não participa da troca de modalidade). */}
+        <span aria-hidden="true" className="my-2.5 mx-1 w-px self-stretch bg-white/20" />
+        <a
+          href={SIMULATOR_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative z-10 min-h-[44px] px-4 sm:px-6 inline-flex items-center gap-1.5
+                     text-xs sm:text-sm font-bold whitespace-nowrap rounded-full
+                     text-white hover:text-white/90 transition-colors duration-200
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d22e]
+                     focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        >
+          <Calculator size={14} aria-hidden="true" className="text-[#f2d22e]" />
+          Simulação
+        </a>
       </div>
 
       {/* ── Search form ───────────────────────────────────────────────────────── */}
