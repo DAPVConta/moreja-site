@@ -9,6 +9,7 @@ import {
   type ClaivorFeedItem,
   type ClaivorItemKind,
 } from '@/lib/feed/claivor'
+import { jitterCoords } from '@/lib/recife-geo'
 
 /**
  * Importa imóveis e empreendimentos do feed JSON do ClaivorCRM para
@@ -32,6 +33,62 @@ const EXTERNAL_ID_PREFIX = 'claivor_'
 const FEED_TIMEOUT_MS = 30_000
 const EXPIRES_MS = 10 * 365 * 24 * 60 * 60 * 1000
 
+// ── Geocodificação (Nominatim/OSM) ──────────────────────────────────────────
+// O feed Claivor não traz lat/lng nem endereço — só bairro/cidade/UF. Para o
+// mapa funcionar em QUALQUER região, geocodificamos o centro do bairro na
+// importação e gravamos em Property.latitude/longitude (geo_aproximado=true,
+// com jitter determinístico p/ imóveis do mesmo bairro não empilharem).
+// Coordenadas já resolvidas em importações anteriores são reaproveitadas
+// (mesmo bairro/cidade ⇒ zero requests), então o custo do Nominatim é
+// basicamente só na primeira vez que um bairro novo aparece no feed.
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
+// Política do Nominatim: máx. 1 request/segundo, com User-Agent identificado.
+const GEOCODE_DELAY_MS = 1100
+// Teto por execução p/ caber no maxDuration — o que ficar de fora resolve na
+// próxima rodada do cron (o cache incremental garante convergência).
+const GEOCODE_MAX_LOOKUPS = 12
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function geocodePlace(
+  bairro: string,
+  cidade: string,
+  uf: string,
+): Promise<[number, number] | null> {
+  // 1ª tentativa: bairro + cidade + UF; fallback: só cidade + UF (bairro
+  // desconhecido do OSM ou com typo no feed).
+  const queries = [
+    [bairro, cidade, uf].filter(Boolean).join(', '),
+    [cidade, uf].filter(Boolean).join(', '),
+  ].filter((q, i, arr) => q.length > 0 && arr.indexOf(q) === i)
+
+  for (const q of queries) {
+    try {
+      const url = `${NOMINATIM_URL}?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(q)}`
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'moreja-site-import/1.0 (https://moreja.com.br)' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10_000),
+      })
+      if (res.ok) {
+        const hits = (await res.json()) as { lat?: string; lon?: string }[]
+        const hit = hits?.[0]
+        if (hit?.lat && hit?.lon) {
+          const lat = Number.parseFloat(hit.lat)
+          const lng = Number.parseFloat(hit.lon)
+          if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng]
+        }
+      }
+    } catch (err) {
+      console.warn(`[IMPORT_FEED] geocode falhou para "${q}":`, err)
+    }
+    await sleep(GEOCODE_DELAY_MS)
+  }
+  return null
+}
+
 function isAuthorized(req: NextRequest): boolean {
   const secrets = [process.env.FEED_IMPORT_SECRET, process.env.CRON_SECRET].filter(
     (s): s is string => typeof s === 'string' && s.length > 0,
@@ -52,6 +109,7 @@ interface ImportSummary {
   updated: number
   removed: number
   price_changes: number
+  geocoded: number
   skipped: string[]
   duration_ms: number
 }
@@ -145,7 +203,56 @@ async function runImport(req: NextRequest): Promise<NextResponse> {
     (existing ?? []).map((row) => [row.external_id as string, row.data as Property]),
   )
 
-  // 4. Upsert em lote
+  // 4. Geocodificação (centro do bairro) para o mapa — qualquer região.
+  //    Ordem de resolução por imóvel sem lat/lng:
+  //      a) coords da importação anterior, se bairro/cidade não mudaram;
+  //      b) cache local por bairro|cidade|uf (imóveis do mesmo bairro
+  //         compartilham 1 lookup);
+  //      c) Nominatim (limitado a GEOCODE_MAX_LOOKUPS por execução).
+  const geoCache = new Map<string, [number, number] | null>()
+  let geocodeLookups = 0
+  let geocoded = 0
+  for (const r of rows) {
+    const p = r.property
+    if (typeof p.latitude === 'number' && typeof p.longitude === 'number') continue
+
+    const prev = previousById.get(r.external_id)
+    if (
+      prev &&
+      typeof prev.latitude === 'number' &&
+      typeof prev.longitude === 'number' &&
+      (prev.bairro ?? '') === (p.bairro ?? '') &&
+      (prev.cidade ?? '') === (p.cidade ?? '')
+    ) {
+      p.latitude = prev.latitude
+      p.longitude = prev.longitude
+      p.geo_aproximado = prev.geo_aproximado ?? true
+      continue
+    }
+
+    if (!p.bairro && !p.cidade) continue
+    const placeKey = `${p.bairro ?? ''}|${p.cidade ?? ''}|${p.estado ?? ''}`.toLowerCase()
+    if (!geoCache.has(placeKey)) {
+      if (geocodeLookups >= GEOCODE_MAX_LOOKUPS) {
+        skipped.push(`geocode adiado p/ próxima rodada (${placeKey})`)
+        continue
+      }
+      geocodeLookups++
+      geoCache.set(placeKey, await geocodePlace(p.bairro ?? '', p.cidade ?? '', p.estado ?? ''))
+    }
+    const coords = geoCache.get(placeKey)
+    if (!coords) continue
+
+    // Jitter determinístico (~150m) por código: imóveis do mesmo bairro não
+    // empilham no mesmo pixel e o ponto é estável entre importações.
+    const [lat, lng] = jitterCoords(coords, p.codigo)
+    p.latitude = lat
+    p.longitude = lng
+    p.geo_aproximado = true
+    geocoded++
+  }
+
+  // 5. Upsert em lote
   const now = new Date()
   const expiresAt = new Date(now.getTime() + EXPIRES_MS).toISOString()
   const { error: upsertErr } = await supabase.from('properties_cache').upsert(
@@ -163,7 +270,7 @@ async function runImport(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'db_write_failed' }, { status: 500 })
   }
 
-  // 5. Histórico de preço (primeira importação e mudanças)
+  // 6. Histórico de preço (primeira importação e mudanças)
   const priceRows = rows
     .filter((r) => {
       const prev = previousById.get(r.external_id)
@@ -182,7 +289,7 @@ async function runImport(req: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // 6. Remove itens que saíram do feed
+  // 7. Remove itens que saíram do feed
   const currentIds = new Set(rows.map((r) => r.external_id))
   const staleIds = [...previousById.keys()].filter((id) => !currentIds.has(id))
   if (staleIds.length > 0) {
@@ -195,7 +302,7 @@ async function runImport(req: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // 7. Revalida as páginas que listam/exibem imóveis
+  // 8. Revalida as páginas que listam/exibem imóveis
   for (const path of ['/', '/comprar', '/alugar', '/empreendimentos']) {
     revalidatePath(path)
   }
@@ -212,6 +319,7 @@ async function runImport(req: NextRequest): Promise<NextResponse> {
     updated: rows.length - inserted,
     removed: staleIds.length,
     price_changes: priceRows.length,
+    geocoded,
     skipped,
     duration_ms: Date.now() - startedAt,
   }

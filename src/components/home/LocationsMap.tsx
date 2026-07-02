@@ -16,21 +16,40 @@ interface LocationsMapProps {
   maxPointsEachSide?: number
 }
 
-// Recife metropolitan bbox — pega Recife, Olinda, Jaboatão dos Guararapes,
-// Camaragibe, Paulista e parte do Cabo. O `maxBounds` do Leaflet trava o
-// pan, então a área aqui define o que o usuário consegue ver.
-const RECIFE_BOUNDS: [[number, number], [number, number]] = [
-  [-8.32, -35.10], // SW
-  [-7.82, -34.78], // NE
+// O mapa não é mais travado numa região fixa: o enquadramento inicial é
+// calculado a partir dos próprios pins (fitBounds) e o pan fica limitado
+// apenas ao Brasil — a empresa pode atuar em qualquer cidade/região.
+const BRAZIL_BOUNDS: [[number, number], [number, number]] = [
+  [-34.5, -75.0], // SW
+  [6.0, -32.0],   // NE
 ]
-const RECIFE_CENTER: [number, number] = [-8.0476, -34.92]
-const RECIFE_DEFAULT_ZOOM = 11
-const RECIFE_MIN_ZOOM = 10
-const RECIFE_MAX_ZOOM = 17
+const BRAZIL_CENTER: [number, number] = [-14.235, -51.925]
+const DEFAULT_ZOOM = 4
+const MIN_ZOOM = 4
+const MAX_ZOOM = 17
 
-function withinRecife(lat: number, lng: number): boolean {
-  const [[s, w], [n, e]] = RECIFE_BOUNDS
+function withinBrazil(lat: number, lng: number): boolean {
+  const [[s, w], [n, e]] = BRAZIL_BOUNDS
   return lat >= s && lat <= n && lng >= w && lng <= e
+}
+
+/** Bbox que enquadra todos os pins, com folga proporcional nas bordas. */
+function computeFitBounds(points: MapPoint[]): [[number, number], [number, number]] | null {
+  if (points.length === 0) return null
+  let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity
+  for (const p of points) {
+    if (p.lat < minLat) minLat = p.lat
+    if (p.lat > maxLat) maxLat = p.lat
+    if (p.lng < minLng) minLng = p.lng
+    if (p.lng > maxLng) maxLng = p.lng
+  }
+  // Folga mínima de ~3km para 1 pin só não virar um zoom de rua.
+  const padLat = Math.max((maxLat - minLat) * 0.15, 0.03)
+  const padLng = Math.max((maxLng - minLng) * 0.15, 0.03)
+  return [
+    [minLat - padLat, minLng - padLng],
+    [maxLat + padLat, maxLng + padLng],
+  ]
 }
 
 function priceLabel(p: Property): string | undefined {
@@ -52,6 +71,9 @@ function toMapPoint(
   if (typeof p.latitude === 'number' && typeof p.longitude === 'number') {
     lat = p.latitude
     lng = p.longitude
+    // Coords geocodificadas na importação (centro do bairro) continuam
+    // marcadas como aproximadas no popup.
+    approximate = p.geo_aproximado === true
   } else {
     // Fallback 1: Supremo CRM frequentemente não retorna coords
     // (especialmente p/ empreendimentos). Geocodificamos por bairro com
@@ -70,7 +92,7 @@ function toMapPoint(
   }
 
   if (typeof lat !== 'number' || typeof lng !== 'number') return null
-  if (!withinRecife(lat, lng)) return null
+  if (!withinBrazil(lat, lng)) return null
 
   return {
     id: p.id,
@@ -88,26 +110,26 @@ function toMapPoint(
 }
 
 /**
- * Seção "Onde estamos no Recife" — mapa interativo travado na região
- * metropolitana com pins distintos para imóveis (amarelo, ícone casa) e
- * empreendimentos (navy, ícone prédio).
+ * Seção "Onde estão nossos imóveis" — mapa interativo com pins distintos
+ * para imóveis (amarelo, ícone casa) e empreendimentos (navy, ícone prédio).
+ * O enquadramento inicial se ajusta automaticamente aos pins existentes
+ * (fitBounds), então funciona para qualquer cidade/região onde a
+ * imobiliária atue.
  *
  * O mapa em si é client-side (Leaflet via CDN); este Server Component
- * apenas prepara os pontos a partir do Supremo proxy. Pontos sem
- * latitude/longitude no payload do CRM são ignorados — mostramos só o que
- * pode ser plotado de fato.
+ * apenas prepara os pontos a partir do portfólio importado. Pontos sem
+ * latitude/longitude (nem bairro geocodificável) são ignorados — mostramos
+ * só o que pode ser plotado de fato.
  */
 export async function LocationsMap({
-  title = 'Onde estamos no Recife',
+  title = 'Onde estão nossos imóveis',
   subtitle = 'Explore o mapa para descobrir imóveis e empreendimentos próximos a você. Cada pin é um endereço real do nosso portfólio.',
-  cityLabel = 'Recife e Região Metropolitana',
-  ctaHref = '/comprar?cidade=Recife',
+  cityLabel,
+  ctaHref = '/comprar',
   maxPointsEachSide = 60,
 }: LocationsMapProps) {
-  // Não filtramos por cidade no fetch — o bbox da RMR já corta tudo fora,
-  // e empreendimentos costumam vir cadastrados em Paulista, Olinda ou
-  // Jaboatão dos Guararapes (todos dentro do bbox). O filtro por cidade
-  // estaria descartando pontos válidos da região.
+  // Sem filtro por cidade no fetch: o portfólio pode estar em qualquer
+  // região e o enquadramento (fitBounds) se adapta ao que existir.
   const [imoveisRes, empreendsRes] = await Promise.all([
     fetchProperties({
       limit: maxPointsEachSide,
@@ -141,9 +163,11 @@ export async function LocationsMap({
             </span>
             <h2 className="heading-h2 text-[#010744] mb-2">{title}</h2>
             <p className="lead text-gray-600">{subtitle}</p>
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#010744]/70 mt-3">
-              {cityLabel}
-            </p>
+            {cityLabel && (
+              <p className="text-sm font-semibold uppercase tracking-wider text-[#010744]/70 mt-3">
+                {cityLabel}
+              </p>
+            )}
           </div>
 
           <Link
@@ -176,11 +200,12 @@ export async function LocationsMap({
         ) : (
           <LocationsMapClient
             points={points}
-            bounds={RECIFE_BOUNDS}
-            center={RECIFE_CENTER}
-            zoom={RECIFE_DEFAULT_ZOOM}
-            minZoom={RECIFE_MIN_ZOOM}
-            maxZoom={RECIFE_MAX_ZOOM}
+            bounds={BRAZIL_BOUNDS}
+            fitBounds={computeFitBounds(points)}
+            center={BRAZIL_CENTER}
+            zoom={DEFAULT_ZOOM}
+            minZoom={MIN_ZOOM}
+            maxZoom={MAX_ZOOM}
           />
         )}
       </div>
