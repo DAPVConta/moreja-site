@@ -1,5 +1,5 @@
+import { createClient } from '@supabase/supabase-js'
 import type { Property, PropertyFilters, PropertyListResponse } from '@/types/property'
-import { createSupabaseServerClient } from './supabase-server'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -14,6 +14,20 @@ const LOCAL_ONLY = process.env.PROPERTIES_SOURCE !== 'supremo'
 // Só registros importados do feed contam — mocks de seed (imovel_mock-*) e
 // resíduos de cache do Supremo (imoveis_*) ficam de fora da vitrine.
 const FEED_PREFIX = 'claivor_'
+
+// Client anon SEM cookies: properties_cache tem leitura pública via RLS e
+// estas funções rodam em páginas estáticas/ISR e em generateMetadata/
+// generateStaticParams — `cookies()` (createSupabaseServerClient) lá dispara
+// DynamicServerError e derruba a rota com DYNAMIC_SERVER_USAGE (500).
+function createAnonClient() {
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (url: RequestInfo | URL, options: RequestInit = {}) =>
+        fetch(url, { ...options, cache: 'no-store' }),
+    },
+  })
+}
 
 /**
  * ISR strategy:
@@ -146,7 +160,7 @@ async function fetchLocalProperties(
   type: 'imovel' | 'empreendimento' = 'imovel',
 ): Promise<PropertyListResponse> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = createAnonClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')
@@ -234,7 +248,7 @@ async function fetchLocalProperty(
   type: 'imovel' | 'empreendimento' = 'imovel',
 ): Promise<Property | null> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = createAnonClient()
     const { data } = await supabase
       .from('properties_cache')
       .select('data')

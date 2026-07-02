@@ -98,6 +98,13 @@ const BAIRRO_COORDS: Record<string, LatLng> = {
   'barra de jangada|jaboatao dos guararapes': [-8.2138, -34.9319],
   'prazeres|jaboatão dos guararapes':  [-8.1748, -34.9476],
   'prazeres|jaboatao dos guararapes':  [-8.1748, -34.9476],
+  // Reserva do Paiva fica no Cabo de Santo Agostinho, mas feeds costumam
+  // cadastrar como Jaboatão — mapeamos as duas grafias.
+  'paiva|jaboatão dos guararapes':     [-8.2760, -34.9450],
+  'paiva|jaboatao dos guararapes':     [-8.2760, -34.9450],
+  'paiva|cabo de santo agostinho':     [-8.2760, -34.9450],
+  // Feed Claivor manda Piedade com cidade=Recife; mesmo ponto de Jaboatão.
+  'piedade|recife':                    [-8.1762, -34.9125],
 
   // ── Paulista ──────────────────────────────────────────────────
   'pau amarelo|paulista':    [-7.9398, -34.8388],
