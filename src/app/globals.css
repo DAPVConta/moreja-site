@@ -607,6 +607,29 @@
   animation: trust-dot-pulse 2s ease-in-out infinite;
 }
 
+/* ── Botão Simulação (hero) — glow dourado pulsante ─────────────────────────
+   Halo suave que respira em volta da pílula para dar destaque ao link do
+   simulador sem competir com o CTA principal de busca. A regra global de
+   prefers-reduced-motion em @layer base congela a animação — o botão fica
+   com o glow mínimo do frame 0%, ainda destacado, sem pulsar.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes simulator-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgb(242 210 46 / 0),
+      0 0 8px 0 rgb(242 210 46 / 0.20);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgb(242 210 46 / 0.16),
+      0 0 18px 3px rgb(242 210 46 / 0.45);
+  }
+}
+
+.simulator-glow {
+  animation: simulator-glow 2.4s ease-in-out infinite;
+}
+
 /* ── BannersSection (redesign editorial) ────────────────────────────────────
    Três animações coordenadas:
 
