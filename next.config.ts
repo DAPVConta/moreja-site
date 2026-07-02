@@ -32,6 +32,21 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.sistemasupremo.com.br',
       },
+      // ClaivorCRM — feed importado via /api/import-feed. As fotos ficam no
+      // storage Supabase self-hosted do CRM.
+      {
+        protocol: 'https',
+        hostname: 'claivorcrm.com.br',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.claivorcrm.com.br',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.supabase.srv1577302.hstgr.cloud',
+        pathname: '/storage/v1/object/public/**',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
