@@ -2,11 +2,7 @@
 
 import { useMemo } from 'react'
 import { Calculator, ExternalLink } from 'lucide-react'
-
-// Caminho interno — o next.config.ts faz proxy para o app do simulador,
-// então o usuário vê apenas o domínio da Morejá.
-const SIMULATOR_URL =
-  process.env.NEXT_PUBLIC_SIMULATOR_URL ?? '/simulacao-financiamento'
+import { SIMULATOR_URL } from '@/lib/simulator'
 
 interface MortgageSimulatorCTAProps {
   /** Valor do imóvel em reais (price). */
