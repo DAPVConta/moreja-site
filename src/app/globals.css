@@ -607,6 +607,55 @@
   animation: trust-dot-pulse 2s ease-in-out infinite;
 }
 
+/* ── BannersSection (redesign editorial) ────────────────────────────────────
+   Três animações coordenadas:
+
+   .banner-kenburns     — zoom lento (1 → 1.06) na imagem do slide ativo.
+                          Aplicada só quando o slide está visível; a troca de
+                          classe reinicia a animação a cada ativação.
+   .banner-content-in   — entrada do bloco de texto (fade + translateY),
+                          staggered via animation-delay inline por elemento.
+   .banner-progress     — preenchimento (scaleX 0→1) do segmento ativo da
+                          barra de progresso; duration setada inline igual ao
+                          intervalo do autoplay, play-state controlado por
+                          style (pausa junto com o autoplay).
+
+   A regra global de prefers-reduced-motion em @layer base colapsa
+   animation-duration para 0.01ms — Ken Burns congela e o conteúdo aparece
+   sem deslocamento; nenhuma media query extra necessária.
+────────────────────────────────────────────────────────────────────────────── */
+@keyframes banner-kenburns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+.banner-kenburns {
+  animation: banner-kenburns 9s ease-out forwards;
+  will-change: transform;
+}
+
+@keyframes banner-content-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.banner-content-in {
+  opacity: 0;
+  animation: banner-content-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes banner-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.banner-progress {
+  transform-origin: left center;
+  animation-name: banner-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
 /* ── View Transition — reduced motion: collapse all durations ────────────────
    Complements the existing *{} rule in @layer base by also covering
    ::view-transition-* pseudo-elements that live outside the normal DOM cascade.

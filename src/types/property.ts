@@ -28,6 +28,9 @@ export interface Property {
   tour_virtual?: string
   latitude?: number
   longitude?: number
+  /** True quando lat/lng foram geocodificados por bairro/cidade (centro
+   *  aproximado), não fornecidos como endereço exato pela fonte. */
+  geo_aproximado?: boolean
   destaque?: boolean
   publicado_em?: string
   atualizado_em?: string

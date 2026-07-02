@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Pause, Play, ArrowRight } from 'lucide-react'
@@ -42,6 +42,23 @@ const FALLBACK_BANNERS: Banner[] = [
   },
 ]
 
+/**
+ * BannersSection — carrossel editorial.
+ *
+ * Direção de design (redesign):
+ *  • Imagem full-bleed com Ken Burns sutil no slide ativo (classe
+ *    .banner-kenburns, ver globals.css) + crossfade de 700ms.
+ *  • Scrim navy cinematográfico no rodapé (marca #010744) no lugar do
+ *    antigo card branco — o texto vive sobre a imagem, em tipografia
+ *    display branca, com entrada staggered (.banner-content-in).
+ *  • Eyebrow com filete dourado + contador ("01 — 03"): funciona mesmo
+ *    quando o admin só preencheu o título.
+ *  • Controles consolidados no rodapé: barras de progresso segmentadas
+ *    (estilo stories, sincronizadas com o autoplay) à esquerda e setas +
+ *    pause à direita. Nada flutuando no meio da imagem.
+ *  • Banner só-imagem (arte com texto baked-in, ex. MCMV): nenhum bloco
+ *    de texto é renderizado e o scrim é mínimo, apenas para os controles.
+ */
 export function BannersSection({
   banners: bannersProp,
   autoplay = true,
@@ -56,30 +73,32 @@ export function BannersSection({
   const [paused, setPaused] = useState(false)
   const multi = banners.length > 1
   const intervalMs = Math.max(1, intervalSeconds) * 1000
+  const running = multi && autoplay && !paused
 
   const go = (index: number) => {
     if (banners.length === 0) return
     setCurrent((index + banners.length) % banners.length)
   }
 
-  // Autoplay com setInterval — mais robusto que setTimeout-encadeado.
-  // Loop garantido via modulo. Pause em hover via state `paused` (controlado
-  // por onMouseEnter/Leave) ou click no botão pause/play.
+  // Autoplay com setInterval. `current` nas deps: navegação manual reinicia
+  // o ciclo, mantendo o intervalo cheio E em sincronia exata com a barra de
+  // progresso (que também reinicia via key={current}).
   useEffect(() => {
-    if (!multi || !autoplay || paused) return
+    if (!running) return
     const id = setInterval(() => {
       setCurrent((p) => (p + 1) % banners.length)
     }, intervalMs)
     return () => clearInterval(id)
-  }, [multi, autoplay, paused, banners.length, intervalMs])
+  }, [running, banners.length, intervalMs, current])
 
-  // banners nunca é vazio aqui — já substituído por FALLBACK_BANNERS acima
+  const total = String(banners.length).padStart(2, '0')
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-white">
       <div className="container-page">
         <div
-          className="relative w-full overflow-hidden rounded-2xl shadow-xl shadow-[#010744]/10
+          className="relative w-full overflow-hidden rounded-3xl bg-[#010744]
+                     shadow-2xl shadow-[#010744]/15 ring-1 ring-[#010744]/10
                      aspect-[3/2] md:aspect-[12/5]"
           // Pause apenas via botão explícito (pause/play), não no hover.
           // Cliente pediu loop contínuo — sair do hover não pode reiniciar
@@ -91,11 +110,12 @@ export function BannersSection({
           {banners.map((b, i) => {
             const isCurrent = i === current
             const hasMobile = !!b.mobile_image_url
+            const hasContent = !!(b.title || b.subtitle || b.cta_text)
 
             return (
               <div
                 key={b.id}
-                className="absolute inset-0 transition-opacity duration-700"
+                className="absolute inset-0 transition-opacity duration-700 ease-out"
                 style={{
                   opacity: isCurrent ? 1 : 0,
                   pointerEvents: isCurrent ? 'auto' : 'none',
@@ -104,90 +124,108 @@ export function BannersSection({
                 role="group"
                 aria-label={`Banner ${i + 1} de ${banners.length}`}
               >
-                {/* Imagem mobile (se informada) */}
-                {hasMobile && b.mobile_image_url && (
-                  <Image
-                    src={b.mobile_image_url}
-                    alt={b.title ?? ''}
-                    fill
-                    sizes="100vw"
-                    className="object-cover md:hidden"
-                    priority={i === 0}
-                    fetchPriority={i === 0 ? 'high' : 'auto'}
-                  />
-                )}
-                {/* Imagem desktop (ou default) */}
-                {b.image_url && (
-                  <Image
-                    src={b.image_url}
-                    alt={b.title ?? ''}
-                    fill
-                    sizes="(max-width: 1280px) 100vw, 1280px"
-                    className={`object-cover ${hasMobile ? 'hidden md:block' : ''}`}
-                    priority={i === 0}
-                    fetchPriority={i === 0 ? 'high' : 'auto'}
-                  />
-                )}
-
-                {/*
-                 * Card compacto no canto inferior esquerdo. Antes era um <h2>
-                 * gigante "drop-shadow" sobre gradient preto cobrindo metade
-                 * da imagem — quando o banner já tem texto baked-in (caso
-                 * comum: arte do "Minha Casa Minha Vida"), os dois conflitavam
-                 * visualmente. Agora o overlay é só uma pílula contida com
-                 * título compacto + CTA, e admin pode deixar tudo vazio se
-                 * a imagem já comunica sozinha.
-                 */}
-                {(b.title || b.subtitle || b.cta_text) && (
-                  <>
-                    {/* Sutil gradiente só na faixa inferior, p/ o card "respirar" */}
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2
-                                 bg-gradient-to-t from-black/45 to-transparent"
+                {/* Wrapper do Ken Burns — a troca de classe quando o slide
+                    ativa reinicia a animação; slides inativos ficam em
+                    scale(1), invisíveis atrás do crossfade. */}
+                <div className={`absolute inset-0 ${isCurrent ? 'banner-kenburns' : ''}`}>
+                  {/* Imagem mobile (se informada) */}
+                  {hasMobile && b.mobile_image_url && (
+                    <Image
+                      src={b.mobile_image_url}
+                      alt={b.title ?? ''}
+                      fill
+                      sizes="100vw"
+                      className="object-cover md:hidden"
+                      priority={i === 0}
+                      fetchPriority={i === 0 ? 'high' : 'auto'}
                     />
-                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 lg:p-6">
-                      <div
-                        className="max-w-md sm:max-w-lg lg:max-w-xl flex items-stretch gap-3
-                                   rounded-xl bg-white/95 backdrop-blur-sm shadow-xl
-                                   p-3 sm:p-4"
-                      >
-                        {(b.title || b.subtitle) && (
-                          <div className="flex-1 min-w-0 self-center">
-                            {b.title && (
-                              <h3
-                                className="text-sm sm:text-base font-bold text-[#010744]
-                                           leading-snug line-clamp-2"
-                              >
-                                {b.title}
-                              </h3>
-                            )}
-                            {b.subtitle && (
-                              <p className="text-xs sm:text-[13px] text-gray-600 leading-snug
-                                            line-clamp-2 mt-0.5">
-                                {b.subtitle}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                        {b.cta_text && b.cta_link && (
-                          <Link
-                            href={b.cta_link}
-                            className="shrink-0 self-center inline-flex items-center gap-1.5
-                                       rounded-lg bg-[#f2d22e] px-3 sm:px-4 py-2 sm:py-2.5
-                                       font-bold text-[#010744] text-xs sm:text-sm shadow-md
-                                       transition-all hover:brightness-105 hover:shadow-lg
-                                       active:scale-[0.98]
-                                       focus-visible:outline-none focus-visible:ring-2
-                                       focus-visible:ring-[#010744] focus-visible:ring-offset-2"
-                          >
-                            {b.cta_text}
-                            <ArrowRight size={14} aria-hidden="true" />
-                          </Link>
-                        )}
-                      </div>
+                  )}
+                  {/* Imagem desktop (ou default) */}
+                  {b.image_url && (
+                    <Image
+                      src={b.image_url}
+                      alt={b.title ?? ''}
+                      fill
+                      sizes="(max-width: 1280px) 100vw, 1280px"
+                      className={`object-cover ${hasMobile ? 'hidden md:block' : ''}`}
+                      priority={i === 0}
+                      fetchPriority={i === 0 ? 'high' : 'auto'}
+                    />
+                  )}
+                </div>
+
+                {/* Scrim: cinematográfico quando há texto; mínimo (só p/ os
+                    controles respirarem) quando a arte fala sozinha. */}
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute inset-x-0 bottom-0 ${
+                    hasContent
+                      ? 'h-4/5 bg-gradient-to-t from-[#010744]/90 via-[#010744]/40 to-transparent'
+                      : 'h-24 bg-gradient-to-t from-black/40 to-transparent'
+                  }`}
+                />
+
+                {hasContent && isCurrent && (
+                  <div
+                    className="absolute inset-x-0 bottom-0 p-5 pb-16 sm:p-8 sm:pb-8 lg:p-10
+                               flex flex-col items-start gap-2 sm:gap-3
+                               sm:pr-40 lg:pr-48"
+                  >
+                    {/* Eyebrow: filete dourado + contador. Keyed por slide —
+                        re-renderiza e re-anima a cada troca. */}
+                    <div
+                      className="banner-content-in flex items-center gap-3"
+                      style={{ animationDelay: '80ms' }}
+                    >
+                      <span aria-hidden="true" className="h-px w-8 bg-[#f2d22e]" />
+                      <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#f2d22e]">
+                        {String(i + 1).padStart(2, '0')} — {total}
+                      </span>
                     </div>
-                  </>
+
+                    {b.title && (
+                      <h2
+                        className="banner-content-in max-w-2xl text-2xl sm:text-4xl lg:text-[2.75rem]
+                                   font-bold leading-[1.08] tracking-tight text-white
+                                   [text-wrap:balance] drop-shadow-sm"
+                        style={{ animationDelay: '160ms' }}
+                      >
+                        {b.title}
+                      </h2>
+                    )}
+
+                    {b.subtitle && (
+                      <p
+                        className="banner-content-in max-w-xl text-sm sm:text-base text-white/75
+                                   leading-relaxed line-clamp-2"
+                        style={{ animationDelay: '240ms' }}
+                      >
+                        {b.subtitle}
+                      </p>
+                    )}
+
+                    {b.cta_text && b.cta_link && (
+                      <Link
+                        href={b.cta_link}
+                        className="banner-content-in group/cta mt-1 sm:mt-2 inline-flex items-center gap-2
+                                   rounded-full bg-[#f2d22e] px-5 py-2.5 sm:px-6 sm:py-3
+                                   text-sm font-bold text-[#010744] shadow-lg shadow-black/20
+                                   transition-all hover:brightness-105 hover:shadow-xl
+                                   active:scale-[0.98]
+                                   focus-visible:outline-none focus-visible:ring-2
+                                   focus-visible:ring-white focus-visible:ring-offset-2
+                                   focus-visible:ring-offset-[#010744]"
+                        style={{ animationDelay: '320ms' }}
+                      >
+                        {b.cta_text}
+                        <ArrowRight
+                          size={16}
+                          className="transition-transform group-hover/cta:translate-x-1"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
             )
@@ -195,67 +233,90 @@ export function BannersSection({
 
           {multi && (
             <>
-              {/* Arrow buttons — 48x48, glassmorphism, sempre visíveis */}
-              <button
-                onClick={() => {
-                  go(current - 1)
-                }}
-                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-10
-                           flex items-center justify-center h-12 w-12 rounded-full
-                           bg-white/20 border border-white/30 backdrop-blur-md
-                           text-white transition-all hover:bg-white/40 hover:scale-105
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white
-                           focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                aria-label="Banner anterior"
+              {/* Barras de progresso segmentadas — canto inferior esquerdo.
+                  O segmento ativo enche em sincronia com o autoplay (mesma
+                  duration; ambos reiniciam quando `current` muda). */}
+              <div
+                className="absolute bottom-5 left-5 sm:left-8 lg:left-10 z-10 flex items-center gap-2"
+                aria-label="Navegação dos banners"
               >
-                <ChevronLeft size={22} />
-              </button>
-              <button
-                onClick={() => {
-                  go(current + 1)
-                }}
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10
-                           flex items-center justify-center h-12 w-12 rounded-full
-                           bg-white/20 border border-white/30 backdrop-blur-md
-                           text-white transition-all hover:bg-white/40 hover:scale-105
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white
-                           focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                aria-label="Próximo banner"
-              >
-                <ChevronRight size={22} />
-              </button>
-
-              {/* Dots + pause button (WCAG 2.2.2) */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
-                <div className="flex gap-2">
-                  {banners.map((_, i) => (
+                {banners.map((_, i) => {
+                  const isActive = i === current
+                  // Estados do preenchimento dourado:
+                  //  • ativo + autoplay  → anima scaleX 0→1 na duração do ciclo;
+                  //    key com `current` reinicia a cada troca de slide; pausar
+                  //    congela via animationPlayState (não pula para cheio).
+                  //  • ativo sem autoplay → cheio, estático.
+                  //  • inativo            → vazio.
+                  const fillStyle: React.CSSProperties =
+                    isActive && autoplay
+                      ? {
+                          animationDuration: `${intervalMs}ms`,
+                          animationPlayState: running ? 'running' : 'paused',
+                        }
+                      : { transform: isActive ? 'scaleX(1)' : 'scaleX(0)', transformOrigin: 'left center' }
+                  return (
                     <button
                       key={i}
-                      onClick={() => {
-                        go(i)
-                            }}
-                      className={`h-2 rounded-full transition-all ${
-                        i === current ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-                      }`}
+                      onClick={() => go(i)}
                       aria-label={`Ir para banner ${i + 1}`}
-                      aria-current={i === current ? 'true' : undefined}
-                    />
-                  ))}
-                </div>
+                      aria-current={isActive ? 'true' : undefined}
+                      className="group/seg relative h-6 w-8 sm:w-12 cursor-pointer"
+                    >
+                      {/* trilho */}
+                      <span
+                        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full
+                                   bg-white/30 transition-colors group-hover/seg:bg-white/50"
+                      />
+                      {/* preenchimento */}
+                      <span
+                        key={isActive ? `fill-${current}` : `idle-${i}`}
+                        className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full
+                                    bg-[#f2d22e] ${isActive && autoplay ? 'banner-progress' : ''}`}
+                        style={fillStyle}
+                      />
+                    </button>
+                  )
+                })}
+              </div>
 
+              {/* Setas + pause — consolidados no canto inferior direito */}
+              <div className="absolute bottom-4 right-4 sm:right-6 z-10 flex items-center gap-2">
                 {autoplay && (
                   <button
                     type="button"
                     onClick={() => setPaused((p) => !p)}
                     aria-label={paused ? 'Retomar autoplay' : 'Pausar autoplay'}
-                    className="ml-1 flex h-7 w-7 items-center justify-center rounded-full
-                               bg-white/20 border border-white/30 backdrop-blur-md text-white
-                               transition-colors hover:bg-white/40
+                    className="flex h-9 w-9 items-center justify-center rounded-full
+                               border border-white/25 bg-white/10 text-white backdrop-blur-md
+                               transition-all hover:bg-white/25
                                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   >
-                    {paused ? <Play size={12} /> : <Pause size={12} />}
+                    {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
                   </button>
                 )}
+                <button
+                  onClick={() => go(current - 1)}
+                  aria-label="Banner anterior"
+                  className="flex h-11 w-11 items-center justify-center rounded-full
+                             border border-white/25 bg-white/10 text-white backdrop-blur-md
+                             transition-all hover:bg-[#f2d22e] hover:border-[#f2d22e] hover:text-[#010744]
+                             active:scale-95
+                             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <ChevronLeft size={20} aria-hidden="true" />
+                </button>
+                <button
+                  onClick={() => go(current + 1)}
+                  aria-label="Próximo banner"
+                  className="flex h-11 w-11 items-center justify-center rounded-full
+                             border border-white/25 bg-white/10 text-white backdrop-blur-md
+                             transition-all hover:bg-[#f2d22e] hover:border-[#f2d22e] hover:text-[#010744]
+                             active:scale-95
+                             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <ChevronRight size={20} aria-hidden="true" />
+                </button>
               </div>
             </>
           )}

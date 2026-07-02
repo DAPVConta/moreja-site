@@ -22,9 +22,13 @@ export interface MapPoint {
 
 interface LocationsMapClientProps {
   points: MapPoint[]
-  /** Bounding box em [southWest, northEast] — bloqueia o pan fora da área. */
+  /** Bounding box em [southWest, northEast] — bloqueia o pan fora da área
+   *  (hoje: Brasil inteiro). */
   bounds: [[number, number], [number, number]]
-  /** Centro inicial. */
+  /** Bbox que enquadra os pins — quando presente, o mapa abre ajustado a
+   *  ele (fitBounds) em vez de center/zoom fixos. */
+  fitBounds?: [[number, number], [number, number]] | null
+  /** Centro inicial (fallback quando fitBounds não vem). */
   center: [number, number]
   zoom: number
   minZoom: number
@@ -50,6 +54,10 @@ interface LeafletLatLngBounds {
 }
 interface LeafletMap {
   remove(): void
+  fitBounds(
+    bounds: [[number, number], [number, number]],
+    opts?: { padding?: [number, number]; maxZoom?: number },
+  ): LeafletMap
 }
 interface LeafletDivIcon {
   options: { html?: string }
@@ -214,6 +222,7 @@ function buildPopupHtml(p: MapPoint): string {
 export function LocationsMapClient({
   points,
   bounds,
+  fitBounds,
   center,
   zoom,
   minZoom,
@@ -249,6 +258,12 @@ export function LocationsMapClient({
           attributionControl: true,
         })
         mapRef.current = map
+
+        // Enquadra automaticamente todos os pins — o mapa se adapta à(s)
+        // região(ões) onde o portfólio estiver, sem área fixa hardcoded.
+        if (fitBounds) {
+          map.fitBounds(fitBounds, { padding: [32, 32], maxZoom: 13 })
+        }
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution:
@@ -286,7 +301,7 @@ export function LocationsMapClient({
         mapRef.current = null
       }
     }
-  }, [points, bounds, center, zoom, minZoom, maxZoom, filter])
+  }, [points, bounds, fitBounds, center, zoom, minZoom, maxZoom, filter])
 
   const counts = points.reduce(
     (acc, p) => {
@@ -327,7 +342,7 @@ export function LocationsMapClient({
       <div
         ref={containerRef}
         className="h-[460px] w-full rounded-2xl overflow-hidden border border-[#010744]/10 shadow-sm bg-[#f3f3eb]"
-        aria-label="Mapa interativo de imóveis e empreendimentos no Recife"
+        aria-label="Mapa interativo de imóveis e empreendimentos"
         role="application"
       />
 
@@ -362,10 +377,10 @@ export function LocationsMapClient({
               Não foi possível carregar o mapa.
             </p>
             <Link
-              href="/comprar?cidade=Recife"
+              href="/comprar"
               className="inline-block mt-3 text-sm font-semibold text-[#010744] underline"
             >
-              Ver lista de imóveis em Recife
+              Ver lista de imóveis
             </Link>
           </div>
         </div>
