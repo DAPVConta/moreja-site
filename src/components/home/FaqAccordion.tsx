@@ -31,7 +31,7 @@ const DEFAULT_FAQS: FaqItem[] = [
   {
     question: 'Como simulo o financiamento de um imóvel?',
     answer:
-      'Na página de cada imóvel à venda há um simulador de financiamento que abre o portal da Caixa ou do Banco do Brasil já com o valor pré-preenchido. Para uma análise personalizada de crédito, fale com nosso corretor.',
+      'Na página de cada imóvel à venda há um botão "Simular financiamento" que abre o nosso simulador em uma nova aba. Para uma análise personalizada de crédito, fale com nosso corretor.',
   },
   {
     question: 'Atendem em quais cidades?',

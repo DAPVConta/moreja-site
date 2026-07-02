@@ -1,5 +1,9 @@
 import type { NextConfig } from 'next'
 
+// Simulador de financiamento hospedado na Netlify, servido via proxy em
+// /simulacao-financiamento para o usuário enxergar apenas o nosso domínio.
+const SIMULATOR_ORIGIN = 'https://inspiring-yeot-ec0490.netlify.app'
+
 const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
@@ -48,10 +52,26 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [],
-      afterFiles: [],
+      afterFiles: [
+        // Simulador de financiamento (app externo na Netlify) proxied sob
+        // o nosso domínio — o usuário nunca vê a URL da Netlify.
+        {
+          source: '/simulacao-financiamento',
+          destination: `${SIMULATOR_ORIGIN}/simulacao-financiamento`,
+        },
+        {
+          source: '/simulacao-financiamento/:path*',
+          destination: `${SIMULATOR_ORIGIN}/simulacao-financiamento/:path*`,
+        },
+      ],
       fallback: [
         { source: '/admin', destination: '/admin/index.html' },
         { source: '/admin/:path*', destination: '/admin/index.html' },
+        // Assets do simulador (Vite serve em /assets e /lovable-uploads com
+        // caminho absoluto). Como fallback, só dispara quando nenhum arquivo
+        // ou rota local atende — zero risco de colisão com o site.
+        { source: '/assets/:path*', destination: `${SIMULATOR_ORIGIN}/assets/:path*` },
+        { source: '/lovable-uploads/:path*', destination: `${SIMULATOR_ORIGIN}/lovable-uploads/:path*` },
       ],
     }
   },
