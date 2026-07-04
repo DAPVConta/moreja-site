@@ -68,7 +68,7 @@ async function geocodePlace(
     try {
       const url = `${NOMINATIM_URL}?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(q)}`
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'moreja-site-import/1.0 (https://moreja.com.br)' },
+        headers: { 'User-Agent': 'moreja-site-import/1.0 (https://www.morejaimobiliaria.com.br)' },
         cache: 'no-store',
         signal: AbortSignal.timeout(10_000),
       })

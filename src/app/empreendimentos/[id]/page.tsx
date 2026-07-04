@@ -33,7 +33,7 @@ import { PropertyMap } from '@/components/properties/PropertyMap'
 import { LeadFormInline } from '@/components/properties/LeadFormInline'
 import { ShareButtonClient } from '@/components/properties/ShareButtonClient'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 interface PageProps {
   params: Promise<{ id: string }>

@@ -303,7 +303,7 @@ export async function buildRouteMetadata(
   ogDescription: string
   robots: string
 }> {
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
   const seo = await getSeoRoute(route)
   const config = await getSiteConfig()
 

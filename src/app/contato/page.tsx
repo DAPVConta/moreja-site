@@ -4,7 +4,7 @@ import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { buildRouteMetadata, getSiteConfig } from '@/lib/site-config'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 export async function generateMetadata(): Promise<Metadata> {
   const meta = await buildRouteMetadata('/contato', {
@@ -36,7 +36,7 @@ export default async function ContatoPage() {
   const turnstileSiteKey = config.turnstile_site_key?.trim() || undefined
   // site_config (editável no admin) é a fonte primária; env é só fallback.
   const phone = config.phone || process.env.NEXT_PUBLIC_PHONE || ''
-  const email = config.email || process.env.NEXT_PUBLIC_EMAIL || 'contato@moreja.com.br'
+  const email = config.email || process.env.NEXT_PUBLIC_EMAIL || 'administracao@morejaimobiliaria.com.br'
   const address = config.address || process.env.NEXT_PUBLIC_ADDRESS || ''
   const whatsapp = (config.whatsapp || phone).replace(/\D/g, '')
 

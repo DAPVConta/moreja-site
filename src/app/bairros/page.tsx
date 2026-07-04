@@ -5,7 +5,7 @@ import { ArrowRight, MapPin } from 'lucide-react'
 import { getNeighborhoodGuides } from '@/lib/site-config'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 export const metadata: Metadata = {
   title: 'Guia de Bairros | Morejá Imobiliária',

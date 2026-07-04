@@ -5,7 +5,7 @@ import { MapPin, Phone, Mail, Award, Users, Home, TrendingUp } from 'lucide-reac
 import { getBrokers, getTestimonials, getSiteConfig, buildRouteMetadata } from '@/lib/site-config'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.morejaimobiliaria.com.br'
 
 // /sobre raramente muda — revalidate 1h
 export const revalidate = 3600
@@ -282,15 +282,15 @@ export default async function SobrePage() {
             <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#010744]" />
-                {config.phone || process.env.NEXT_PUBLIC_PHONE || '(XX) XXXX-XXXX'}
+                {config.phone || process.env.NEXT_PUBLIC_PHONE || '+55 81 98593-1081'}
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#010744]" />
-                {config.email || process.env.NEXT_PUBLIC_EMAIL || 'contato@moreja.com.br'}
+                {config.email || process.env.NEXT_PUBLIC_EMAIL || 'administracao@morejaimobiliaria.com.br'}
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#010744]" />
-                {config.address || process.env.NEXT_PUBLIC_ADDRESS || 'Endereço da Morejá'}
+                {config.address || process.env.NEXT_PUBLIC_ADDRESS || 'Av. Engenheiro Domingos Ferreira 1920, sala 102, Recife/PE'}
               </div>
             </div>
           </div>
