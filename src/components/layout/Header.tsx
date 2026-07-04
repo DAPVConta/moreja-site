@@ -404,12 +404,6 @@ export function Header({
         ]
       : []),
     {
-      id: 'creci',
-      content: (
-        <span className="text-white/60">CRECI · PE</span>
-      ),
-    },
-    {
       id: 'region',
       content: (
         <span className="text-white/60">Atendemos toda Recife/PE</span>
