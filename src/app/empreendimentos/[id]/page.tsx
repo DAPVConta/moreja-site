@@ -347,7 +347,7 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
                   </a>
                 )}
                 <a
-                  href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+                  href={`tel:${siteConfig.phone || process.env.NEXT_PUBLIC_PHONE || ''}`}
                   className="w-full flex items-center justify-center gap-2 border border-[#010744] text-[#010744] py-3 rounded-xl font-semibold text-sm hover:bg-[#010744] hover:text-white transition-colors"
                 >
                   <Phone className="w-4 h-4" />
@@ -386,7 +386,7 @@ export default async function EmpreendimentoPage({ params }: PageProps) {
             </a>
           )}
           <a
-            href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+            href={`tel:${siteConfig.phone || process.env.NEXT_PUBLIC_PHONE || ''}`}
             className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm"
             aria-label="Ligar"
           >
