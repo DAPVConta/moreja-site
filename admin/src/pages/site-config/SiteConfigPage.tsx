@@ -333,14 +333,14 @@ export default function SiteConfigPage() {
               <FormField control={form.control} name="phone" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
-                  <FormControl><Input placeholder="(11) 3000-0000" {...field} /></FormControl>
+                  <FormControl><Input placeholder="(81) 3000-0000" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="whatsapp" render={({ field }) => (
                 <FormItem>
                   <FormLabel>WhatsApp (exibição)</FormLabel>
-                  <FormControl><Input placeholder="(11) 9 9999-9999" {...field} /></FormControl>
+                  <FormControl><Input placeholder="(81) 9 8593-1081" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -348,7 +348,7 @@ export default function SiteConfigPage() {
             <FormField control={form.control} name="whatsapp_full" render={({ field }) => (
               <FormItem>
                 <FormLabel>WhatsApp (DDI + número para link)</FormLabel>
-                <FormControl><Input placeholder="5511999999999" {...field} /></FormControl>
+                <FormControl><Input placeholder="5581985931081" {...field} /></FormControl>
                 <FormDescription>
                   Usado no link wa.me/ — somente dígitos, com DDI (ex: 5511999999999)
                 </FormDescription>
@@ -358,7 +358,7 @@ export default function SiteConfigPage() {
             <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem>
                 <FormLabel>E-mail</FormLabel>
-                <FormControl><Input placeholder="contato@moreja.com.br" {...field} /></FormControl>
+                <FormControl><Input placeholder="administracao@morejaimobiliaria.com.br" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

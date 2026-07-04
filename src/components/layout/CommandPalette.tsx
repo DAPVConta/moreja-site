@@ -96,7 +96,7 @@ const QUICK_ACTIONS = [
     id: 'whatsapp',
     label: 'Falar pelo WhatsApp',
     icon: MessageCircle,
-    href: 'https://wa.me/5581999999999',
+    href: 'https://wa.me/5581985931081',
     external: true,
   },
 ] as const

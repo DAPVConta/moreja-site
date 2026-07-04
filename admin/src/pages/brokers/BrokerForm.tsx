@@ -159,7 +159,7 @@ export function BrokerForm({ open, onOpenChange, broker }: BrokerFormProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="joao@moreja.com.br" {...field} />
+                      <Input placeholder="joao@morejaimobiliaria.com.br" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -188,7 +188,7 @@ export function BrokerForm({ open, onOpenChange, broker }: BrokerFormProps) {
                   <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <Input placeholder="(11) 3000-0000" {...field} />
+                      <Input placeholder="(81) 3000-0000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,7 +201,7 @@ export function BrokerForm({ open, onOpenChange, broker }: BrokerFormProps) {
                   <FormItem>
                     <FormLabel>WhatsApp</FormLabel>
                     <FormControl>
-                      <Input placeholder="(11) 9 9999-9999" {...field} />
+                      <Input placeholder="(81) 9 8593-1081" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
