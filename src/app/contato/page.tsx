@@ -34,10 +34,11 @@ const HORARIOS = [
 export default async function ContatoPage() {
   const config = await getSiteConfig()
   const turnstileSiteKey = config.turnstile_site_key?.trim() || undefined
-  const phone = process.env.NEXT_PUBLIC_PHONE ?? ''
-  const email = process.env.NEXT_PUBLIC_EMAIL ?? 'contato@moreja.com.br'
-  const address = process.env.NEXT_PUBLIC_ADDRESS ?? ''
-  const whatsapp = phone.replace(/\D/g, '')
+  // site_config (editável no admin) é a fonte primária; env é só fallback.
+  const phone = config.phone || process.env.NEXT_PUBLIC_PHONE || ''
+  const email = config.email || process.env.NEXT_PUBLIC_EMAIL || 'contato@moreja.com.br'
+  const address = config.address || process.env.NEXT_PUBLIC_ADDRESS || ''
+  const whatsapp = (config.whatsapp || phone).replace(/\D/g, '')
 
   return (
     <>

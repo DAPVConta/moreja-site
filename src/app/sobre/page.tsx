@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Award, Users, Home, TrendingUp } from 'lucide-react'
-import { getBrokers, getTestimonials, buildRouteMetadata } from '@/lib/site-config'
+import { getBrokers, getTestimonials, getSiteConfig, buildRouteMetadata } from '@/lib/site-config'
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://moreja.com.br'
@@ -53,7 +53,7 @@ const DIFERENCIAIS = [
 ]
 
 export default async function SobrePage() {
-  const [brokers, testimonials] = await Promise.all([getBrokers(), getTestimonials()])
+  const [brokers, testimonials, config] = await Promise.all([getBrokers(), getTestimonials(), getSiteConfig()])
 
   return (
     <>
@@ -282,15 +282,15 @@ export default async function SobrePage() {
             <div className="mt-10 flex flex-wrap justify-center gap-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#010744]" />
-                {process.env.NEXT_PUBLIC_PHONE ?? '(XX) XXXX-XXXX'}
+                {config.phone || process.env.NEXT_PUBLIC_PHONE || '(XX) XXXX-XXXX'}
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#010744]" />
-                {process.env.NEXT_PUBLIC_EMAIL ?? 'contato@moreja.com.br'}
+                {config.email || process.env.NEXT_PUBLIC_EMAIL || 'contato@moreja.com.br'}
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#010744]" />
-                {process.env.NEXT_PUBLIC_ADDRESS ?? 'Endereço da Morejá'}
+                {config.address || process.env.NEXT_PUBLIC_ADDRESS || 'Endereço da Morejá'}
               </div>
             </div>
           </div>

@@ -328,7 +328,7 @@ export default async function ImovelPage({ params }: PageProps) {
                       </a>
                     )}
                     <a
-                      href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+                      href={`tel:${siteConfig.phone || process.env.NEXT_PUBLIC_PHONE || ''}`}
                       className="mt-2 w-full flex items-center justify-center gap-2 border border-[#010744] text-[#010744] py-2.5 rounded-lg font-medium text-sm hover:bg-[#010744] hover:text-white transition-colors"
                     >
                       <Phone className="w-4 h-4" />
@@ -389,7 +389,7 @@ export default async function ImovelPage({ params }: PageProps) {
             </a>
           )}
           <a
-            href={`tel:${process.env.NEXT_PUBLIC_PHONE ?? ''}`}
+            href={`tel:${siteConfig.phone || process.env.NEXT_PUBLIC_PHONE || ''}`}
             className="flex-1 inline-flex items-center justify-center gap-2 bg-[#010744] text-white h-12 rounded-lg font-semibold text-sm transition-colors active:scale-[0.98] active:bg-[#000533]"
             aria-label="Ligar para a corretora"
           >
