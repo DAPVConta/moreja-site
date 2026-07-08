@@ -167,7 +167,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       },
       { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '08:00', closes: '12:00' },
     ],
-    sameAs: [config.instagram, config.facebook, config.linkedin, config.youtube].filter(Boolean),
+    sameAs: [config.instagram, config.facebook, config.linkedin, config.youtube, config.tiktok_url].filter(Boolean),
     priceRange: '$$',
   }
 
@@ -284,6 +284,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           instagram={config.instagram}
           facebook={config.facebook}
           youtube={config.youtube}
+          tiktok={config.tiktok_url}
         />
 
         {/* Default 5581900000000 (Recife area) quando admin não cadastrou —
